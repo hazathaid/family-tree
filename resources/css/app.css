@@ -1,0 +1,14 @@
+@import "bootstrap/dist/css/bootstrap.min.css";
+
+:root {
+    --family-primary: #1e88e5;
+    --family-secondary: #43a047;
+    --family-accent: #fb8c00;
+    --family-danger: #e53935;
+    --family-background: #f5f7fa;
+}
+
+body {
+    background: var(--family-background);
+    font-family: Inter, Arial, sans-serif;
+}

@@ -1,0 +1,106 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use Laravel\Sanctum\Sanctum;
+use Tests\TestCase;
+
+class ProfileApiTest extends TestCase
+{
+    use RefreshDatabase;
+
+    public function test_user_can_view_profile(): void
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $this->getJson('/api/v1/profile')
+            ->assertOk()
+            ->assertJsonPath('data.uuid', $user->uuid)
+            ->assertJsonPath('data.email', $user->email);
+    }
+
+    public function test_user_can_update_profile(): void
+    {
+        $user = User::factory()->create(['email_verified_at' => now()]);
+        Sanctum::actingAs($user);
+
+        $this->putJson('/api/v1/profile', [
+            'name' => 'Siti Aminah',
+            'email' => 'siti@example.com',
+            'phone' => '081299988877',
+        ])->assertOk()
+            ->assertJsonPath('data.name', 'Siti Aminah')
+            ->assertJsonPath('data.email', 'siti@example.com');
+
+        $this->assertDatabaseHas('users', [
+            'id' => $user->id,
+            'name' => 'Siti Aminah',
+            'email' => 'siti@example.com',
+            'phone' => '081299988877',
+            'email_verified_at' => null,
+        ]);
+    }
+
+    public function test_user_can_change_password_and_revoke_tokens(): void
+    {
+        $user = User::factory()->create(['password' => Hash::make('old-secret')]);
+        $user->createToken('existing-device');
+        Sanctum::actingAs($user);
+
+        $this->patchJson('/api/v1/profile/password', [
+            'current_password' => 'old-secret',
+            'password' => 'new-secret',
+            'password_confirmation' => 'new-secret',
+        ])->assertOk()
+            ->assertJsonPath('message', 'Password changed');
+
+        $this->assertTrue(Hash::check('new-secret', $user->refresh()->password));
+        $this->assertDatabaseCount('personal_access_tokens', 0);
+    }
+
+    public function test_user_cannot_change_password_with_wrong_current_password(): void
+    {
+        $user = User::factory()->create(['password' => Hash::make('old-secret')]);
+        Sanctum::actingAs($user);
+
+        $this->patchJson('/api/v1/profile/password', [
+            'current_password' => 'wrong-secret',
+            'password' => 'new-secret',
+            'password_confirmation' => 'new-secret',
+        ])->assertUnprocessable()
+            ->assertJsonPath('success', false)
+            ->assertJsonValidationErrors('current_password');
+    }
+
+    public function test_user_can_upload_avatar(): void
+    {
+        Storage::fake('public');
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $this->postJson('/api/v1/profile/avatar', [
+            'avatar' => UploadedFile::fake()->image('avatar.jpg')->size(512),
+        ])->assertOk()
+            ->assertJsonPath('message', 'Avatar uploaded');
+
+        Storage::disk('public')->assertExists($user->refresh()->avatar);
+    }
+
+    public function test_avatar_upload_rejects_invalid_file_type(): void
+    {
+        Storage::fake('public');
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $this->postJson('/api/v1/profile/avatar', [
+            'avatar' => UploadedFile::fake()->create('avatar.gif', 100, 'image/gif'),
+        ])->assertUnprocessable()
+            ->assertJsonValidationErrors('avatar');
+    }
+}
