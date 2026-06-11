@@ -15,8 +15,7 @@ class ProfileController extends Controller
 {
     public function __construct(
         private readonly ProfileService $profileService,
-    ) {
-    }
+    ) {}
 
     public function show(Request $request): JsonResponse
     {

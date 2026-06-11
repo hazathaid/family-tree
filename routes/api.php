@@ -3,6 +3,10 @@
 use App\Http\Controllers\Api\V1\Auth\AuthController;
 use App\Http\Controllers\Api\V1\Auth\EmailVerificationController;
 use App\Http\Controllers\Api\V1\Auth\ForgotPasswordController;
+use App\Http\Controllers\Api\V1\FamilyBranchController;
+use App\Http\Controllers\Api\V1\FamilyController;
+use App\Http\Controllers\Api\V1\FamilyDashboardController;
+use App\Http\Controllers\Api\V1\FamilyRoleController;
 use App\Http\Controllers\Api\V1\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -28,5 +32,17 @@ Route::prefix('v1')->group(function (): void {
         Route::put('/', [ProfileController::class, 'update']);
         Route::patch('password', [ProfileController::class, 'changePassword']);
         Route::post('avatar', [ProfileController::class, 'uploadAvatar']);
+    });
+
+    Route::middleware('auth:sanctum')->group(function (): void {
+        Route::apiResource('families', FamilyController::class);
+
+        Route::get('families/{family}/roles', [FamilyRoleController::class, 'index']);
+        Route::post('families/{family}/roles/invite', [FamilyRoleController::class, 'invite']);
+        Route::patch('families/{family}/roles/{membership}', [FamilyRoleController::class, 'assign']);
+        Route::delete('families/{family}/roles/{membership}', [FamilyRoleController::class, 'remove']);
+
+        Route::apiResource('families.branches', FamilyBranchController::class);
+        Route::get('families/{family}/dashboard', [FamilyDashboardController::class, 'show']);
     });
 });

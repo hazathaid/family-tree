@@ -14,7 +14,7 @@ class UserRepositoryTest extends TestCase
     public function test_repository_finds_users_by_email_and_uuid(): void
     {
         $user = User::factory()->create(['email' => 'repo@example.com']);
-        $repository = new EloquentUserRepository();
+        $repository = new EloquentUserRepository;
 
         $this->assertTrue($repository->findByEmail('repo@example.com')?->is($user));
         $this->assertTrue($repository->findByUuid($user->uuid)?->is($user));
@@ -23,7 +23,7 @@ class UserRepositoryTest extends TestCase
     public function test_repository_updates_user(): void
     {
         $user = User::factory()->create();
-        $repository = new EloquentUserRepository();
+        $repository = new EloquentUserRepository;
 
         $updated = $repository->update($user, ['name' => 'Updated Name']);
 

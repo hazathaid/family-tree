@@ -16,7 +16,7 @@ class ProfileServiceTest extends TestCase
     public function test_changing_password_hashes_new_password(): void
     {
         $user = User::factory()->create(['password' => Hash::make('old-secret')]);
-        $service = new ProfileService(new EloquentUserRepository());
+        $service = new ProfileService(new EloquentUserRepository);
 
         $service->changePassword($user, 'new-secret');
 
@@ -26,7 +26,7 @@ class ProfileServiceTest extends TestCase
     public function test_email_verification_is_cleared_when_email_changes(): void
     {
         $user = User::factory()->create(['email' => 'old@example.com', 'email_verified_at' => now()]);
-        $service = new ProfileService(new EloquentUserRepository());
+        $service = new ProfileService(new EloquentUserRepository);
 
         $updated = $service->update($user, [
             'name' => $user->name,

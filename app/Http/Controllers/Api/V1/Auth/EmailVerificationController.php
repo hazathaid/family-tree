@@ -12,8 +12,7 @@ class EmailVerificationController extends Controller
 {
     public function __construct(
         private readonly EmailVerificationService $emailVerificationService,
-    ) {
-    }
+    ) {}
 
     public function send(Request $request): JsonResponse
     {

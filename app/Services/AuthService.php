@@ -13,8 +13,7 @@ class AuthService
 {
     public function __construct(
         private readonly UserRepositoryInterface $users,
-    ) {
-    }
+    ) {}
 
     public function register(array $data): User
     {
@@ -60,7 +59,7 @@ class AuthService
         $token = $user->currentAccessToken();
 
         if ($token === null) {
-            throw new AuthenticationException();
+            throw new AuthenticationException;
         }
 
         $token->delete();

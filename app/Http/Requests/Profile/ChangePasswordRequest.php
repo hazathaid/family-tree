@@ -4,8 +4,8 @@ namespace App\Http\Requests\Profile;
 
 use App\Http\Requests\ApiFormRequest;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Validator;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Validation\Validator;
 
 class ChangePasswordRequest extends ApiFormRequest
 {

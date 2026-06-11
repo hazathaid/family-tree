@@ -12,8 +12,7 @@ class ProfileService
 {
     public function __construct(
         private readonly UserRepositoryInterface $users,
-    ) {
-    }
+    ) {}
 
     public function update(User $user, array $data): User
     {
