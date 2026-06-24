@@ -13,12 +13,14 @@ use App\Repositories\Contracts\FamilyDashboardRepositoryInterface;
 use App\Repositories\Contracts\FamilyMemberRepositoryInterface;
 use App\Repositories\Contracts\FamilyRepositoryInterface;
 use App\Repositories\Contracts\FamilyUserRoleRepositoryInterface;
+use App\Repositories\Contracts\RelationshipRepositoryInterface;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use App\Repositories\Eloquent\EloquentFamilyBranchRepository;
 use App\Repositories\Eloquent\EloquentFamilyDashboardRepository;
 use App\Repositories\Eloquent\EloquentFamilyMemberRepository;
 use App\Repositories\Eloquent\EloquentFamilyRepository;
 use App\Repositories\Eloquent\EloquentFamilyUserRoleRepository;
+use App\Repositories\Eloquent\EloquentRelationshipRepository;
 use App\Repositories\Eloquent\EloquentUserRepository;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\Facades\Gate;
@@ -34,6 +36,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(FamilyBranchRepositoryInterface::class, EloquentFamilyBranchRepository::class);
         $this->app->bind(FamilyDashboardRepositoryInterface::class, EloquentFamilyDashboardRepository::class);
         $this->app->bind(FamilyMemberRepositoryInterface::class, EloquentFamilyMemberRepository::class);
+        $this->app->bind(RelationshipRepositoryInterface::class, EloquentRelationshipRepository::class);
     }
 
     public function boot(): void

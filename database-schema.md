@@ -124,6 +124,7 @@ Setiap orang dalam silsilah disimpan di sini.
 | Field     | Type      |
 | --------- | --------- |
 | id        | BIGINT PK |
+| uuid      | CHAR(36) UNIQUE |
 | family_id | BIGINT    |
 | uuid      | CHAR(36)  |
 
@@ -197,41 +198,29 @@ Model Graph.
 
 | created_at | TIMESTAMP |
 | updated_at | TIMESTAMP |
+| deleted_at | TIMESTAMP NULL |
 
 relationship_type:
 
 ```text
 father
 mother
-
 child
-
 husband
 wife
-
-adoptive_father
-adoptive_mother
-
-step_father
-step_mother
-
-guardian
-
-sibling
-
-grandfather
-grandmother
-
-other
 ```
+
+Relasi turunan seperti pakde, bude, om, tante, sepupu, keponakan, menantu, mertua, buyut, dan cicit tidak disimpan di database. Nilai tersebut wajib dihitung oleh Relationship Engine dari graph relasi dasar.
 
 Index:
 
 ```sql
+uuid
 source_member_id
 target_member_id
 relationship_type
 family_id
+family_id, source_member_id, target_member_id, relationship_type
 ```
 
 ---

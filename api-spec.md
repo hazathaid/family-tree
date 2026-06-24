@@ -239,24 +239,44 @@ Request
 
 ```json
 {
-  "family_id": 1,
-  "source_member_id": 10,
-  "target_member_id": 20,
+  "family_uuid": "family-public-uuid",
+  "source_member_uuid": "source-member-public-uuid",
+  "target_member_uuid": "target-member-public-uuid",
   "relationship_type": "father"
 }
 ```
+
+Allowed `relationship_type` values:
+
+```text
+father
+mother
+child
+husband
+wife
+```
+
+The API also accepts numeric `family_id`, `source_member_id`, and `target_member_id` for compatibility with older clients.
 
 ---
 
 ## Update Relationship
 
-PUT /relationships/{id}
+PUT /relationships/{relationship_uuid}
+
+Request fields match Create Relationship. Updates are rejected when they would create an invalid graph.
+
+---
+
+## Relationship Detail
+
+GET /relationships/{relationship_uuid}
 
 ---
 
 ## Delete Relationship
 
-DELETE /relationships/{id}
+DELETE /relationships/{relationship_uuid}
 
 ---
 
@@ -267,8 +287,21 @@ GET /relationships
 Parameters
 
 ```text
-family_id
-member_id
+family_uuid
+member_uuid
+limit
+```
+
+Numeric `family_id` and `member_id` filters are also accepted.
+
+Validation rules:
+
+```text
+One biological father only.
+One biological mother only.
+No circular parent relationship.
+Husband and wife inverse edges stay consistent.
+Relationship updates preserve graph integrity.
 ```
 
 ---
