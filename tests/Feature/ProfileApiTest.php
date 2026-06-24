@@ -85,7 +85,7 @@ class ProfileApiTest extends TestCase
         Sanctum::actingAs($user);
 
         $this->postJson('/api/v1/profile/avatar', [
-            'avatar' => UploadedFile::fake()->image('avatar.jpg')->size(512),
+            'avatar' => UploadedFile::fake()->createWithContent('avatar.png', $this->tinyPng()),
         ])->assertOk()
             ->assertJsonPath('message', 'Avatar uploaded');
 
@@ -102,5 +102,10 @@ class ProfileApiTest extends TestCase
             'avatar' => UploadedFile::fake()->create('avatar.gif', 100, 'image/gif'),
         ])->assertUnprocessable()
             ->assertJsonValidationErrors('avatar');
+    }
+
+    private function tinyPng(): string
+    {
+        return base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=') ?: '';
     }
 }

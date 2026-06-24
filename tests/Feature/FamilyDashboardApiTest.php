@@ -9,6 +9,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -28,8 +29,24 @@ class FamilyDashboardApiTest extends TestCase
         Sanctum::actingAs($user);
 
         DB::table('family_members')->insert([
-            ['id' => 1, 'family_id' => $family->id, 'is_alive' => true],
-            ['id' => 2, 'family_id' => $family->id, 'is_alive' => false],
+            [
+                'id' => 1,
+                'uuid' => (string) Str::uuid(),
+                'family_id' => $family->id,
+                'full_name' => 'Living Member',
+                'is_alive' => true,
+                'death_date' => null,
+                'created_by' => $user->id,
+            ],
+            [
+                'id' => 2,
+                'uuid' => (string) Str::uuid(),
+                'family_id' => $family->id,
+                'full_name' => 'Deceased Member',
+                'is_alive' => false,
+                'death_date' => '2024-01-01',
+                'created_by' => $user->id,
+            ],
         ]);
         DB::table('articles')->insert([
             ['family_id' => $family->id],
@@ -54,12 +71,6 @@ class FamilyDashboardApiTest extends TestCase
 
     private function createDashboardSourceTables(): void
     {
-        Schema::create('family_members', function (Blueprint $table): void {
-            $table->id();
-            $table->foreignId('family_id');
-            $table->boolean('is_alive');
-        });
-
         Schema::create('articles', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('family_id');

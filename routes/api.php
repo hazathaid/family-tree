@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\Auth\ForgotPasswordController;
 use App\Http\Controllers\Api\V1\FamilyBranchController;
 use App\Http\Controllers\Api\V1\FamilyController;
 use App\Http\Controllers\Api\V1\FamilyDashboardController;
+use App\Http\Controllers\Api\V1\FamilyMemberController;
 use App\Http\Controllers\Api\V1\FamilyRoleController;
 use App\Http\Controllers\Api\V1\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -44,5 +45,8 @@ Route::prefix('v1')->group(function (): void {
 
         Route::apiResource('families.branches', FamilyBranchController::class);
         Route::get('families/{family}/dashboard', [FamilyDashboardController::class, 'show']);
+
+        Route::apiResource('family-members', FamilyMemberController::class);
+        Route::post('family-members/{family_member}/photo', [FamilyMemberController::class, 'uploadPhoto']);
     });
 });

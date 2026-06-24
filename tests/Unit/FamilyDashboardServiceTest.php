@@ -10,10 +10,9 @@ use App\Repositories\Eloquent\EloquentFamilyUserRoleRepository;
 use App\Services\FamilyDashboardService;
 use App\Services\FamilyRoleCatalogService;
 use App\Services\FamilyService;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class FamilyDashboardServiceTest extends TestCase
@@ -23,10 +22,24 @@ class FamilyDashboardServiceTest extends TestCase
     public function test_dashboard_counts_existing_source_tables(): void
     {
         $family = Family::factory()->create(['created_by' => User::factory()]);
-        $this->createFamilyMembersTable();
+        $user = User::factory()->create();
         DB::table('family_members')->insert([
-            ['family_id' => $family->id, 'is_alive' => true],
-            ['family_id' => $family->id, 'is_alive' => false],
+            [
+                'uuid' => (string) Str::uuid(),
+                'family_id' => $family->id,
+                'full_name' => 'Living Member',
+                'is_alive' => true,
+                'death_date' => null,
+                'created_by' => $user->id,
+            ],
+            [
+                'uuid' => (string) Str::uuid(),
+                'family_id' => $family->id,
+                'full_name' => 'Deceased Member',
+                'is_alive' => false,
+                'death_date' => '2024-01-01',
+                'created_by' => $user->id,
+            ],
         ]);
 
         $summary = $this->service()->summary($family);
@@ -46,14 +59,5 @@ class FamilyDashboardServiceTest extends TestCase
                 new FamilyRoleCatalogService,
             ),
         );
-    }
-
-    private function createFamilyMembersTable(): void
-    {
-        Schema::create('family_members', function (Blueprint $table): void {
-            $table->id();
-            $table->foreignId('family_id');
-            $table->boolean('is_alive');
-        });
     }
 }
