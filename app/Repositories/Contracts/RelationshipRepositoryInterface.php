@@ -42,7 +42,12 @@ interface RelationshipRepositoryInterface
     public function parentEdges(Family $family, ?int $exceptRelationshipId = null): Collection;
 
     /**
-     * @return Collection<int, MemberRelationship>
+     * @return iterable<int, object>
      */
-    public function graphEdgesForFamily(int $familyId): Collection;
+    public function graphEdgesForFamily(int $familyId): iterable;
+
+    /**
+     * @return iterable<int, object>
+     */
+    public function graphEdgesForMember(int $familyId, int $memberId): iterable;
 }

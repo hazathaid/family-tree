@@ -5,13 +5,14 @@ namespace App\Services;
 use App\Models\FamilyMember;
 use App\Models\MemberRelationship;
 use App\Repositories\Contracts\RelationshipRepositoryInterface;
-use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use SplQueue;
 
 class RelationshipTraversalService
 {
     public function __construct(
         private readonly RelationshipRepositoryInterface $relationships,
+        private readonly RelationshipCacheService $cache,
     ) {}
 
     /**
@@ -27,14 +28,12 @@ class RelationshipTraversalService
             return [];
         }
 
-        /** @var Collection<int, FamilyMember> $members */
-        $members = FamilyMember::query()
-            ->select(['id', 'uuid', 'full_name', 'gender', 'birth_date'])
-            ->where('family_id', $source->family_id)
-            ->get()
-            ->keyBy('id');
+        $cachedPath = $this->cache->getPath($source, $target);
 
-        $graph = $this->buildGraph($source->family_id, $members);
+        if ($cachedPath !== null) {
+            return $cachedPath;
+        }
+
         $queue = new SplQueue;
         $queue->enqueue($source->id);
 
@@ -44,8 +43,8 @@ class RelationshipTraversalService
         while (! $queue->isEmpty()) {
             $current = $queue->dequeue();
 
-            foreach ($graph[$current] ?? [] as $edge) {
-                $next = $edge['to_member_id'];
+            foreach ($this->neighborsForMember($source->family_id, $current) as $edge) {
+                $next = $edge[0];
 
                 if (isset($visited[$next])) {
                     continue;
@@ -58,88 +57,109 @@ class RelationshipTraversalService
                 ];
 
                 if ($next === $target->id) {
-                    return $this->reconstructPath($source->id, $target->id, $previous);
+                    $path = $this->enrichPath($this->reconstructPath($source->id, $target->id, $previous));
+                    $this->cache->putPath($source, $target, $path);
+
+                    return $path;
                 }
 
                 $queue->enqueue($next);
             }
         }
 
+        $this->cache->putPath($source, $target, []);
+
         return [];
     }
 
     /**
-     * @param  Collection<int, FamilyMember>  $members
-     * @return array<int, array<int, array<string, mixed>>>
+     * @return array<int, array{0: int, 1: string, 2: int, 3: string}>
      */
-    private function buildGraph(int $familyId, Collection $members): array
+    private function neighborsForMember(int $familyId, int $memberId): array
     {
-        $graph = [];
+        $relationships = [];
+        $memberIds = [$memberId];
 
-        foreach ($this->relationships->graphEdgesForFamily($familyId) as $relationship) {
-            foreach ($this->normalizedEdges($relationship, $members) as $edge) {
-                $graph[$edge['from_member_id']][] = $edge;
+        foreach ($this->relationships->graphEdgesForMember($familyId, $memberId) as $relationship) {
+            $relationships[] = $relationship;
+            $memberIds[] = $relationship->source_member_id;
+            $memberIds[] = $relationship->target_member_id;
+        }
+
+        /** @var array<int, string|null> $memberGenders */
+        $memberGenders = DB::table('family_members')
+            ->where('family_id', $familyId)
+            ->whereIn('id', array_values(array_unique($memberIds)))
+            ->whereNull('deleted_at')
+            ->pluck('gender', 'id')
+            ->all();
+        $neighbors = [];
+
+        foreach ($relationships as $relationship) {
+            foreach ($this->normalizedEdges($relationship, $memberGenders) as $edge) {
+                if ($edge[0] === $memberId) {
+                    $neighbors[] = [$edge[1], $edge[2], $edge[3], $edge[4]];
+                }
             }
         }
 
-        return $graph;
+        return $neighbors;
     }
 
     /**
-     * @param  Collection<int, FamilyMember>  $members
-     * @return array<int, array<string, mixed>>
+     * @param  array<int, string|null>  $memberGenders
+     * @return array<int, array{0: int, 1: int, 2: string, 3: int, 4: string}>
      */
-    private function normalizedEdges(MemberRelationship $relationship, Collection $members): array
+    private function normalizedEdges(object $relationship, array $memberGenders): array
     {
-        $source = $members->get($relationship->source_member_id);
-        $target = $members->get($relationship->target_member_id);
-
-        if (! $source instanceof FamilyMember || ! $target instanceof FamilyMember) {
+        if (! array_key_exists($relationship->source_member_id, $memberGenders)
+            || ! array_key_exists($relationship->target_member_id, $memberGenders)) {
             return [];
         }
 
         return match ($relationship->relationship_type) {
             MemberRelationship::TYPE_FATHER, MemberRelationship::TYPE_MOTHER => [
-                $this->edge($target, $source, $relationship->relationship_type, $relationship),
-                $this->edge($source, $target, 'child', $relationship),
+                $this->edge($relationship->target_member_id, $relationship->source_member_id, $relationship->relationship_type, $relationship),
+                $this->edge($relationship->source_member_id, $relationship->target_member_id, 'child', $relationship),
             ],
             MemberRelationship::TYPE_CHILD => [
-                $this->edge($source, $target, $this->parentRelationFor($target), $relationship),
-                $this->edge($target, $source, 'child', $relationship),
+                $this->edge(
+                    $relationship->source_member_id,
+                    $relationship->target_member_id,
+                    $this->parentRelationFor($memberGenders[$relationship->target_member_id]),
+                    $relationship
+                ),
+                $this->edge($relationship->target_member_id, $relationship->source_member_id, 'child', $relationship),
             ],
             MemberRelationship::TYPE_HUSBAND, MemberRelationship::TYPE_WIFE => [
-                $this->edge($source, $target, 'spouse', $relationship),
-                $this->edge($target, $source, 'spouse', $relationship),
+                $this->edge($relationship->source_member_id, $relationship->target_member_id, 'spouse', $relationship),
+                $this->edge($relationship->target_member_id, $relationship->source_member_id, 'spouse', $relationship),
             ],
             default => [],
         };
     }
 
     /**
-     * @return array<string, mixed>
+     * @return array{0: int, 1: int, 2: string, 3: int, 4: string}
      */
     private function edge(
-        FamilyMember $from,
-        FamilyMember $to,
+        int $fromMemberId,
+        int $toMemberId,
         string $relationship,
-        MemberRelationship $sourceRelationship
+        object $sourceRelationship
     ): array {
         return [
-            'from_member_id' => $from->id,
-            'from_member_uuid' => $from->uuid,
-            'from_member_name' => $from->full_name,
-            'to_member_id' => $to->id,
-            'to_member_uuid' => $to->uuid,
-            'to_member_name' => $to->full_name,
-            'relationship' => $relationship,
-            'relationship_id' => $sourceRelationship->id,
-            'relationship_type' => $sourceRelationship->relationship_type,
+            $fromMemberId,
+            $toMemberId,
+            $relationship,
+            $sourceRelationship->id,
+            $sourceRelationship->relationship_type,
         ];
     }
 
-    private function parentRelationFor(FamilyMember $member): string
+    private function parentRelationFor(?string $gender): string
     {
-        return match ($member->gender) {
+        return match ($gender) {
             'male' => 'father',
             'female' => 'mother',
             default => 'parent',
@@ -147,8 +167,8 @@ class RelationshipTraversalService
     }
 
     /**
-     * @param  array<int, array{from_member_id: int, edge: array<string, mixed>}>  $previous
-     * @return array<int, array<string, mixed>>
+     * @param  array<int, array{from_member_id: int, edge: array{0: int, 1: string, 2: int, 3: string}}>  $previous
+     * @return array<int, array{0: int, 1: int, 2: string, 3: int, 4: string}>
      */
     private function reconstructPath(int $sourceMemberId, int $targetMemberId, array $previous): array
     {
@@ -156,10 +176,58 @@ class RelationshipTraversalService
         $current = $targetMemberId;
 
         while ($current !== $sourceMemberId && isset($previous[$current])) {
-            array_unshift($path, $previous[$current]['edge']);
+            array_unshift($path, [
+                $previous[$current]['from_member_id'],
+                $previous[$current]['edge'][0],
+                $previous[$current]['edge'][1],
+                $previous[$current]['edge'][2],
+                $previous[$current]['edge'][3],
+            ]);
             $current = $previous[$current]['from_member_id'];
         }
 
         return $path;
+    }
+
+    /**
+     * @param  array<int, array{0: int, 1: int, 2: string, 3: int, 4: string}>  $path
+     * @return array<int, array<string, mixed>>
+     */
+    private function enrichPath(array $path): array
+    {
+        if ($path === []) {
+            return [];
+        }
+
+        $memberIds = [];
+
+        foreach ($path as $edge) {
+            $memberIds[] = $edge[0];
+            $memberIds[] = $edge[1];
+        }
+
+        $members = DB::table('family_members')
+            ->select(['id', 'uuid', 'full_name'])
+            ->whereIn('id', array_values(array_unique($memberIds)))
+            ->whereNull('deleted_at')
+            ->get()
+            ->keyBy('id');
+
+        return array_map(function (array $edge) use ($members): array {
+            $from = $members->get($edge[0]);
+            $to = $members->get($edge[1]);
+
+            return [
+                'from_member_id' => $edge[0],
+                'from_member_uuid' => $from?->uuid,
+                'from_member_name' => $from?->full_name,
+                'to_member_id' => $edge[1],
+                'to_member_uuid' => $to?->uuid,
+                'to_member_name' => $to?->full_name,
+                'relationship' => $edge[2],
+                'relationship_id' => $edge[3],
+                'relationship_type' => $edge[4],
+            ];
+        }, $path);
     }
 }

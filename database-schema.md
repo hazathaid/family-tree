@@ -33,6 +33,7 @@ families
 
 family_members
 member_relationships
+member_relationship_cache
 
 member_photos
 member_documents
@@ -221,6 +222,45 @@ target_member_id
 relationship_type
 family_id
 family_id, source_member_id, target_member_id, relationship_type
+```
+
+---
+
+# member_relationship_cache
+
+Cache hasil pencarian Relationship Engine.
+
+Tabel ini menyimpan hasil lookup dan path traversal, bukan relasi turunan permanen. Data cache wajib dihapus ketika data anggota keluarga atau relasi dasar berubah.
+
+| Field | Type |
+| --- | --- |
+| id | BIGINT PK |
+| uuid | CHAR(36) UNIQUE |
+| family_id | BIGINT FK families |
+| source_member_id | BIGINT FK family_members |
+| target_member_id | BIGINT FK family_members |
+| relationship_name | VARCHAR(255) NULL |
+| relationship_path | JSON |
+| is_connected | BOOLEAN |
+| expires_at | TIMESTAMP |
+| created_at | TIMESTAMP |
+| updated_at | TIMESTAMP |
+
+TTL:
+
+```text
+24 jam
+```
+
+Indexes:
+
+```sql
+uuid
+family_id
+source_member_id
+target_member_id
+expires_at
+family_id, source_member_id, target_member_id
 ```
 
 ---

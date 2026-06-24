@@ -105,3 +105,5 @@ Response:
 ```
 
 The endpoint derives relationship names through BFS graph traversal over stored base edges. It does not read or persist derived relationship fields.
+
+FT-405 caches successful and disconnected relationship-engine lookups for 24 hours in `member_relationship_cache`. The API response shape is unchanged. Cache entries are invalidated when base relationships or family member records change.

@@ -9,6 +9,7 @@ class RelationshipResolverService
 {
     public function __construct(
         private readonly RelationshipTraversalService $traversal,
+        private readonly RelationshipCacheService $cache,
     ) {}
 
     /**
@@ -29,10 +30,22 @@ class RelationshipResolverService
             ];
         }
 
+        $cached = $this->cache->get($source, $target);
+
+        if ($cached !== null && ($cached['relationship'] !== null || $cached['is_connected'] === false)) {
+            return [
+                'relationship' => $cached['relationship'],
+                'path' => $cached['path'],
+            ];
+        }
+
         $path = $this->traversal->shortestPath($source, $target);
+        $relationship = $path === [] ? null : $this->relationshipName($source, $target, $path);
+
+        $this->cache->putResolved($source, $target, $relationship, $path);
 
         return [
-            'relationship' => $path === [] ? null : $this->relationshipName($source, $target, $path),
+            'relationship' => $relationship,
             'path' => $path,
         ];
     }

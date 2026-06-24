@@ -34,6 +34,7 @@ Responsibilities:
 * Use Breadth First Search to find the shortest path from source member to target member.
 * Track visited nodes during BFS so spouse and parent-child cycles do not create infinite traversal.
 * Return a path of member-to-member steps without storing derived relationships.
+* Read and write cached traversal paths through `RelationshipCacheService`.
 
 ### `RelationshipResolverService`
 
@@ -44,5 +45,17 @@ Responsibilities:
 * Support: Saya, Ayah, Ibu, Kakek, Nenek, Saudara Laki-Laki, Saudara Perempuan, Pakde, Bude, Om, Tante, Sepupu, Keponakan, Menantu, Mertua, Buyut, and Cicit.
 * Use birth dates when available to distinguish Pakde/Bude from Om/Tante.
 * Return `null` when members are in the same family but no graph path connects them.
+* Cache resolved relationship names and paths for 24 hours.
+
+### `RelationshipCacheService`
+
+Responsibilities:
+
+* Persist relationship lookup results in `member_relationship_cache`.
+* Cache both connected paths and disconnected lookups.
+* Store BFS relationship paths as JSON.
+* Apply a 24-hour TTL to every cached lookup.
+* Invalidate all cached lookups for a family when base relationships change.
+* Invalidate all cached lookups for a family when member data changes.
 
 Derived relationship labels are calculated dynamically and are never stored in `member_relationships`.

@@ -10,6 +10,7 @@ use App\Repositories\Contracts\RelationshipRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class EloquentRelationshipRepository implements RelationshipRepositoryInterface
 {
@@ -108,10 +109,9 @@ class EloquentRelationshipRepository implements RelationshipRepositoryInterface
         return $query->get();
     }
 
-    public function graphEdgesForFamily(int $familyId): Collection
+    public function graphEdgesForFamily(int $familyId): iterable
     {
-        /** @var Collection<int, MemberRelationship> $relationships */
-        $relationships = MemberRelationship::query()
+        return DB::table('member_relationships')
             ->select([
                 'id',
                 'family_id',
@@ -120,8 +120,26 @@ class EloquentRelationshipRepository implements RelationshipRepositoryInterface
                 'relationship_type',
             ])
             ->where('family_id', $familyId)
-            ->get();
+            ->whereNull('deleted_at')
+            ->cursor();
+    }
 
-        return $relationships;
+    public function graphEdgesForMember(int $familyId, int $memberId): iterable
+    {
+        return DB::table('member_relationships')
+            ->select([
+                'id',
+                'family_id',
+                'source_member_id',
+                'target_member_id',
+                'relationship_type',
+            ])
+            ->where('family_id', $familyId)
+            ->where(function ($query) use ($memberId): void {
+                $query->where('source_member_id', $memberId)
+                    ->orWhere('target_member_id', $memberId);
+            })
+            ->whereNull('deleted_at')
+            ->cursor();
     }
 }

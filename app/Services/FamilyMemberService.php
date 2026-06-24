@@ -17,25 +17,34 @@ class FamilyMemberService
     public function __construct(
         private readonly FamilyMemberRepositoryInterface $members,
         private readonly FamilyBranchRepositoryInterface $branches,
+        private readonly RelationshipCacheService $relationshipCache,
     ) {}
 
     public function create(User $user, Family $family, array $data): FamilyMember
     {
-        return $this->members->create([
+        $member = $this->members->create([
             ...$this->memberAttributes($family, $data),
             'family_id' => $family->id,
             'created_by' => $user->id,
         ]);
+
+        $this->relationshipCache->invalidateMember($member);
+
+        return $member;
     }
 
     public function update(FamilyMember $member, array $data): FamilyMember
     {
-        return $this->members->update($member, $this->memberAttributes($member->family, $data));
+        $updated = $this->members->update($member, $this->memberAttributes($member->family, $data));
+        $this->relationshipCache->invalidateMember($updated);
+
+        return $updated;
     }
 
     public function delete(FamilyMember $member): void
     {
         $this->members->delete($member);
+        $this->relationshipCache->invalidateMember($member);
     }
 
     public function uploadPhoto(FamilyMember $member, UploadedFile $photo): FamilyMember
@@ -56,10 +65,14 @@ class FamilyMemberService
 
         $this->createThumbnail($photo, $thumbnailPath);
 
-        return $this->members->update($member, [
+        $updated = $this->members->update($member, [
             'profile_photo' => $path,
             'profile_photo_thumbnail' => $thumbnailPath,
         ]);
+
+        $this->relationshipCache->invalidateMember($updated);
+
+        return $updated;
     }
 
     private function memberAttributes(Family $family, array $data): array
