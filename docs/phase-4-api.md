@@ -69,3 +69,39 @@ DELETE /relationships/{relationship_uuid}
 ```
 
 Deletes the relationship using soft delete. For husband/wife relationships, the inverse spouse edge is soft deleted as well.
+
+## Relationship Engine
+
+### Resolve Relationship
+
+```http
+GET /relationship-engine
+```
+
+Query parameters:
+
+```text
+source_member_id
+target_member_id
+```
+
+Response:
+
+```json
+{
+  "success": true,
+  "message": "Success",
+  "data": {
+    "relationship": "Sepupu",
+    "path": [
+      {
+        "from_member_id": 10,
+        "to_member_id": 5,
+        "relationship": "father"
+      }
+    ]
+  }
+}
+```
+
+The endpoint derives relationship names through BFS graph traversal over stored base edges. It does not read or persist derived relationship fields.

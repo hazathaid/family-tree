@@ -40,4 +40,9 @@ interface RelationshipRepositoryInterface
      * @return Collection<int, MemberRelationship>
      */
     public function parentEdges(Family $family, ?int $exceptRelationshipId = null): Collection;
+
+    /**
+     * @return Collection<int, MemberRelationship>
+     */
+    public function graphEdgesForFamily(int $familyId): Collection;
 }

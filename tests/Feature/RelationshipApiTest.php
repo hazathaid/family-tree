@@ -157,4 +157,71 @@ class RelationshipApiTest extends TestCase
             'relationship_type' => 'wife',
         ]);
     }
+
+    public function test_owner_can_resolve_relationship_engine_path(): void
+    {
+        $owner = User::factory()->create();
+        $family = Family::factory()->create(['created_by' => $owner->id]);
+        $grandfather = FamilyMember::factory()->create([
+            'family_id' => $family->id,
+            'created_by' => $owner->id,
+            'gender' => 'male',
+        ]);
+        $father = FamilyMember::factory()->create([
+            'family_id' => $family->id,
+            'created_by' => $owner->id,
+            'gender' => 'male',
+        ]);
+        $uncle = FamilyMember::factory()->create([
+            'family_id' => $family->id,
+            'created_by' => $owner->id,
+            'gender' => 'male',
+        ]);
+        $source = FamilyMember::factory()->create([
+            'family_id' => $family->id,
+            'created_by' => $owner->id,
+            'gender' => 'male',
+        ]);
+        $cousin = FamilyMember::factory()->create([
+            'family_id' => $family->id,
+            'created_by' => $owner->id,
+            'gender' => 'female',
+        ]);
+        FamilyUserRole::factory()->owner()->create([
+            'family_id' => $family->id,
+            'user_id' => $owner->id,
+        ]);
+        MemberRelationship::factory()->create([
+            'family_id' => $family->id,
+            'source_member_id' => $grandfather->id,
+            'target_member_id' => $father->id,
+            'relationship_type' => 'father',
+        ]);
+        MemberRelationship::factory()->create([
+            'family_id' => $family->id,
+            'source_member_id' => $grandfather->id,
+            'target_member_id' => $uncle->id,
+            'relationship_type' => 'father',
+        ]);
+        MemberRelationship::factory()->create([
+            'family_id' => $family->id,
+            'source_member_id' => $father->id,
+            'target_member_id' => $source->id,
+            'relationship_type' => 'father',
+        ]);
+        MemberRelationship::factory()->create([
+            'family_id' => $family->id,
+            'source_member_id' => $uncle->id,
+            'target_member_id' => $cousin->id,
+            'relationship_type' => 'father',
+        ]);
+        Sanctum::actingAs($owner);
+
+        $this->getJson('/api/v1/relationship-engine?source_member_id='.$source->id.'&target_member_id='.$cousin->id)
+            ->assertOk()
+            ->assertJsonPath('data.relationship', 'Sepupu')
+            ->assertJsonCount(4, 'data.path')
+            ->assertJsonPath('data.path.0.relationship', 'father')
+            ->assertJsonPath('data.path.3.relationship', 'child');
+    }
 }

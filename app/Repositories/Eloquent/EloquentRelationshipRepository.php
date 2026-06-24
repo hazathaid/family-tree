@@ -107,4 +107,21 @@ class EloquentRelationshipRepository implements RelationshipRepositoryInterface
 
         return $query->get();
     }
+
+    public function graphEdgesForFamily(int $familyId): Collection
+    {
+        /** @var Collection<int, MemberRelationship> $relationships */
+        $relationships = MemberRelationship::query()
+            ->select([
+                'id',
+                'family_id',
+                'source_member_id',
+                'target_member_id',
+                'relationship_type',
+            ])
+            ->where('family_id', $familyId)
+            ->get();
+
+        return $relationships;
+    }
 }

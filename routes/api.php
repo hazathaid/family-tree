@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\V1\FamilyMemberController;
 use App\Http\Controllers\Api\V1\FamilyRoleController;
 use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\RelationshipController;
+use App\Http\Controllers\Api\V1\RelationshipEngineController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function (): void {
@@ -50,6 +51,7 @@ Route::prefix('v1')->group(function (): void {
         Route::apiResource('family-members', FamilyMemberController::class);
         Route::post('family-members/{family_member}/photo', [FamilyMemberController::class, 'uploadPhoto']);
 
+        Route::get('relationship-engine', [RelationshipEngineController::class, 'show']);
         Route::apiResource('relationships', RelationshipController::class);
     });
 });

@@ -31,3 +31,5 @@ family_id, source_member_id, target_member_id, relationship_type
 ```
 
 Only base graph relationships are stored. Derived kinship names such as pakde, bude, om, tante, sepupu, keponakan, menantu, mertua, buyut, and cicit are not persisted.
+
+FT-403 and FT-404 do not add tables or columns. The traversal and resolver services read the existing graph and calculate derived relationships at request time.
