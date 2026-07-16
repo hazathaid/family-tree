@@ -8,9 +8,11 @@ use App\Http\Controllers\Api\V1\FamilyController;
 use App\Http\Controllers\Api\V1\FamilyDashboardController;
 use App\Http\Controllers\Api\V1\FamilyMemberController;
 use App\Http\Controllers\Api\V1\FamilyRoleController;
+use App\Http\Controllers\Api\V1\FamilyTreeController;
 use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\RelationshipController;
 use App\Http\Controllers\Api\V1\RelationshipEngineController;
+use App\Http\Controllers\Api\V1\TreeExportController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function (): void {
@@ -53,5 +55,8 @@ Route::prefix('v1')->group(function (): void {
 
         Route::get('relationship-engine', [RelationshipEngineController::class, 'show']);
         Route::apiResource('relationships', RelationshipController::class);
+        Route::get('tree/generate', [FamilyTreeController::class, 'generate']);
+        Route::get('tree/export/png', [TreeExportController::class, 'png'])->middleware('throttle:10,1');
+        Route::get('tree/export/pdf', [TreeExportController::class, 'pdf'])->middleware('throttle:10,1');
     });
 });

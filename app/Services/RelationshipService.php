@@ -18,6 +18,7 @@ class RelationshipService
         private readonly FamilyRepositoryInterface $families,
         private readonly FamilyMemberRepositoryInterface $members,
         private readonly RelationshipCacheService $cache,
+        private readonly TreeCacheService $treeCache,
     ) {}
 
     public function create(array $data): MemberRelationship
@@ -31,6 +32,7 @@ class RelationshipService
             $relationship = $this->relationships->create($attributes);
             $this->syncSpouseInverse($relationship);
             $this->cache->invalidateFamily($relationship->family_id);
+            $this->treeCache->invalidateFamily($relationship->family_id);
 
             return $relationship->load(['family', 'sourceMember', 'targetMember']);
         });
@@ -60,6 +62,7 @@ class RelationshipService
             );
             $this->syncSpouseInverse($updated);
             $this->cache->invalidateFamily($updated->family_id);
+            $this->treeCache->invalidateFamily($updated->family_id);
 
             return $updated->load(['family', 'sourceMember', 'targetMember']);
         });
@@ -77,6 +80,7 @@ class RelationshipService
             );
             $this->relationships->delete($relationship);
             $this->cache->invalidateFamily($relationship->family_id);
+            $this->treeCache->invalidateFamily($relationship->family_id);
         });
     }
 

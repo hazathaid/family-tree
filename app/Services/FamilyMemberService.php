@@ -18,6 +18,7 @@ class FamilyMemberService
         private readonly FamilyMemberRepositoryInterface $members,
         private readonly FamilyBranchRepositoryInterface $branches,
         private readonly RelationshipCacheService $relationshipCache,
+        private readonly TreeCacheService $treeCache,
     ) {}
 
     public function create(User $user, Family $family, array $data): FamilyMember
@@ -29,6 +30,7 @@ class FamilyMemberService
         ]);
 
         $this->relationshipCache->invalidateMember($member);
+        $this->treeCache->invalidateFamily($member->family_id);
 
         return $member;
     }
@@ -37,6 +39,7 @@ class FamilyMemberService
     {
         $updated = $this->members->update($member, $this->memberAttributes($member->family, $data));
         $this->relationshipCache->invalidateMember($updated);
+        $this->treeCache->invalidateFamily($updated->family_id);
 
         return $updated;
     }
@@ -45,6 +48,7 @@ class FamilyMemberService
     {
         $this->members->delete($member);
         $this->relationshipCache->invalidateMember($member);
+        $this->treeCache->invalidateFamily($member->family_id);
     }
 
     public function uploadPhoto(FamilyMember $member, UploadedFile $photo): FamilyMember
@@ -71,6 +75,7 @@ class FamilyMemberService
         ]);
 
         $this->relationshipCache->invalidateMember($updated);
+        $this->treeCache->invalidateFamily($updated->family_id);
 
         return $updated;
     }
