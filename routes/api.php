@@ -1,5 +1,9 @@
 <?php
 
+use App\Http\Controllers\Api\V1\ArticleCategoryController;
+use App\Http\Controllers\Api\V1\ArticleCommentController;
+use App\Http\Controllers\Api\V1\ArticleController;
+use App\Http\Controllers\Api\V1\ArticleLikeController;
 use App\Http\Controllers\Api\V1\Auth\AuthController;
 use App\Http\Controllers\Api\V1\Auth\EmailVerificationController;
 use App\Http\Controllers\Api\V1\Auth\ForgotPasswordController;
@@ -9,6 +13,7 @@ use App\Http\Controllers\Api\V1\FamilyDashboardController;
 use App\Http\Controllers\Api\V1\FamilyMemberController;
 use App\Http\Controllers\Api\V1\FamilyRoleController;
 use App\Http\Controllers\Api\V1\FamilyTreeController;
+use App\Http\Controllers\Api\V1\FeaturedArticleController;
 use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\RelationshipController;
 use App\Http\Controllers\Api\V1\RelationshipEngineController;
@@ -58,5 +63,19 @@ Route::prefix('v1')->group(function (): void {
         Route::get('tree/generate', [FamilyTreeController::class, 'generate']);
         Route::get('tree/export/png', [TreeExportController::class, 'png'])->middleware('throttle:10,1');
         Route::get('tree/export/pdf', [TreeExportController::class, 'pdf'])->middleware('throttle:10,1');
+
+        Route::apiResource('article-categories', ArticleCategoryController::class);
+        Route::post('articles/{article}/publish', [ArticleController::class, 'publish']);
+        Route::post('articles/{article}/featured-image', [ArticleController::class, 'image'])->middleware('throttle:10,1');
+        Route::apiResource('articles', ArticleController::class);
+        Route::get('articles/{article}/comments', [ArticleCommentController::class, 'index']);
+        Route::post('articles/{article}/comments', [ArticleCommentController::class, 'store'])->middleware('throttle:30,1');
+        Route::put('articles/{article}/comments/{comment}', [ArticleCommentController::class, 'update']);
+        Route::delete('articles/{article}/comments/{comment}', [ArticleCommentController::class, 'destroy']);
+        Route::post('articles/{article}/like', [ArticleLikeController::class, 'store'])->middleware('throttle:60,1');
+        Route::delete('articles/{article}/like', [ArticleLikeController::class, 'destroy'])->middleware('throttle:60,1');
+        Route::post('articles/{article}/feature', [FeaturedArticleController::class, 'store']);
+        Route::delete('articles/{article}/feature', [FeaturedArticleController::class, 'destroy']);
+        Route::get('families/{family}/articles/featured', [FeaturedArticleController::class, 'index']);
     });
 });

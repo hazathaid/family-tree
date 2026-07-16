@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Article;
 use App\Models\Family;
 use App\Models\FamilyUserRole;
 use App\Models\User;
@@ -48,9 +49,9 @@ class FamilyDashboardApiTest extends TestCase
                 'created_by' => $user->id,
             ],
         ]);
-        DB::table('articles')->insert([
-            ['family_id' => $family->id],
-            ['family_id' => $family->id],
+        Article::factory()->count(2)->create([
+            'family_id' => $family->id,
+            'author_id' => $user->id,
         ]);
         DB::table('member_photos')->insert([
             ['member_id' => 1],
@@ -71,11 +72,6 @@ class FamilyDashboardApiTest extends TestCase
 
     private function createDashboardSourceTables(): void
     {
-        Schema::create('articles', function (Blueprint $table): void {
-            $table->id();
-            $table->foreignId('family_id');
-        });
-
         Schema::create('member_photos', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('member_id');

@@ -69,4 +69,9 @@ class Family extends Model
     {
         return $this->hasMany(FamilyMember::class);
     }
+
+    public function articles(): HasMany
+    {
+        return $this->hasMany(Article::class);
+    }
 }
