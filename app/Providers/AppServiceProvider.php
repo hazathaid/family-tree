@@ -41,6 +41,7 @@ use App\Repositories\Contracts\PushDeviceTokenRepositoryInterface;
 use App\Repositories\Contracts\RelationshipRepositoryInterface;
 use App\Repositories\Contracts\ReportRepositoryInterface;
 use App\Repositories\Contracts\SearchRepositoryInterface;
+use App\Repositories\Contracts\SystemHealthRepositoryInterface;
 use App\Repositories\Contracts\TreeRepositoryInterface;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use App\Repositories\Eloquent\EloquentActivityLogRepository;
@@ -64,10 +65,14 @@ use App\Repositories\Eloquent\EloquentPushDeviceTokenRepository;
 use App\Repositories\Eloquent\EloquentRelationshipRepository;
 use App\Repositories\Eloquent\EloquentReportRepository;
 use App\Repositories\Eloquent\EloquentSearchRepository;
+use App\Repositories\Eloquent\EloquentSystemHealthRepository;
 use App\Repositories\Eloquent\EloquentTreeRepository;
 use App\Repositories\Eloquent\EloquentUserRepository;
 use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -97,10 +102,16 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(NotificationRepositoryInterface::class, EloquentNotificationRepository::class);
         $this->app->bind(PushDeviceTokenRepositoryInterface::class, EloquentPushDeviceTokenRepository::class);
         $this->app->bind(ReportRepositoryInterface::class, EloquentReportRepository::class);
+        $this->app->bind(SystemHealthRepositoryInterface::class, EloquentSystemHealthRepository::class);
     }
 
     public function boot(): void
     {
+        RateLimiter::for('api', fn (Request $request): Limit => Limit::perMinute(60)
+            ->by($request->user()?->getAuthIdentifier() ?: $request->ip()));
+        RateLimiter::for('login', fn (Request $request): Limit => Limit::perMinute(5)
+            ->by(strtolower((string) $request->input('email')).'|'.$request->ip()));
+
         Gate::define('administer', fn ($user): bool => $user->hasRole('super-admin'));
         Gate::policy(Family::class, FamilyPolicy::class);
         Gate::policy(FamilyBranch::class, FamilyBranchPolicy::class);

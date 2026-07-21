@@ -23,7 +23,6 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $created_at
  * @property-read User|null $user
  */
-
 class AuditLog extends Model
 {
     use HasFactory, HasUuids;

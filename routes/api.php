@@ -28,14 +28,17 @@ use App\Http\Controllers\Api\V1\RelationshipController;
 use App\Http\Controllers\Api\V1\RelationshipEngineController;
 use App\Http\Controllers\Api\V1\ReportController;
 use App\Http\Controllers\Api\V1\SearchController;
+use App\Http\Controllers\Api\V1\SystemHealthController;
 use App\Http\Controllers\Api\V1\TimelineController;
 use App\Http\Controllers\Api\V1\TreeExportController;
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('v1')->group(function (): void {
+Route::prefix('v1')->middleware('throttle:api')->group(function (): void {
+    Route::get('health', SystemHealthController::class);
+
     Route::prefix('auth')->group(function (): void {
         Route::post('register', [AuthController::class, 'register'])->middleware('guest:sanctum');
-        Route::post('login', [AuthController::class, 'login'])->middleware('guest:sanctum');
+        Route::post('login', [AuthController::class, 'login'])->middleware(['guest:sanctum', 'throttle:login']);
         Route::post('forgot-password', [ForgotPasswordController::class, 'store'])->middleware('guest:sanctum');
         Route::post('reset-password', [ForgotPasswordController::class, 'reset'])->middleware('guest:sanctum');
 

@@ -38,7 +38,17 @@ services:
   queue:
     build:
       context: .
-    command: php artisan queue:work redis --tries=3
+    command: php artisan horizon
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - mysql
+      - redis
+
+  scheduler:
+    build:
+      context: .
+    command: php artisan schedule:work
     volumes:
       - .:/var/www/html
     depends_on:

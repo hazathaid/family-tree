@@ -27,6 +27,7 @@ RUN mkdir -p bootstrap/cache \
     --no-interaction \
     --prefer-dist \
     --optimize-autoloader \
+    --ignore-platform-req=ext-pcntl \
     --no-progress
 
 FROM php:8.3-fpm-bookworm AS runtime
@@ -36,6 +37,7 @@ WORKDIR /var/www/html
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         git \
+        default-mysql-client \
         libfreetype6-dev \
         libicu-dev \
         libjpeg62-turbo-dev \

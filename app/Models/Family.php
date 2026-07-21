@@ -20,6 +20,7 @@ use Illuminate\Support\Carbon;
  * @property string|null $logo
  * @property string|null $cover_image
  * @property int $created_by
+ * @property-read User|null $creator
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
