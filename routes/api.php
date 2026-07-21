@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\Api\V1\Admin\AuditLogController;
+use App\Http\Controllers\Api\V1\Admin\FamilyModerationController;
+use App\Http\Controllers\Api\V1\Admin\UserManagementController;
 use App\Http\Controllers\Api\V1\ArticleCategoryController;
 use App\Http\Controllers\Api\V1\ArticleCommentController;
 use App\Http\Controllers\Api\V1\ArticleController;
@@ -104,5 +107,16 @@ Route::prefix('v1')->group(function (): void {
         Route::get('families/{family}/gamification', [GamificationController::class, 'profile']);
         Route::get('families/{family}/leaderboard', [GamificationController::class, 'users']);
         Route::get('leaderboard/families', [GamificationController::class, 'families']);
+
+        Route::prefix('admin')->group(function (): void {
+            Route::get('users', [UserManagementController::class, 'index']);
+            Route::get('users/{user}', [UserManagementController::class, 'show']);
+            Route::patch('users/{user}', [UserManagementController::class, 'update']);
+            Route::get('families', [FamilyModerationController::class, 'index']);
+            Route::get('families/{family}', [FamilyModerationController::class, 'show']);
+            Route::delete('families/{family}/content', [FamilyModerationController::class, 'destroyContent']);
+            Route::get('audit-logs', [AuditLogController::class, 'index']);
+            Route::get('audit-logs/export', [AuditLogController::class, 'export']);
+        });
     });
 });

@@ -775,11 +775,11 @@ POST /push-devices
 
 GET /admin/users
 
-GET /admin/users/{id}
+GET /admin/users/{user_uuid}
 
-PUT /admin/users/{id}
+PATCH /admin/users/{user_uuid}
 
-DELETE /admin/users/{id}
+Request: `status=active|suspended`
 
 ---
 
@@ -787,13 +787,19 @@ DELETE /admin/users/{id}
 
 GET /admin/families
 
-DELETE /admin/families/{id}
+GET /admin/families/{family_uuid}
+
+DELETE /admin/families/{family_uuid}/content
+
+Request: `content_type=article|photo|event`, `content_uuid`
 
 ---
 
 ## Audit Logs
 
 GET /admin/audit-logs
+
+GET /admin/audit-logs/export
 
 ---
 

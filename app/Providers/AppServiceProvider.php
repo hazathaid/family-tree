@@ -21,10 +21,12 @@ use App\Policies\FamilyPolicy;
 use App\Policies\MemberPhotoPolicy;
 use App\Policies\PhotoAlbumPolicy;
 use App\Repositories\Contracts\ActivityLogRepositoryInterface;
+use App\Repositories\Contracts\AdministrationRepositoryInterface;
 use App\Repositories\Contracts\ArticleCategoryRepositoryInterface;
 use App\Repositories\Contracts\ArticleCommentRepositoryInterface;
 use App\Repositories\Contracts\ArticleLikeRepositoryInterface;
 use App\Repositories\Contracts\ArticleRepositoryInterface;
+use App\Repositories\Contracts\AuditLogRepositoryInterface;
 use App\Repositories\Contracts\EventRepositoryInterface;
 use App\Repositories\Contracts\FamilyBranchRepositoryInterface;
 use App\Repositories\Contracts\FamilyDashboardRepositoryInterface;
@@ -42,10 +44,12 @@ use App\Repositories\Contracts\SearchRepositoryInterface;
 use App\Repositories\Contracts\TreeRepositoryInterface;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use App\Repositories\Eloquent\EloquentActivityLogRepository;
+use App\Repositories\Eloquent\EloquentAdministrationRepository;
 use App\Repositories\Eloquent\EloquentArticleCategoryRepository;
 use App\Repositories\Eloquent\EloquentArticleCommentRepository;
 use App\Repositories\Eloquent\EloquentArticleLikeRepository;
 use App\Repositories\Eloquent\EloquentArticleRepository;
+use App\Repositories\Eloquent\EloquentAuditLogRepository;
 use App\Repositories\Eloquent\EloquentEventRepository;
 use App\Repositories\Eloquent\EloquentFamilyBranchRepository;
 use App\Repositories\Eloquent\EloquentFamilyDashboardRepository;
@@ -71,6 +75,8 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(ActivityLogRepositoryInterface::class, EloquentActivityLogRepository::class);
+        $this->app->bind(AdministrationRepositoryInterface::class, EloquentAdministrationRepository::class);
+        $this->app->bind(AuditLogRepositoryInterface::class, EloquentAuditLogRepository::class);
         $this->app->bind(UserRepositoryInterface::class, EloquentUserRepository::class);
         $this->app->bind(FamilyRepositoryInterface::class, EloquentFamilyRepository::class);
         $this->app->bind(FamilyUserRoleRepositoryInterface::class, EloquentFamilyUserRoleRepository::class);
@@ -95,6 +101,7 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        Gate::define('administer', fn ($user): bool => $user->hasRole('super-admin'));
         Gate::policy(Family::class, FamilyPolicy::class);
         Gate::policy(FamilyBranch::class, FamilyBranchPolicy::class);
         Gate::policy(FamilyMember::class, FamilyMemberPolicy::class);
