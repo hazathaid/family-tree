@@ -17,7 +17,12 @@ use Illuminate\Validation\ValidationException;
 
 class ArticleService
 {
-    public function __construct(private readonly ArticleRepositoryInterface $articles, private readonly RichTextSanitizer $sanitizer, private readonly ActivityLogService $activityLog) {}
+    public function __construct(
+        private readonly ArticleRepositoryInterface $articles,
+        private readonly RichTextSanitizer $sanitizer,
+        private readonly ActivityLogService $activityLog,
+        private readonly GamificationService $gamification,
+    ) {}
 
     public function create(User $user, ArticleData $data): Article
     {
@@ -30,6 +35,7 @@ class ArticleService
             ArticlePublished::dispatch($article);
         }
         $this->activityLog->articleCreated($user, $article);
+        $this->gamification->award($family, $user, GamificationService::ACTION_WRITE_ARTICLE, Article::class, $article->id);
 
         return $this->articles->loadDetails($article, $user);
     }

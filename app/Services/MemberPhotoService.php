@@ -14,7 +14,11 @@ use Illuminate\Validation\ValidationException;
 
 class MemberPhotoService
 {
-    public function __construct(private readonly MemberPhotoRepositoryInterface $photos, private readonly ActivityLogService $activityLog) {}
+    public function __construct(
+        private readonly MemberPhotoRepositoryInterface $photos,
+        private readonly ActivityLogService $activityLog,
+        private readonly GamificationService $gamification,
+    ) {}
 
     public function upload(User $user, array $data, UploadedFile $image): MemberPhoto
     {
@@ -36,6 +40,7 @@ class MemberPhotoService
 
         $photo = $this->photos->create(['family_id' => $family->id, 'photo_album_id' => $album?->id, 'uploaded_by' => $user->id, 'path' => $path, 'thumbnail_path' => $thumbnailPath, 'original_name' => $image->getClientOriginalName(), 'mime_type' => 'image/jpeg', 'size' => strlen($contents), 'width' => $width, 'height' => $height, 'caption' => $data['caption'] ?? null, 'captured_at' => $data['captured_at'] ?? null]);
         $this->activityLog->photoUploaded($user, $photo);
+        $this->gamification->award($family, $user, GamificationService::ACTION_UPLOAD_PHOTO, MemberPhoto::class, $photo->id);
 
         return $photo;
     }

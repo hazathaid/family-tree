@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\V1\FamilyMemberController;
 use App\Http\Controllers\Api\V1\FamilyRoleController;
 use App\Http\Controllers\Api\V1\FamilyTreeController;
 use App\Http\Controllers\Api\V1\FeaturedArticleController;
+use App\Http\Controllers\Api\V1\GamificationController;
 use App\Http\Controllers\Api\V1\MemberPhotoController;
 use App\Http\Controllers\Api\V1\NotificationController;
 use App\Http\Controllers\Api\V1\PhotoAlbumController;
@@ -100,5 +101,8 @@ Route::prefix('v1')->group(function (): void {
         Route::get('search', [SearchController::class, 'index'])->middleware('throttle:60,1');
         Route::get('families/{family}/reports/family-statistics', [ReportController::class, 'familyStatistics']);
         Route::get('families/{family}/reports/activity', [ReportController::class, 'activity']);
+        Route::get('families/{family}/gamification', [GamificationController::class, 'profile']);
+        Route::get('families/{family}/leaderboard', [GamificationController::class, 'users']);
+        Route::get('leaderboard/families', [GamificationController::class, 'families']);
     });
 });

@@ -20,6 +20,7 @@ class FamilyMemberService
         private readonly RelationshipCacheService $relationshipCache,
         private readonly TreeCacheService $treeCache,
         private readonly ActivityLogService $activityLog,
+        private readonly GamificationService $gamification,
     ) {}
 
     public function create(User $user, Family $family, array $data): FamilyMember
@@ -33,6 +34,7 @@ class FamilyMemberService
         $this->relationshipCache->invalidateMember($member);
         $this->treeCache->invalidateFamily($member->family_id);
         $this->activityLog->memberCreated($user, $member);
+        $this->gamification->award($family, $user, GamificationService::ACTION_ADD_MEMBER, FamilyMember::class, $member->id);
 
         return $member;
     }
