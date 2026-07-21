@@ -16,7 +16,9 @@ class TreeGraphBuilderService
             $nodes[$member->id] = ['id' => $member->id, 'uuid' => $member->uuid, 'name' => $member->full_name,
                 'nickname' => $member->nickname, 'gender' => $member->gender,
                 'birth_year' => $member->birth_date ? (int) substr((string) $member->birth_date, 0, 4) : null,
-                'is_alive' => (bool) $member->is_alive, 'profile_photo' => $member->profile_photo];
+                'death_year' => $member->death_date ? (int) substr((string) $member->death_date, 0, 4) : null,
+                'is_alive' => (bool) $member->is_alive, 'profile_photo' => $member->profile_photo,
+                'biography' => $member->biography];
             $adjacency[$member->id] = [];
         }
         foreach ($this->repository->relationships($familyId) as $relation) {

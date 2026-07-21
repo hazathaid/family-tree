@@ -23,8 +23,10 @@ class TreeLayoutService
                     [$x, $y] = [$width / 2 + $radius * cos($angle), $height / 2 + $radius * sin($angle)];
                 } else {
                     $level = array_search($generation, array_keys($groups), true);
-                    $x = 120 + $index * 220;
-                    $y = 80 + $level * 180;
+                    $spacingX = $layout === 'compact' ? 170 : 220;
+                    $spacingY = $layout === 'compact' ? 140 : 180;
+                    $x = 120 + $index * $spacingX;
+                    $y = 80 + $level * $spacingY;
                     if ($layout === 'horizontal') {
                         [$x, $y] = [$y, $x];
                     }

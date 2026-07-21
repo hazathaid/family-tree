@@ -12,7 +12,10 @@ class EloquentTreeRepository implements TreeRepositoryInterface
 {
     public function members(int $familyId): iterable
     {
-        return DB::table('family_members')->select(['id', 'uuid', 'full_name', 'nickname', 'gender', 'birth_date', 'is_alive', 'profile_photo'])
+        return DB::table('family_members')->select([
+            'id', 'uuid', 'full_name', 'nickname', 'gender', 'birth_date', 'death_date', 'is_alive',
+            'profile_photo', 'biography',
+        ])
             ->where('family_id', $familyId)->whereNull('deleted_at')->orderBy('id')->cursor();
     }
 

@@ -4,6 +4,7 @@ use App\Http\Controllers\Web\AuthController;
 use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\EmailVerificationController;
 use App\Http\Controllers\Web\FamilySettingsController;
+use App\Http\Controllers\Web\FamilyTreeController;
 use App\Http\Controllers\Web\MemberController;
 use App\Http\Controllers\Web\OnboardingController;
 use App\Http\Controllers\Web\PasswordController;
@@ -34,6 +35,7 @@ Route::middleware('auth')->group(function (): void {
         Route::post('/families/{family}/activate', [OnboardingController::class, 'select'])->name('families.activate');
         Route::middleware('active.family')->group(function (): void {
             Route::get('/dashboard', DashboardController::class)->name('dashboard');
+            Route::get('/tree', FamilyTreeController::class)->name('tree.index');
 
             Route::get('/settings', [FamilySettingsController::class, 'index'])->name('settings.index');
             Route::put('/settings', [FamilySettingsController::class, 'update'])->name('settings.update');
