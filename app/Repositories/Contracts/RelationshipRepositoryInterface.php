@@ -50,4 +50,6 @@ interface RelationshipRepositoryInterface
      * @return iterable<int, object>
      */
     public function graphEdgesForMember(int $familyId, int $memberId): iterable;
+
+    public function forMember(FamilyMember $member): Collection;
 }

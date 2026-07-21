@@ -142,4 +142,17 @@ class EloquentRelationshipRepository implements RelationshipRepositoryInterface
             ->whereNull('deleted_at')
             ->cursor();
     }
+
+    public function forMember(FamilyMember $member): Collection
+    {
+        return MemberRelationship::query()
+            ->with(['sourceMember', 'targetMember'])
+            ->where('family_id', $member->family_id)
+            ->where(function (Builder $query) use ($member): void {
+                $query->where('source_member_id', $member->id)
+                    ->orWhere('target_member_id', $member->id);
+            })
+            ->latest()
+            ->get();
+    }
 }

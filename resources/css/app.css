@@ -172,6 +172,33 @@ a {
     place-items: center;
 }
 
+.member-avatar {
+    width: 3.5rem;
+    height: 3.5rem;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.member-avatar-placeholder {
+    display: grid;
+    color: var(--family-primary-dark);
+    background: #eaf4fd;
+    font-weight: 700;
+    place-items: center;
+}
+
+.family-cover {
+    width: 100%;
+    max-height: 18rem;
+    border-radius: var(--family-radius);
+    object-fit: cover;
+}
+
+.text-preline {
+    white-space: pre-line;
+}
+
 .min-width-0 {
     min-width: 0;
 }

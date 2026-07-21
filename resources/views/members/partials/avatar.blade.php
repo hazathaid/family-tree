@@ -1,0 +1,1 @@
+@if($member->profile_photo_thumbnail)<img class="member-avatar" src="{{ Storage::url($member->profile_photo_thumbnail) }}" alt="Foto {{ $member->full_name }}">@else<div class="member-avatar member-avatar-placeholder" aria-hidden="true">{{ mb_strtoupper(mb_substr($member->full_name, 0, 1)) }}</div>@endif

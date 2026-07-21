@@ -3,6 +3,8 @@
 use App\Http\Controllers\Web\AuthController;
 use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\EmailVerificationController;
+use App\Http\Controllers\Web\FamilySettingsController;
+use App\Http\Controllers\Web\MemberController;
 use App\Http\Controllers\Web\OnboardingController;
 use App\Http\Controllers\Web\PasswordController;
 use Illuminate\Support\Facades\Route;
@@ -30,6 +32,20 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/onboarding', [OnboardingController::class, 'index'])->name('onboarding.index');
         Route::post('/onboarding/families', [OnboardingController::class, 'store'])->name('onboarding.families.store');
         Route::post('/families/{family}/activate', [OnboardingController::class, 'select'])->name('families.activate');
-        Route::get('/dashboard', DashboardController::class)->middleware('active.family')->name('dashboard');
+        Route::middleware('active.family')->group(function (): void {
+            Route::get('/dashboard', DashboardController::class)->name('dashboard');
+
+            Route::get('/settings', [FamilySettingsController::class, 'index'])->name('settings.index');
+            Route::put('/settings', [FamilySettingsController::class, 'update'])->name('settings.update');
+            Route::post('/settings/branches', [FamilySettingsController::class, 'storeBranch'])->name('settings.branches.store');
+            Route::put('/settings/branches/{branch}', [FamilySettingsController::class, 'updateBranch'])->name('settings.branches.update');
+            Route::delete('/settings/branches/{branch}', [FamilySettingsController::class, 'destroyBranch'])->name('settings.branches.destroy');
+            Route::post('/settings/members', [FamilySettingsController::class, 'invite'])->name('settings.members.invite');
+            Route::patch('/settings/members/{membership}', [FamilySettingsController::class, 'assignRole'])->name('settings.members.role');
+            Route::delete('/settings/members/{membership}', [FamilySettingsController::class, 'removeRole'])->name('settings.members.destroy');
+
+            Route::resource('members', MemberController::class)->except('show');
+            Route::get('/members/{member}', [MemberController::class, 'show'])->name('members.show');
+        });
     });
 });

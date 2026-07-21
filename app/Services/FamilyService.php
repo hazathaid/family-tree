@@ -8,8 +8,10 @@ use App\Models\FamilyUserRole;
 use App\Models\User;
 use App\Repositories\Contracts\FamilyRepositoryInterface;
 use App\Repositories\Contracts\FamilyUserRoleRepositoryInterface;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class FamilyService
@@ -48,6 +50,25 @@ class FamilyService
         Cache::forget($this->dashboardCacheKey($updated));
 
         return $updated;
+    }
+
+    public function updateIdentityAssets(Family $family, ?UploadedFile $logo, ?UploadedFile $coverImage): Family
+    {
+        $attributes = [];
+
+        foreach (['logo' => $logo, 'cover_image' => $coverImage] as $field => $file) {
+            if (! $file instanceof UploadedFile) {
+                continue;
+            }
+
+            if ($family->{$field}) {
+                Storage::disk('public')->delete($family->{$field});
+            }
+
+            $attributes[$field] = $file->store('families/'.$family->uuid, 'public');
+        }
+
+        return $attributes === [] ? $family : $this->families->update($family, $attributes);
     }
 
     public function delete(Family $family): void
