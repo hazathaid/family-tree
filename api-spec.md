@@ -722,7 +722,7 @@ Response
 
 ## Family Statistics
 
-GET /reports/family-statistics
+GET /families/{family_uuid}/reports/family-statistics
 
 Response
 
@@ -734,6 +734,19 @@ Response
   "deceased_members": 80
 }
 ```
+
+## Activity Reports
+
+GET /families/{family_uuid}/reports/activity
+
+Optional query parameters:
+
+```text
+from (date)
+to (date, after or equal to from)
+```
+
+Returns active users, photo upload totals, and article totals for the selected period. The default period is the last 30 days.
 
 ---
 

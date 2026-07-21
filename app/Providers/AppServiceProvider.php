@@ -36,6 +36,7 @@ use App\Repositories\Contracts\NotificationRepositoryInterface;
 use App\Repositories\Contracts\PhotoAlbumRepositoryInterface;
 use App\Repositories\Contracts\PushDeviceTokenRepositoryInterface;
 use App\Repositories\Contracts\RelationshipRepositoryInterface;
+use App\Repositories\Contracts\ReportRepositoryInterface;
 use App\Repositories\Contracts\SearchRepositoryInterface;
 use App\Repositories\Contracts\TreeRepositoryInterface;
 use App\Repositories\Contracts\UserRepositoryInterface;
@@ -55,6 +56,7 @@ use App\Repositories\Eloquent\EloquentNotificationRepository;
 use App\Repositories\Eloquent\EloquentPhotoAlbumRepository;
 use App\Repositories\Eloquent\EloquentPushDeviceTokenRepository;
 use App\Repositories\Eloquent\EloquentRelationshipRepository;
+use App\Repositories\Eloquent\EloquentReportRepository;
 use App\Repositories\Eloquent\EloquentSearchRepository;
 use App\Repositories\Eloquent\EloquentTreeRepository;
 use App\Repositories\Eloquent\EloquentUserRepository;
@@ -85,6 +87,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(EventRepositoryInterface::class, EloquentEventRepository::class);
         $this->app->bind(NotificationRepositoryInterface::class, EloquentNotificationRepository::class);
         $this->app->bind(PushDeviceTokenRepositoryInterface::class, EloquentPushDeviceTokenRepository::class);
+        $this->app->bind(ReportRepositoryInterface::class, EloquentReportRepository::class);
     }
 
     public function boot(): void
