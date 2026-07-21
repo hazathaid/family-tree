@@ -2,7 +2,7 @@
 
 Project: Family Tree Platform Indonesia
 
-Version: 1.0
+Version: 1.1
 
 ---
 
@@ -12,21 +12,35 @@ Phase 1 - Foundation & Authentication
 
 Phase 2 - Family Management
 
-Phase 3 - Relationship Engine
+Phase 3 - Family Members
 
-Phase 4 - Tree Generator
+Phase 4 - Relationship Engine
 
-Phase 5 - Articles & Timeline
+Phase 5 - Family Tree Generator
 
-Phase 6 - Events & Notifications
+Phase 6 - Articles
 
-Phase 7 - Mobile Application
+Phase 7 - Photo Archive
 
-Phase 8 - Gamification
+Phase 8 - Timeline
 
-Phase 9 - Reporting & Analytics
+Phase 9 - Events
 
-Phase 10 - Production Readiness
+Phase 10 - Notifications
+
+Phase 11 - Search
+
+Phase 12 - Reporting
+
+Phase 13 - Mobile Application
+
+Phase 14 - Gamification
+
+Phase 15 - Administration
+
+Phase 16 - Production Readiness
+
+Phase 17 - Web Application
 
 ---
 
@@ -810,6 +824,535 @@ Tools:
 
 ---
 
+# Phase 17 - Web Application
+
+Phase 17 builds the Blade web client on top of the existing service and repository layers. Web controllers must remain thin and must not duplicate business logic from API controllers or services.
+
+Implementation order is mandatory. Complete and verify one task before starting the next task.
+
+## Step 1 - Web Foundation
+
+## FT-1701 Web Design System and Shared Layout
+
+Dependencies:
+
+* FT-101
+
+Deliverables:
+
+* Bootstrap 5 design tokens matching `ui-spec.md`
+* Inter font with system fallback
+* Public, guest, authenticated, and error page layouts
+* Responsive top navigation, sidebar, mobile navigation, and footer
+* Reusable Blade components for buttons, forms, cards, badges, alerts, pagination, modals, empty states, and loading states
+* Vite entry points for shared CSS and JavaScript
+
+Acceptance Criteria:
+
+* Layout works on mobile, tablet, and desktop breakpoints
+* Main navigation is keyboard accessible
+* Active navigation and validation states are visible
+* No Vue, React, or Angular dependency
+* Shared components have feature or view tests
+
+---
+
+## FT-1702 Public Landing Page
+
+Dependencies:
+
+* FT-1701
+
+Deliverables:
+
+* Hero section
+* Product features
+* Family tree preview
+* Testimonials
+* FAQ
+* Call to action and footer
+* SEO title, description, Open Graph, and semantic markup
+
+Acceptance Criteria:
+
+* Guest can reach register and login within one click
+* Page follows the content and visual direction in `ui-spec.md`
+* Responsive images do not cause layout shift
+* Landing page feature test passes
+
+---
+
+## Step 2 - Web Authentication
+
+## FT-1703 Authentication Pages and Session Flow
+
+Dependencies:
+
+* FT-103
+* FT-1701
+
+Deliverables:
+
+* Login page
+* Register page
+* Forgot and reset password pages
+* Email verification page
+* Logout action
+* Session-based web authentication using the existing user model and authentication services
+* Guest and authenticated middleware redirects
+
+Acceptance Criteria:
+
+* User can register, login, logout, reset password, and verify email from the web
+* Forms use Form Request Validation
+* CSRF protection is enabled
+* Authentication errors do not expose internal exceptions
+* Authentication feature tests pass
+
+---
+
+## FT-1704 Web Onboarding and Family Selection
+
+Dependencies:
+
+* FT-201
+* FT-202
+* FT-1703
+
+Deliverables:
+
+* First-login onboarding
+* Create-family flow
+* Existing-family selector
+* Active family context stored in session
+* Empty state for users without a family
+
+Acceptance Criteria:
+
+* New user can create a family and enter its dashboard
+* User with multiple families can switch active family
+* Family membership authorization is enforced
+* Onboarding feature tests pass
+
+---
+
+## Step 3 - Application Home
+
+## FT-1705 Web Dashboard
+
+Dependencies:
+
+* FT-204
+* FT-1704
+
+Deliverables:
+
+* Welcome banner
+* Member, living, deceased, article, photo, and event statistics
+* Recent family activity
+* Upcoming birthdays and events
+* Notifications summary
+* Family facts and recently added members
+* Cache-aware dashboard web controller
+
+Acceptance Criteria:
+
+* Dashboard data comes from existing services or dedicated presentation services
+* Dashboard respects active family authorization
+* Dashboard loads in less than 2 seconds under the documented test dataset
+* Every widget has an empty state
+* Dashboard feature and performance tests pass
+
+---
+
+## Step 4 - Family and Member Management
+
+## FT-1706 Family Profile and Settings
+
+Dependencies:
+
+* FT-201
+* FT-202
+* FT-203
+* FT-1704
+
+Deliverables:
+
+* Family profile page
+* Edit family profile and identity assets
+* Family branch management pages
+* Family member invitations and role management
+* Privacy and notification settings tabs
+
+Acceptance Criteria:
+
+* Owner and admin actions follow RBAC policies
+* Destructive actions require confirmation
+* Uploads follow documented type and size limits
+* Family settings feature tests pass
+
+---
+
+## FT-1707 Member Directory
+
+Dependencies:
+
+* FT-301
+* FT-1705
+
+Deliverables:
+
+* Paginated member list
+* Search, gender, living status, and branch filters
+* Responsive desktop table and mobile cards
+* Sort controls
+* Member empty state
+
+Acceptance Criteria:
+
+* Filters can be combined and remain in the URL query string
+* Queries are paginated and do not load the full family into memory
+* Only members from the active family are visible
+* Directory feature tests pass
+
+---
+
+## FT-1708 Member Create, Edit, and Detail Pages
+
+Dependencies:
+
+* FT-302
+* FT-303
+* FT-304
+* FT-1707
+
+Deliverables:
+
+* Tabbed member form for basic info, family info, biography, photos, and documents
+* Member detail sections for profile, relationships, photos, articles, and timeline
+* Profile photo upload and replacement
+* Deceased member presentation with memorial marker
+* Policy-protected edit and delete actions
+
+Acceptance Criteria:
+
+* Create and update use Form Request Validation
+* Profile photos are validated and thumbnails are displayed
+* Deceased members display the `†` marker consistently
+* Member web feature tests pass
+
+---
+
+## FT-1709 Relationship Management UI
+
+Dependencies:
+
+* FT-401
+* FT-402
+* FT-404
+* FT-1708
+
+Deliverables:
+
+* Add, update, and remove base relationships
+* Member relationship list
+* Relationship-to-me labels from Relationship Engine
+* Searchable member selectors
+* Clear graph validation messages
+
+Acceptance Criteria:
+
+* UI only submits father, mother, child, husband, or wife relationships
+* Derived relationships are never stored
+* Circular and invalid parent relationships are rejected
+* Relationship mutations invalidate related caches
+* Relationship web feature tests pass
+
+---
+
+## Step 5 - Flagship Family Tree
+
+## FT-1710 Interactive Family Tree Viewer
+
+Dependencies:
+
+* FT-501 through FT-505
+* FT-1709
+
+Deliverables:
+
+* Ancestor, descendant, and full tree modes
+* Root member and depth selectors
+* Vertical, horizontal, and compact layouts
+* Pan, zoom, center, expand, and collapse controls
+* Search and focus member
+* Living, photo, nickname, and relationship-label filters
+* Member detail drawer
+* Lazy loading for large trees
+
+Acceptance Criteria:
+
+* Tree data comes from Family Tree and Relationship services
+* BFS output is rendered without recalculating relationships in JavaScript
+* Root member is visually highlighted
+* Mobile tree uses compact layout by default
+* Keyboard controls and accessible labels are available
+* Tree viewer feature and performance tests pass
+
+---
+
+## FT-1711 Web Tree Export and Print Flow
+
+Dependencies:
+
+* FT-506
+* FT-507
+* FT-508
+* FT-1710
+
+Deliverables:
+
+* PNG export action
+* PDF export action
+* A4, A3, and A2 print size selector
+* Export progress, success, and failure states
+* Printable tree header, statistics, generation date, and footer
+
+Acceptance Criteria:
+
+* Export uses queued backend export services
+* Export output matches selected tree mode and root
+* Unauthorized users cannot download another family's export
+* Export and print feature tests pass
+
+---
+
+## Step 6 - Family Content and Engagement
+
+## FT-1712 Articles Web Module
+
+Dependencies:
+
+* FT-601 through FT-605
+* FT-1705
+
+Deliverables:
+
+* Article cards and filters
+* Article detail
+* Create, edit, draft, publish, and delete flows
+* Category selection and cover image
+* Comments, likes, and featured article presentation
+
+Acceptance Criteria:
+
+* Content is sanitized before rendering
+* Mutations follow policies and Form Request Validation
+* Draft articles are hidden from unauthorized users
+* Article web feature tests pass
+
+---
+
+## FT-1713 Photo Archive Web Module
+
+Dependencies:
+
+* FT-701 through FT-703
+* FT-1705
+
+Deliverables:
+
+* Responsive photo gallery
+* Album list and detail pages
+* Photo upload and detail pages
+* Member tagging
+* Image thumbnails, placeholders, and lazy loading
+
+Acceptance Criteria:
+
+* File type and 10 MB family photo limit are enforced
+* Gallery is paginated
+* Images include useful alternative text
+* Photo archive web feature tests pass
+
+---
+
+## FT-1714 Events and RSVP Web Module
+
+Dependencies:
+
+* FT-901 through FT-903
+* FT-1705
+
+Deliverables:
+
+* Upcoming and past event lists
+* Event detail
+* Create, edit, and delete flows
+* RSVP controls and attendee list
+* Event reminder status
+
+Acceptance Criteria:
+
+* Dates are displayed in the configured application timezone
+* RSVP supports yes, no, and maybe
+* Event permissions are enforced
+* Event web feature tests pass
+
+---
+
+## FT-1715 Timeline and Notifications Web Module
+
+Dependencies:
+
+* FT-801
+* FT-802
+* FT-1001
+* FT-1705
+
+Deliverables:
+
+* Paginated family timeline
+* Member, photo, article, and event filters
+* Notification bell with unread count
+* Recent notification dropdown
+* Notification list, mark-read, and mark-all-read actions
+
+Acceptance Criteria:
+
+* Timeline and notifications are scoped to the authenticated user and active family
+* Filters do not trigger unbounded queries
+* Notification state updates without a full application reload when Alpine.js is available
+* Timeline and notification feature tests pass
+
+---
+
+## Step 7 - Discovery, Insights, and User Account
+
+## FT-1716 Global Search Web Interface
+
+Dependencies:
+
+* FT-1101
+* FT-1102
+* FT-1705
+
+Deliverables:
+
+* Global search input in authenticated navigation
+* Grouped member, article, and event results
+* Advanced filters
+* Paginated result pages
+
+Acceptance Criteria:
+
+* Search is restricted to families accessible by the user
+* Search term is validated and safely escaped
+* Empty and no-result states provide useful next actions
+* Search web feature tests pass
+
+---
+
+## FT-1717 Reports and Gamification Web Module
+
+Dependencies:
+
+* FT-1201
+* FT-1202
+* FT-1401 through FT-1403
+* FT-1705
+
+Deliverables:
+
+* Family statistic and activity report cards
+* Generation, city, growth, and activity visualizations
+* Date filters and accessible data tables
+* User points, badges, and leaderboard pages
+
+Acceptance Criteria:
+
+* Reports use cached reporting services
+* Visual information has a text or table alternative
+* Report access follows family policies
+* Report and gamification feature tests pass
+
+---
+
+## FT-1718 User Profile, Preferences, and Security
+
+Dependencies:
+
+* FT-104
+* FT-1703
+
+Deliverables:
+
+* User profile and avatar page
+* Notification preferences
+* Change password flow
+* Active session information
+* Account security settings
+
+Acceptance Criteria:
+
+* Current password is required for sensitive changes
+* Avatar upload follows profile photo validation rules
+* Session fixation protection is verified
+* Profile and security feature tests pass
+
+---
+
+## Step 8 - Administration and Release Quality
+
+## FT-1719 Web Administration Console
+
+Dependencies:
+
+* FT-1501 through FT-1503
+* FT-1701
+
+Deliverables:
+
+* User management pages
+* Family moderation pages
+* Audit log viewer and export action
+* Administrative navigation and dashboard
+
+Acceptance Criteria:
+
+* All routes require super admin authorization
+* Moderation actions require confirmation and create audit records
+* Internal exception data is never displayed
+* Administration feature tests pass
+
+---
+
+## FT-1720 Web Accessibility, Performance, and Release Hardening
+
+Dependencies:
+
+* FT-1701 through FT-1719
+
+Deliverables:
+
+* Responsive and cross-browser review
+* Keyboard navigation and screen reader review
+* Color contrast and responsive typography review
+* Query count and N+1 review
+* Asset optimization and cache headers
+* Custom 403, 404, 419, 422, 429, and 500 pages
+* Web smoke test suite
+
+Acceptance Criteria:
+
+* Important actions are reachable within three clicks
+* Initial authenticated page and dashboard load in less than 2 seconds under the documented test dataset
+* Tree viewer loads in less than 5 seconds under its documented target dataset
+* No critical accessibility issue remains
+* `composer test`, `composer analyse`, `composer pint`, and `npm run build` pass
+
+---
+
 # Definition of Done
 
 For every task Codex must generate:
@@ -826,3 +1369,16 @@ For every task Codex must generate:
 * API Documentation
 
 No task is complete without tests passing.
+
+For Phase 17 web-only tasks, migration, model, repository, API Resource, and API documentation are required only when the task changes backend data or API behavior. Every Phase 17 task must still include:
+
+* Thin Web Controller or documented direct view route
+* Existing Service reuse or dedicated presentation service
+* Form Request Validation for every POST, PUT, PATCH, and DELETE input
+* Authorization Policy enforcement
+* Responsive Blade views and reusable components
+* Empty, loading, validation, and error states where applicable
+* Unit tests for new presentation or service logic
+* Web Feature Tests
+* Updated web documentation
+* Passing Pint, PHPStan, PHPUnit, and frontend build checks
