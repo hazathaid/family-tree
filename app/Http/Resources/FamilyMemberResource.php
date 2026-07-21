@@ -27,6 +27,7 @@ class FamilyMemberResource extends JsonResource
             'birth_date' => $member->birth_date?->toDateString(),
             'birth_place' => $member->birth_place,
             'is_alive' => $member->is_alive,
+            'generation' => $this->when($member->getAttribute('generation') !== null, $member->getAttribute('generation')),
             'death_date' => $member->death_date?->toDateString(),
             'death_place' => $member->death_place,
             'biography' => $member->biography,

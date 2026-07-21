@@ -22,6 +22,7 @@ use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\PushDeviceController;
 use App\Http\Controllers\Api\V1\RelationshipController;
 use App\Http\Controllers\Api\V1\RelationshipEngineController;
+use App\Http\Controllers\Api\V1\SearchController;
 use App\Http\Controllers\Api\V1\TimelineController;
 use App\Http\Controllers\Api\V1\TreeExportController;
 use Illuminate\Support\Facades\Route;
@@ -95,5 +96,6 @@ Route::prefix('v1')->group(function (): void {
         Route::post('notifications/{notification}/read', [NotificationController::class, 'read']);
         Route::post('push-devices', [PushDeviceController::class, 'store'])->middleware('throttle:20,1');
         Route::delete('push-devices/{device}', [PushDeviceController::class, 'destroy']);
+        Route::get('search', [SearchController::class, 'index'])->middleware('throttle:60,1');
     });
 });
