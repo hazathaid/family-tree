@@ -18,6 +18,7 @@ use App\Policies\FamilyMemberPolicy;
 use App\Policies\FamilyPolicy;
 use App\Policies\MemberPhotoPolicy;
 use App\Policies\PhotoAlbumPolicy;
+use App\Repositories\Contracts\ActivityLogRepositoryInterface;
 use App\Repositories\Contracts\ArticleCategoryRepositoryInterface;
 use App\Repositories\Contracts\ArticleCommentRepositoryInterface;
 use App\Repositories\Contracts\ArticleLikeRepositoryInterface;
@@ -32,6 +33,7 @@ use App\Repositories\Contracts\PhotoAlbumRepositoryInterface;
 use App\Repositories\Contracts\RelationshipRepositoryInterface;
 use App\Repositories\Contracts\TreeRepositoryInterface;
 use App\Repositories\Contracts\UserRepositoryInterface;
+use App\Repositories\Eloquent\EloquentActivityLogRepository;
 use App\Repositories\Eloquent\EloquentArticleCategoryRepository;
 use App\Repositories\Eloquent\EloquentArticleCommentRepository;
 use App\Repositories\Eloquent\EloquentArticleLikeRepository;
@@ -54,6 +56,7 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        $this->app->bind(ActivityLogRepositoryInterface::class, EloquentActivityLogRepository::class);
         $this->app->bind(UserRepositoryInterface::class, EloquentUserRepository::class);
         $this->app->bind(FamilyRepositoryInterface::class, EloquentFamilyRepository::class);
         $this->app->bind(FamilyUserRoleRepositoryInterface::class, EloquentFamilyUserRoleRepository::class);

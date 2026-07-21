@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\V1\PhotoAlbumController;
 use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\RelationshipController;
 use App\Http\Controllers\Api\V1\RelationshipEngineController;
+use App\Http\Controllers\Api\V1\TimelineController;
 use App\Http\Controllers\Api\V1\TreeExportController;
 use Illuminate\Support\Facades\Route;
 
@@ -83,5 +84,6 @@ Route::prefix('v1')->group(function (): void {
         Route::apiResource('photo-albums', PhotoAlbumController::class);
         Route::put('member-photos/{member_photo}/tags', [MemberPhotoController::class, 'tag']);
         Route::apiResource('member-photos', MemberPhotoController::class)->only(['index', 'store', 'show', 'destroy']);
+        Route::get('timeline', [TimelineController::class, 'index']);
     });
 });

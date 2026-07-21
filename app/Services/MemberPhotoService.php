@@ -14,7 +14,7 @@ use Illuminate\Validation\ValidationException;
 
 class MemberPhotoService
 {
-    public function __construct(private readonly MemberPhotoRepositoryInterface $photos) {}
+    public function __construct(private readonly MemberPhotoRepositoryInterface $photos, private readonly ActivityLogService $activityLog) {}
 
     public function upload(User $user, array $data, UploadedFile $image): MemberPhoto
     {
@@ -34,7 +34,10 @@ class MemberPhotoService
         Storage::disk('public')->put($path, $contents);
         Storage::disk('public')->put($thumbnailPath, $thumbnail);
 
-        return $this->photos->create(['family_id' => $family->id, 'photo_album_id' => $album?->id, 'uploaded_by' => $user->id, 'path' => $path, 'thumbnail_path' => $thumbnailPath, 'original_name' => $image->getClientOriginalName(), 'mime_type' => 'image/jpeg', 'size' => strlen($contents), 'width' => $width, 'height' => $height, 'caption' => $data['caption'] ?? null, 'captured_at' => $data['captured_at'] ?? null]);
+        $photo = $this->photos->create(['family_id' => $family->id, 'photo_album_id' => $album?->id, 'uploaded_by' => $user->id, 'path' => $path, 'thumbnail_path' => $thumbnailPath, 'original_name' => $image->getClientOriginalName(), 'mime_type' => 'image/jpeg', 'size' => strlen($contents), 'width' => $width, 'height' => $height, 'caption' => $data['caption'] ?? null, 'captured_at' => $data['captured_at'] ?? null]);
+        $this->activityLog->photoUploaded($user, $photo);
+
+        return $photo;
     }
 
     public function tag(MemberPhoto $photo, array $memberUuids): MemberPhoto

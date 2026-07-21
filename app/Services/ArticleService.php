@@ -17,7 +17,7 @@ use Illuminate\Validation\ValidationException;
 
 class ArticleService
 {
-    public function __construct(private readonly ArticleRepositoryInterface $articles, private readonly RichTextSanitizer $sanitizer) {}
+    public function __construct(private readonly ArticleRepositoryInterface $articles, private readonly RichTextSanitizer $sanitizer, private readonly ActivityLogService $activityLog) {}
 
     public function create(User $user, ArticleData $data): Article
     {
@@ -29,6 +29,7 @@ class ArticleService
         if ($article->status === Article::STATUS_PUBLISHED) {
             ArticlePublished::dispatch($article);
         }
+        $this->activityLog->articleCreated($user, $article);
 
         return $this->articles->loadDetails($article, $user);
     }

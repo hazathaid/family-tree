@@ -19,6 +19,7 @@ class FamilyMemberService
         private readonly FamilyBranchRepositoryInterface $branches,
         private readonly RelationshipCacheService $relationshipCache,
         private readonly TreeCacheService $treeCache,
+        private readonly ActivityLogService $activityLog,
     ) {}
 
     public function create(User $user, Family $family, array $data): FamilyMember
@@ -31,6 +32,7 @@ class FamilyMemberService
 
         $this->relationshipCache->invalidateMember($member);
         $this->treeCache->invalidateFamily($member->family_id);
+        $this->activityLog->memberCreated($user, $member);
 
         return $member;
     }
