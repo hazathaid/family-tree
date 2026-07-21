@@ -6,6 +6,7 @@ use App\Models\Family;
 use App\Models\User;
 use App\Repositories\Contracts\FamilyRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 class EloquentFamilyRepository implements FamilyRepositoryInterface
 {
@@ -38,6 +39,14 @@ class EloquentFamilyRepository implements FamilyRepositoryInterface
             ->whereHas('userRoles', fn ($query) => $query->where('user_id', $user->id))
             ->latest()
             ->paginate($perPage);
+    }
+
+    public function allForUser(User $user): Collection
+    {
+        return Family::query()
+            ->whereHas('userRoles', fn ($query) => $query->where('user_id', $user->id))
+            ->orderBy('name')
+            ->get();
     }
 
     public function slugExists(string $slug, ?int $ignoreId = null): bool

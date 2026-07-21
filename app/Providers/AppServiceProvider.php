@@ -127,7 +127,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Event::class, EventPolicy::class);
 
         ResetPassword::createUrlUsing(function (object $user, string $token): string {
-            return config('app.url').'/reset-password?token='.$token.'&email='.urlencode($user->email);
+            return route('password.reset', ['token' => $token, 'email' => $user->email]);
         });
     }
 }

@@ -48,7 +48,7 @@ Route::prefix('v1')->middleware('throttle:api')->group(function (): void {
             Route::post('email/verification-notification', [EmailVerificationController::class, 'send']);
             Route::get('email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])
                 ->middleware('signed')
-                ->name('verification.verify');
+                ->name('api.verification.verify');
         });
     });
 

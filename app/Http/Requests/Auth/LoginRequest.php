@@ -12,6 +12,7 @@ class LoginRequest extends ApiFormRequest
             'email' => ['required', 'email:rfc', 'max:255'],
             'password' => ['required', 'string'],
             'device_name' => ['nullable', 'string', 'max:255'],
+            'remember' => ['nullable', 'boolean'],
         ];
     }
 }

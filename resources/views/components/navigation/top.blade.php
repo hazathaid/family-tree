@@ -10,6 +10,10 @@
         <nav class="ms-auto d-flex align-items-center gap-2" aria-label="Navigasi akun">
             @if ($variant === 'authenticated')
                 <span class="d-none d-md-inline text-secondary">{{ auth()->user()?->name ?? 'Keluarga' }}</span>
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button class="btn btn-outline-primary btn-sm" type="submit">Keluar</button>
+                </form>
             @else
                 <a class="btn btn-link text-decoration-none" href="{{ Route::has('login') ? route('login') : '#' }}">Masuk</a>
                 <a class="btn btn-primary" href="{{ Route::has('register') ? route('register') : '#' }}">Daftar</a>

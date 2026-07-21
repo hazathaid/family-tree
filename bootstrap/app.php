@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureActiveFamily;
 use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
@@ -21,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->statefulApi();
         $middleware->append(SecurityHeaders::class);
+        $middleware->alias(['active.family' => EnsureActiveFamily::class]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         Integration::handles($exceptions);
