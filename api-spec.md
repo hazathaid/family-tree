@@ -752,17 +752,20 @@ Returns active users, photo upload totals, and article totals for the selected p
 
 # MOBILE SPECIFIC
 
-## Sync Dashboard
+Mobile menggunakan endpoint REST yang sama dengan web agar business logic tidak diduplikasi:
 
-GET /mobile/dashboard
+```text
+POST /auth/login
+GET /families
+GET /families/{family_uuid}/dashboard
+GET /timeline?family_uuid={family_uuid}
+GET /tree/generate?member_uuid={member_uuid}&mode=full&depth=3&layout=vertical
+GET /notifications
+POST /notifications/{notification_uuid}/read
+POST /push-devices
+```
 
-## Sync Notifications
-
-GET /mobile/notifications
-
-## Sync Timeline
-
-GET /mobile/timeline
+`POST /push-devices` menerima `platform=android|ios` dan token push provider. Semua endpoint selain login memerlukan Bearer token Sanctum.
 
 ---
 
