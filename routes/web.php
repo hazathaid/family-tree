@@ -1,13 +1,17 @@
 <?php
 
+use App\Http\Controllers\Web\ArticleController;
 use App\Http\Controllers\Web\AuthController;
 use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\EmailVerificationController;
+use App\Http\Controllers\Web\EventController;
 use App\Http\Controllers\Web\FamilySettingsController;
 use App\Http\Controllers\Web\FamilyTreeController;
 use App\Http\Controllers\Web\MemberController;
 use App\Http\Controllers\Web\OnboardingController;
 use App\Http\Controllers\Web\PasswordController;
+use App\Http\Controllers\Web\PhotoController;
+use App\Http\Controllers\Web\TimelineController;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome')->name('home');
@@ -48,6 +52,28 @@ Route::middleware('auth')->group(function (): void {
 
             Route::resource('members', MemberController::class)->except('show');
             Route::get('/members/{member}', [MemberController::class, 'show'])->name('members.show');
+
+            Route::post('/articles/{article}/publish', [ArticleController::class, 'publish'])->name('articles.publish');
+            Route::post('/articles/{article}/image', [ArticleController::class, 'image'])->name('articles.image');
+            Route::post('/articles/{article}/comments', [ArticleController::class, 'comment'])->name('articles.comments.store');
+            Route::post('/articles/{article}/like', [ArticleController::class, 'like'])->name('articles.like');
+            Route::resource('articles', ArticleController::class);
+
+            Route::get('/photos', [PhotoController::class, 'index'])->name('photos.index');
+            Route::get('/photos/create', [PhotoController::class, 'create'])->name('photos.create');
+            Route::post('/photos', [PhotoController::class, 'store'])->name('photos.store');
+            Route::get('/photos/{photo}', [PhotoController::class, 'show'])->name('photos.show');
+            Route::put('/photos/{photo}/tags', [PhotoController::class, 'tag'])->name('photos.tags.update');
+            Route::delete('/photos/{photo}', [PhotoController::class, 'destroy'])->name('photos.destroy');
+            Route::post('/albums', [PhotoController::class, 'storeAlbum'])->name('albums.store');
+            Route::get('/albums/{album}', [PhotoController::class, 'showAlbum'])->name('albums.show');
+
+            Route::post('/events/{event}/rsvp', [EventController::class, 'rsvp'])->name('events.rsvp');
+            Route::resource('events', EventController::class);
+            Route::get('/timeline', [TimelineController::class, 'index'])->name('timeline.index');
+            Route::get('/notifications', [TimelineController::class, 'notifications'])->name('notifications.index');
+            Route::post('/notifications/read-all', [TimelineController::class, 'readAll'])->name('notifications.read-all');
+            Route::post('/notifications/{notification}/read', [TimelineController::class, 'read'])->name('notifications.read');
         });
     });
 });

@@ -6,6 +6,7 @@ use App\Models\Notification;
 use App\Models\User;
 use App\Repositories\Contracts\NotificationRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 class EloquentNotificationRepository implements NotificationRepositoryInterface
 {
@@ -40,5 +41,15 @@ class EloquentNotificationRepository implements NotificationRepositoryInterface
     {
         return Notification::query()->where('user_id', $user->id)->where('is_read', false)
             ->update(['is_read' => true, 'read_at' => now()]);
+    }
+
+    public function unreadCount(User $user): int
+    {
+        return Notification::query()->where('user_id', $user->id)->where('is_read', false)->count();
+    }
+
+    public function recentForUser(User $user, int $limit): Collection
+    {
+        return Notification::query()->where('user_id', $user->id)->latest()->limit($limit)->get();
     }
 }

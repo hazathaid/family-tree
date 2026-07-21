@@ -11,6 +11,7 @@ use App\Models\FamilyBranch;
 use App\Models\FamilyMember;
 use App\Models\MemberPhoto;
 use App\Models\PhotoAlbum;
+use App\Models\User;
 use App\Policies\ArticleCategoryPolicy;
 use App\Policies\ArticleCommentPolicy;
 use App\Policies\ArticlePolicy;
@@ -72,8 +73,10 @@ use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -109,6 +112,13 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Paginator::useBootstrapFive();
+
+        View::composer('components.navigation.top', function ($view): void {
+            $user = Auth::user();
+            $notifications = app(NotificationRepositoryInterface::class);
+            $view->with('navigationUnreadCount', $user instanceof User ? $notifications->unreadCount($user) : 0)
+                ->with('navigationNotifications', $user instanceof User ? $notifications->recentForUser($user, 5) : collect());
+        });
 
         RateLimiter::for('api', fn (Request $request): Limit => Limit::perMinute(60)
             ->by($request->user()?->getAuthIdentifier() ?: $request->ip()));

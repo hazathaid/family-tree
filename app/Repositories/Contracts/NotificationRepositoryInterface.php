@@ -5,6 +5,7 @@ namespace App\Repositories\Contracts;
 use App\Models\Notification;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 interface NotificationRepositoryInterface
 {
@@ -17,4 +18,8 @@ interface NotificationRepositoryInterface
     public function findForUser(User $user, string $uuid): Notification;
 
     public function markAllRead(User $user): int;
+
+    public function unreadCount(User $user): int;
+
+    public function recentForUser(User $user, int $limit): Collection;
 }
