@@ -5,12 +5,11 @@ namespace App\Services;
 use App\Models\Event;
 use App\Models\User;
 use App\Repositories\Contracts\EventRepositoryInterface;
-use App\Repositories\Contracts\NotificationRepositoryInterface;
 use Illuminate\Support\Facades\DB;
 
 class EventReminderService
 {
-    public function __construct(private readonly EventRepositoryInterface $events, private readonly NotificationRepositoryInterface $notifications) {}
+    public function __construct(private readonly EventRepositoryInterface $events, private readonly NotificationService $notifications) {}
 
     public function sendDueReminders(): int
     {
@@ -35,7 +34,7 @@ class EventReminderService
             $body = $event->title.' akan berlangsung pada '.$event->event_date->format('d-m-Y H:i').($event->location ? ' di '.$event->location : '').'.';
             $userIds = User::query()->where('status', 'active')->whereHas('familyRoles', fn ($query) => $query->where('family_id', $event->family_id))->pluck('id');
             foreach ($userIds as $userId) {
-                $this->notifications->createForEvent($userId, $event->id, $title, $body);
+                $this->notifications->notifyEvent($userId, $event, $title, $body);
             }
             $event->update(['reminder_sent_at' => now()]);
 

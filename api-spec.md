@@ -630,6 +630,40 @@ POST /notifications/{id}/read
 
 POST /notifications/read-all
 
+Optional list query parameters:
+
+```text
+status=read|unread
+limit=1..100
+page
+```
+
+---
+
+# PUSH DEVICES
+
+## Register Device
+
+POST /push-devices
+
+```json
+{
+  "platform": "android",
+  "token": "provider-device-token"
+}
+```
+
+Supported platforms:
+
+```text
+android
+ios
+```
+
+## Remove Device
+
+DELETE /push-devices/{device_uuid}
+
 ---
 
 # TIMELINE

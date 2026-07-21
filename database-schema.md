@@ -423,9 +423,40 @@ Acara keluarga.
 | ------- | ------------ |
 | id      | BIGINT PK    |
 | user_id | BIGINT       |
+| uuid    | CHAR(36) UNIQUE |
+| event_id | BIGINT NULL |
+| type    | VARCHAR(255) |
 | title   | VARCHAR(255) |
 | body    | TEXT         |
+| data    | JSON NULL    |
 | is_read | BOOLEAN      |
+| read_at | TIMESTAMP NULL |
+
+Indexes:
+
+```sql
+user_id, is_read, created_at
+type
+```
+
+---
+
+# push_device_tokens
+
+Token push untuk aplikasi mobile.
+
+| Field | Type |
+| --- | --- |
+| id | BIGINT PK |
+| uuid | CHAR(36) UNIQUE |
+| user_id | BIGINT FK users |
+| platform | ENUM(android,ios) |
+| token | VARCHAR(512) UNIQUE |
+| is_active | BOOLEAN |
+| last_used_at | TIMESTAMP NULL |
+| created_at | TIMESTAMP |
+| updated_at | TIMESTAMP |
+| deleted_at | TIMESTAMP NULL |
 
 ---
 
