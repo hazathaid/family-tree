@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use App\Models\Family;
 use App\Models\User;
 use App\Services\AdministrationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -11,6 +12,19 @@ use Tests\TestCase;
 class AdministrationServiceTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_dashboard_returns_current_administration_counts(): void
+    {
+        $owner = User::factory()->create();
+        User::factory()->suspended()->create();
+        Family::factory()->create(['created_by' => $owner->id]);
+
+        $statistics = app(AdministrationService::class)->dashboard();
+
+        $this->assertSame(2, $statistics['users']);
+        $this->assertSame(1, $statistics['suspended_users']);
+        $this->assertSame(1, $statistics['families']);
+    }
 
     public function test_user_status_is_updated_and_audited(): void
     {

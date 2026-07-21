@@ -23,6 +23,11 @@ class AdministrationService
         return $this->users->paginate($perPage);
     }
 
+    public function dashboard(): array
+    {
+        return $this->administration->dashboardCounts();
+    }
+
     public function updateUserStatus(User $actor, User $user, string $status): User
     {
         if ($actor->is($user) && $status === 'suspended') {
@@ -44,6 +49,11 @@ class AdministrationService
     public function families(int $perPage): LengthAwarePaginator
     {
         return $this->administration->paginateFamilies($perPage);
+    }
+
+    public function family(Family $family): Family
+    {
+        return $this->administration->familyDetails($family);
     }
 
     public function removeContent(User $actor, Family $family, string $type, string $uuid): Model

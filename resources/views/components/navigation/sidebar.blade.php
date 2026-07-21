@@ -13,6 +13,9 @@
         ['label' => 'Profil Saya', 'route' => 'profile.show', 'pattern' => 'profile.*'],
         ['label' => 'Pengaturan', 'route' => 'settings.index', 'pattern' => 'settings.*'],
     ];
+    if (auth()->user()?->can('administer')) {
+        $items[] = ['label' => 'Administrasi', 'route' => 'admin.dashboard', 'pattern' => 'admin.*'];
+    }
 @endphp
 <aside class="{{ $mobile ? '' : 'app-sidebar d-none d-lg-block p-3' }}" aria-label="Navigasi aplikasi">
     <nav class="nav nav-pills flex-column gap-1">

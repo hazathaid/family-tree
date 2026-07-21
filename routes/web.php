@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Web\AdministrationController;
 use App\Http\Controllers\Web\ArticleController;
 use App\Http\Controllers\Web\AuthController;
 use App\Http\Controllers\Web\DashboardController;
@@ -37,6 +38,17 @@ Route::middleware('auth')->group(function (): void {
     Route::post('/email/verification-notification', [EmailVerificationController::class, 'send'])->middleware('throttle:6,1')->name('verification.send');
 
     Route::middleware('verified')->group(function (): void {
+        Route::prefix('admin')->name('admin.')->middleware('can:administer')->group(function (): void {
+            Route::get('/', [AdministrationController::class, 'dashboard'])->name('dashboard');
+            Route::get('/users', [AdministrationController::class, 'users'])->name('users.index');
+            Route::patch('/users/{user}', [AdministrationController::class, 'updateUser'])->name('users.update');
+            Route::get('/families', [AdministrationController::class, 'families'])->name('families.index');
+            Route::get('/families/{family}', [AdministrationController::class, 'family'])->name('families.show');
+            Route::delete('/families/{family}/content', [AdministrationController::class, 'removeContent'])->name('families.content.destroy');
+            Route::get('/audit-logs', [AdministrationController::class, 'auditLogs'])->name('audit-logs.index');
+            Route::get('/audit-logs/export', [AdministrationController::class, 'exportAuditLogs'])->name('audit-logs.export');
+        });
+
         Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
         Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
         Route::post('/profile/avatar', [ProfileController::class, 'avatar'])->name('profile.avatar');
