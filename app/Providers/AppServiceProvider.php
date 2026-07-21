@@ -8,12 +8,16 @@ use App\Models\ArticleComment;
 use App\Models\Family;
 use App\Models\FamilyBranch;
 use App\Models\FamilyMember;
+use App\Models\MemberPhoto;
+use App\Models\PhotoAlbum;
 use App\Policies\ArticleCategoryPolicy;
 use App\Policies\ArticleCommentPolicy;
 use App\Policies\ArticlePolicy;
 use App\Policies\FamilyBranchPolicy;
 use App\Policies\FamilyMemberPolicy;
 use App\Policies\FamilyPolicy;
+use App\Policies\MemberPhotoPolicy;
+use App\Policies\PhotoAlbumPolicy;
 use App\Repositories\Contracts\ArticleCategoryRepositoryInterface;
 use App\Repositories\Contracts\ArticleCommentRepositoryInterface;
 use App\Repositories\Contracts\ArticleLikeRepositoryInterface;
@@ -23,6 +27,8 @@ use App\Repositories\Contracts\FamilyDashboardRepositoryInterface;
 use App\Repositories\Contracts\FamilyMemberRepositoryInterface;
 use App\Repositories\Contracts\FamilyRepositoryInterface;
 use App\Repositories\Contracts\FamilyUserRoleRepositoryInterface;
+use App\Repositories\Contracts\MemberPhotoRepositoryInterface;
+use App\Repositories\Contracts\PhotoAlbumRepositoryInterface;
 use App\Repositories\Contracts\RelationshipRepositoryInterface;
 use App\Repositories\Contracts\TreeRepositoryInterface;
 use App\Repositories\Contracts\UserRepositoryInterface;
@@ -35,6 +41,8 @@ use App\Repositories\Eloquent\EloquentFamilyDashboardRepository;
 use App\Repositories\Eloquent\EloquentFamilyMemberRepository;
 use App\Repositories\Eloquent\EloquentFamilyRepository;
 use App\Repositories\Eloquent\EloquentFamilyUserRoleRepository;
+use App\Repositories\Eloquent\EloquentMemberPhotoRepository;
+use App\Repositories\Eloquent\EloquentPhotoAlbumRepository;
 use App\Repositories\Eloquent\EloquentRelationshipRepository;
 use App\Repositories\Eloquent\EloquentTreeRepository;
 use App\Repositories\Eloquent\EloquentUserRepository;
@@ -58,6 +66,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ArticleRepositoryInterface::class, EloquentArticleRepository::class);
         $this->app->bind(ArticleCommentRepositoryInterface::class, EloquentArticleCommentRepository::class);
         $this->app->bind(ArticleLikeRepositoryInterface::class, EloquentArticleLikeRepository::class);
+        $this->app->bind(PhotoAlbumRepositoryInterface::class, EloquentPhotoAlbumRepository::class);
+        $this->app->bind(MemberPhotoRepositoryInterface::class, EloquentMemberPhotoRepository::class);
     }
 
     public function boot(): void
@@ -68,6 +78,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(ArticleCategory::class, ArticleCategoryPolicy::class);
         Gate::policy(Article::class, ArticlePolicy::class);
         Gate::policy(ArticleComment::class, ArticleCommentPolicy::class);
+        Gate::policy(PhotoAlbum::class, PhotoAlbumPolicy::class);
+        Gate::policy(MemberPhoto::class, MemberPhotoPolicy::class);
 
         ResetPassword::createUrlUsing(function (object $user, string $token): string {
             return config('app.url').'/reset-password?token='.$token.'&email='.urlencode($user->email);

@@ -74,4 +74,14 @@ class Family extends Model
     {
         return $this->hasMany(Article::class);
     }
+
+    public function photoAlbums(): HasMany
+    {
+        return $this->hasMany(PhotoAlbum::class);
+    }
+
+    public function photos(): HasMany
+    {
+        return $this->hasMany(MemberPhoto::class);
+    }
 }

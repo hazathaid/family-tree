@@ -14,6 +14,8 @@ use App\Http\Controllers\Api\V1\FamilyMemberController;
 use App\Http\Controllers\Api\V1\FamilyRoleController;
 use App\Http\Controllers\Api\V1\FamilyTreeController;
 use App\Http\Controllers\Api\V1\FeaturedArticleController;
+use App\Http\Controllers\Api\V1\MemberPhotoController;
+use App\Http\Controllers\Api\V1\PhotoAlbumController;
 use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\RelationshipController;
 use App\Http\Controllers\Api\V1\RelationshipEngineController;
@@ -77,5 +79,9 @@ Route::prefix('v1')->group(function (): void {
         Route::post('articles/{article}/feature', [FeaturedArticleController::class, 'store']);
         Route::delete('articles/{article}/feature', [FeaturedArticleController::class, 'destroy']);
         Route::get('families/{family}/articles/featured', [FeaturedArticleController::class, 'index']);
+
+        Route::apiResource('photo-albums', PhotoAlbumController::class);
+        Route::put('member-photos/{member_photo}/tags', [MemberPhotoController::class, 'tag']);
+        Route::apiResource('member-photos', MemberPhotoController::class)->only(['index', 'store', 'show', 'destroy']);
     });
 });

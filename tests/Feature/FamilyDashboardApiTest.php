@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Article;
 use App\Models\Family;
 use App\Models\FamilyUserRole;
+use App\Models\MemberPhoto;
 use App\Models\User;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -53,8 +54,9 @@ class FamilyDashboardApiTest extends TestCase
             'family_id' => $family->id,
             'author_id' => $user->id,
         ]);
-        DB::table('member_photos')->insert([
-            ['member_id' => 1],
+        MemberPhoto::factory()->create([
+            'family_id' => $family->id,
+            'uploaded_by' => $user->id,
         ]);
         DB::table('events')->insert([
             ['family_id' => $family->id],
@@ -72,11 +74,6 @@ class FamilyDashboardApiTest extends TestCase
 
     private function createDashboardSourceTables(): void
     {
-        Schema::create('member_photos', function (Blueprint $table): void {
-            $table->id();
-            $table->foreignId('member_id');
-        });
-
         Schema::create('events', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('family_id');
