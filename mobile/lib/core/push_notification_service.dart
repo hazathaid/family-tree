@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 
-import 'repositories.dart';
+import '../features/notifications/domain/notification_repository.dart';
 
 class PushNotificationService {
   const PushNotificationService(this.repository, this.messaging);
@@ -11,7 +11,8 @@ class PushNotificationService {
   final FirebaseMessaging messaging;
 
   Future<void> initialize() async {
-    final settings = await messaging.requestPermission(alert: true, badge: true, sound: true);
+    final settings = await messaging.requestPermission(
+        alert: true, badge: true, sound: true);
     if (settings.authorizationStatus == AuthorizationStatus.denied) return;
 
     final token = await messaging.getToken();

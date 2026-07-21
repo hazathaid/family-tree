@@ -1,0 +1,3 @@
+#include "Release.xcconfig"
+APP_DISPLAY_NAME=Family Tree Staging
+APP_BUNDLE_IDENTIFIER=id.familytree.familyTreeMobile.staging

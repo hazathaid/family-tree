@@ -39,7 +39,8 @@ class DashboardSummary {
   final int totalArticles;
   final int totalEvents;
 
-  factory DashboardSummary.fromJson(Map<String, dynamic> json) => DashboardSummary(
+  factory DashboardSummary.fromJson(Map<String, dynamic> json) =>
+      DashboardSummary(
         totalMembers: json['total_members'] as int? ?? 0,
         livingMembers: json['living_members'] as int? ?? 0,
         deceasedMembers: json['deceased_members'] as int? ?? 0,
@@ -49,7 +50,8 @@ class DashboardSummary {
 }
 
 class TimelineItem {
-  const TimelineItem({required this.uuid, required this.message, required this.createdAt});
+  const TimelineItem(
+      {required this.uuid, required this.message, required this.createdAt});
 
   final String uuid;
   final String message;
@@ -75,7 +77,8 @@ class AppNotification {
   final String body;
   final bool isRead;
 
-  factory AppNotification.fromJson(Map<String, dynamic> json) => AppNotification(
+  factory AppNotification.fromJson(Map<String, dynamic> json) =>
+      AppNotification(
         uuid: json['uuid'] as String,
         title: json['title'] as String,
         body: json['body'] as String,
@@ -84,7 +87,11 @@ class AppNotification {
 }
 
 class TreeNode {
-  const TreeNode({required this.uuid, required this.name, required this.x, required this.y});
+  const TreeNode(
+      {required this.uuid,
+      required this.name,
+      required this.x,
+      required this.y});
 
   final String uuid;
   final String name;
@@ -94,11 +101,11 @@ class TreeNode {
   factory TreeNode.fromJson(Map<String, dynamic> json) {
     final position = json['position'] as Map<String, dynamic>? ?? const {};
     return TreeNode(
-        uuid: json['uuid'] as String,
-        name: (json['full_name'] ?? json['name'] ?? '') as String,
-        x: (position['x'] as num? ?? 0).toDouble(),
-        y: (position['y'] as num? ?? 0).toDouble(),
-      );
+      uuid: json['uuid'] as String,
+      name: (json['full_name'] ?? json['name'] ?? '') as String,
+      x: (position['x'] as num? ?? 0).toDouble(),
+      y: (position['y'] as num? ?? 0).toDouble(),
+    );
   }
 }
 

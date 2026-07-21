@@ -6,3 +6,11 @@ build/
 coverage/
 android/local.properties
 ios/Flutter/ephemeral/
+.idea/
+*.iml
+android/key.properties
+android/*.jks
+android/*.keystore
+ios/Runner/GoogleService-Info.plist
+android/app/google-services.json
+android/app/src/*/google-services.json
