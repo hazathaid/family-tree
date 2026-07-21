@@ -8,7 +8,9 @@
         ['label' => 'Foto', 'route' => 'photos.index', 'pattern' => 'photos.*'],
         ['label' => 'Acara', 'route' => 'events.index', 'pattern' => 'events.*'],
         ['label' => 'Timeline', 'route' => 'timeline.index', 'pattern' => 'timeline.*'],
+        ['label' => 'Pencarian', 'route' => 'search.index', 'pattern' => 'search.*'],
         ['label' => 'Laporan', 'route' => 'reports.index', 'pattern' => 'reports.*'],
+        ['label' => 'Profil Saya', 'route' => 'profile.show', 'pattern' => 'profile.*'],
         ['label' => 'Pengaturan', 'route' => 'settings.index', 'pattern' => 'settings.*'],
     ];
 @endphp

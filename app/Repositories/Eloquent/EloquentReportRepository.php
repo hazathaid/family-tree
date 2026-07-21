@@ -51,4 +51,24 @@ class EloquentReportRepository implements ReportRepositoryInterface
             ],
         ];
     }
+
+    public function webInsights(Family $family, ReportCriteria $criteria): array
+    {
+        $monthExpression = DB::connection()->getDriverName() === 'sqlite'
+            ? 'substr(created_at, 1, 7)'
+            : "DATE_FORMAT(created_at, '%Y-%m')";
+        $cities = DB::table('family_members')->where('family_id', $family->id)->whereNull('deleted_at')
+            ->selectRaw("COALESCE(NULLIF(birth_place, ''), 'Tidak diketahui') AS label, COUNT(*) AS total")
+            ->groupBy('label')->orderByDesc('total')->limit(10)->get();
+        $growth = DB::table('family_members')->where('family_id', $family->id)->whereNull('deleted_at')
+            ->whereBetween('created_at', [$criteria->from, $criteria->to])
+            ->selectRaw("{$monthExpression} AS label, COUNT(*) AS total")
+            ->groupBy('label')->orderBy('label')->get();
+        $activity = DB::table('activity_logs')->where('family_id', $family->id)
+            ->whereBetween('created_at', [$criteria->from, $criteria->to])
+            ->selectRaw('DATE(created_at) AS label, COUNT(*) AS total')
+            ->groupBy('label')->orderBy('label')->get();
+
+        return compact('cities', 'growth', 'activity');
+    }
 }

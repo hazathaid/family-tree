@@ -203,6 +203,11 @@ a {
     min-width: 0;
 }
 
+.profile-avatar { width: 8rem; height: 8rem; border-radius: 50%; object-fit: cover; }
+.report-chart { display: grid; gap: .65rem; }
+.report-bar-row { display: grid; grid-template-columns: minmax(6rem, 1fr) minmax(8rem, 3fr) 3rem; gap: .75rem; align-items: center; }
+.report-bar { height: .75rem; background: linear-gradient(90deg, var(--family-primary) var(--report-width), #e8edf2 var(--report-width)); border-radius: 999px; }
+
 .tree-search { width: min(100%, 16rem); }
 .tree-viewer { position: relative; height: min(68vh, 48rem); min-height: 30rem; overflow: hidden; cursor: grab; background-color: #eef5fa; background-image: radial-gradient(#b8cad8 1px, transparent 1px); background-size: 20px 20px; border: 1px solid var(--family-border); border-radius: var(--family-radius); }
 .tree-viewer:active { cursor: grabbing; }

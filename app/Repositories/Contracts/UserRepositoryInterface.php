@@ -4,6 +4,7 @@ namespace App\Repositories\Contracts;
 
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 interface UserRepositoryInterface
 {
@@ -16,4 +17,6 @@ interface UserRepositoryInterface
     public function findByUuid(string $uuid): ?User;
 
     public function paginate(int $perPage = 15): LengthAwarePaginator;
+
+    public function activeSessions(User $user): Collection;
 }

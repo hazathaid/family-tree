@@ -11,6 +11,9 @@ use App\Http\Controllers\Web\MemberController;
 use App\Http\Controllers\Web\OnboardingController;
 use App\Http\Controllers\Web\PasswordController;
 use App\Http\Controllers\Web\PhotoController;
+use App\Http\Controllers\Web\ProfileController;
+use App\Http\Controllers\Web\ReportController;
+use App\Http\Controllers\Web\SearchController;
 use App\Http\Controllers\Web\TimelineController;
 use Illuminate\Support\Facades\Route;
 
@@ -34,12 +37,19 @@ Route::middleware('auth')->group(function (): void {
     Route::post('/email/verification-notification', [EmailVerificationController::class, 'send'])->middleware('throttle:6,1')->name('verification.send');
 
     Route::middleware('verified')->group(function (): void {
+        Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+        Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+        Route::post('/profile/avatar', [ProfileController::class, 'avatar'])->name('profile.avatar');
+        Route::put('/profile/preferences', [ProfileController::class, 'preferences'])->name('profile.preferences');
+        Route::put('/profile/password', [ProfileController::class, 'password'])->name('profile.password');
         Route::get('/onboarding', [OnboardingController::class, 'index'])->name('onboarding.index');
         Route::post('/onboarding/families', [OnboardingController::class, 'store'])->name('onboarding.families.store');
         Route::post('/families/{family}/activate', [OnboardingController::class, 'select'])->name('families.activate');
         Route::middleware('active.family')->group(function (): void {
             Route::get('/dashboard', DashboardController::class)->name('dashboard');
             Route::get('/tree', FamilyTreeController::class)->name('tree.index');
+            Route::get('/search', SearchController::class)->middleware('throttle:60,1')->name('search.index');
+            Route::get('/reports', ReportController::class)->name('reports.index');
 
             Route::get('/settings', [FamilySettingsController::class, 'index'])->name('settings.index');
             Route::put('/settings', [FamilySettingsController::class, 'update'])->name('settings.update');

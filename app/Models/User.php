@@ -42,6 +42,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'email_verified_at',
         'last_login_at',
         'status',
+        'notification_preferences',
     ];
 
     protected $hidden = [
@@ -55,6 +56,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'last_login_at' => 'datetime',
             'password' => 'hashed',
+            'notification_preferences' => 'array',
         ];
     }
 

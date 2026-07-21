@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\User;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
@@ -46,5 +47,20 @@ class ProfileService
         return $this->users->update($user, [
             'avatar' => $path,
         ]);
+    }
+
+    public function updateNotificationPreferences(User $user, array $preferences): User
+    {
+        return $this->users->update($user, ['notification_preferences' => $preferences]);
+    }
+
+    public function activeSessions(User $user, string $currentSessionId): Collection
+    {
+        return $this->users->activeSessions($user)->map(function (object $session) use ($currentSessionId): object {
+            $session->is_current = hash_equals($currentSessionId, (string) $session->id);
+            $session->last_active_at = now()->setTimestamp((int) $session->last_activity);
+
+            return $session;
+        });
     }
 }

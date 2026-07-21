@@ -10,4 +10,6 @@ interface ReportRepositoryInterface
     public function memberStatistics(Family $family): array;
 
     public function activityReport(Family $family, ReportCriteria $criteria): array;
+
+    public function webInsights(Family $family, ReportCriteria $criteria): array;
 }

@@ -9,8 +9,14 @@
         <a class="navbar-brand fw-bold text-primary text-wrap" href="{{ route('home') }}">Family Tree Indonesia</a>
         <nav class="ms-auto d-flex align-items-center gap-2" aria-label="Navigasi akun">
             @if ($variant === 'authenticated')
+                @if(Route::has('search.index'))
+                    <form class="d-none d-md-flex" method="GET" action="{{ route('search.index') }}" role="search">
+                        <label class="visually-hidden" for="global-search">Cari anggota, artikel, atau acara</label>
+                        <input class="form-control form-control-sm" id="global-search" name="keyword" value="{{ request()->routeIs('search.*') ? request('keyword') : '' }}" placeholder="Cari keluarga…" maxlength="100">
+                    </form>
+                @endif
                 @if(Route::has('notifications.index'))<div class="dropdown"><button class="btn btn-link position-relative" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notifikasi, {{ $navigationUnreadCount }} belum dibaca">🔔@if($navigationUnreadCount)<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{ $navigationUnreadCount }}</span>@endif</button><div class="dropdown-menu dropdown-menu-end p-2" style="min-width:18rem">@forelse($navigationNotifications as $notification)<a class="dropdown-item text-wrap" href="{{ route('notifications.index') }}"><strong>{{ $notification->title }}</strong><br><small>{{ Str::limit($notification->body, 60) }}</small></a>@empty<span class="dropdown-item-text text-secondary">Tidak ada notifikasi</span>@endforelse<a class="dropdown-item text-primary border-top mt-2" href="{{ route('notifications.index') }}">Lihat semua</a></div></div>@endif
-                <span class="d-none d-md-inline text-secondary">{{ auth()->user()?->name ?? 'Keluarga' }}</span>
+                <a class="d-none d-md-inline text-secondary text-decoration-none" href="{{ route('profile.show') }}">{{ auth()->user()?->name ?? 'Keluarga' }}</a>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button class="btn btn-outline-primary btn-sm" type="submit">Keluar</button>
