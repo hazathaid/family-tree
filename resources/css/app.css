@@ -121,6 +121,61 @@ a {
     animation: family-loading 1.4s infinite linear;
 }
 
+.dashboard-welcome {
+    padding: clamp(1.5rem, 4vw, 2.5rem);
+    color: #fff;
+    background: linear-gradient(135deg, var(--family-primary-dark), var(--family-primary) 60%, #4fa3ea);
+    border-radius: var(--family-radius);
+    box-shadow: var(--family-shadow);
+}
+
+.dashboard-stat {
+    min-height: 7.25rem;
+}
+
+.dashboard-list-item {
+    display: flex;
+    gap: 1rem;
+    padding-block: 1rem;
+    border-bottom: 1px solid var(--family-border);
+}
+
+.dashboard-list-item:first-child {
+    padding-top: 0;
+}
+
+.dashboard-list-item:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+}
+
+.dashboard-dot {
+    flex: 0 0 auto;
+    width: 0.75rem;
+    height: 0.75rem;
+    margin-top: 0.4rem;
+    background: var(--family-primary);
+    border: 0.2rem solid #d9edfc;
+    border-radius: 50%;
+    box-sizing: content-box;
+}
+
+.dashboard-avatar {
+    display: grid;
+    flex: 0 0 auto;
+    width: 2.75rem;
+    height: 2.75rem;
+    color: var(--family-primary-dark);
+    background: #eaf4fd;
+    border-radius: 50%;
+    font-weight: 700;
+    place-items: center;
+}
+
+.min-width-0 {
+    min-width: 0;
+}
+
 @keyframes family-loading {
     to {
         background-position-x: -200%;

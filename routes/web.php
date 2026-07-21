@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Web\AuthController;
+use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\EmailVerificationController;
 use App\Http\Controllers\Web\OnboardingController;
 use App\Http\Controllers\Web\PasswordController;
@@ -29,6 +30,6 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/onboarding', [OnboardingController::class, 'index'])->name('onboarding.index');
         Route::post('/onboarding/families', [OnboardingController::class, 'store'])->name('onboarding.families.store');
         Route::post('/families/{family}/activate', [OnboardingController::class, 'select'])->name('families.activate');
-        Route::view('/dashboard', 'dashboard')->middleware('active.family')->name('dashboard');
+        Route::get('/dashboard', DashboardController::class)->middleware('active.family')->name('dashboard');
     });
 });
