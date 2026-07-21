@@ -3,14 +3,13 @@
 namespace Tests\Feature;
 
 use App\Models\Article;
+use App\Models\Event;
 use App\Models\Family;
 use App\Models\FamilyUserRole;
 use App\Models\MemberPhoto;
 use App\Models\User;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
@@ -27,7 +26,6 @@ class FamilyDashboardApiTest extends TestCase
             'family_id' => $family->id,
             'user_id' => $user->id,
         ]);
-        $this->createDashboardSourceTables();
         Sanctum::actingAs($user);
 
         DB::table('family_members')->insert([
@@ -58,9 +56,7 @@ class FamilyDashboardApiTest extends TestCase
             'family_id' => $family->id,
             'uploaded_by' => $user->id,
         ]);
-        DB::table('events')->insert([
-            ['family_id' => $family->id],
-        ]);
+        Event::factory()->create(['family_id' => $family->id, 'organizer_id' => $user->id]);
 
         $this->getJson('/api/v1/families/'.$family->uuid.'/dashboard')
             ->assertOk()
@@ -70,13 +66,5 @@ class FamilyDashboardApiTest extends TestCase
             ->assertJsonPath('data.total_articles', 2)
             ->assertJsonPath('data.total_photos', 1)
             ->assertJsonPath('data.total_events', 1);
-    }
-
-    private function createDashboardSourceTables(): void
-    {
-        Schema::create('events', function (Blueprint $table): void {
-            $table->id();
-            $table->foreignId('family_id');
-        });
     }
 }

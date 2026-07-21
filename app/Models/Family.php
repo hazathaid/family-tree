@@ -84,4 +84,9 @@ class Family extends Model
     {
         return $this->hasMany(MemberPhoto::class);
     }
+
+    public function events(): HasMany
+    {
+        return $this->hasMany(Event::class);
+    }
 }

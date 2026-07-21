@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\V1\ArticleLikeController;
 use App\Http\Controllers\Api\V1\Auth\AuthController;
 use App\Http\Controllers\Api\V1\Auth\EmailVerificationController;
 use App\Http\Controllers\Api\V1\Auth\ForgotPasswordController;
+use App\Http\Controllers\Api\V1\EventController;
 use App\Http\Controllers\Api\V1\FamilyBranchController;
 use App\Http\Controllers\Api\V1\FamilyController;
 use App\Http\Controllers\Api\V1\FamilyDashboardController;
@@ -85,5 +86,7 @@ Route::prefix('v1')->group(function (): void {
         Route::put('member-photos/{member_photo}/tags', [MemberPhotoController::class, 'tag']);
         Route::apiResource('member-photos', MemberPhotoController::class)->only(['index', 'store', 'show', 'destroy']);
         Route::get('timeline', [TimelineController::class, 'index']);
+        Route::post('events/{event}/rsvp', [EventController::class, 'rsvp'])->middleware('throttle:30,1');
+        Route::apiResource('events', EventController::class);
     });
 });

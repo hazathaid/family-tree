@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\ActivityLog;
 use App\Models\Article;
+use App\Models\Event;
 use App\Models\FamilyMember;
 use App\Models\MemberPhoto;
 use App\Models\User;
@@ -26,6 +27,11 @@ class ActivityLogService
     public function photoUploaded(User $user, MemberPhoto $photo): ActivityLog
     {
         return $this->record($photo->family_id, $user, ActivityLog::PHOTO_UPLOADED, ['subject_uuid' => $photo->uuid, 'caption' => $photo->caption]);
+    }
+
+    public function eventCreated(User $user, Event $event): ActivityLog
+    {
+        return $this->record($event->family_id, $user, ActivityLog::EVENT_CREATED, ['subject_uuid' => $event->uuid, 'title' => $event->title]);
     }
 
     public function record(int $familyId, ?User $user, string $type, array $payload): ActivityLog
