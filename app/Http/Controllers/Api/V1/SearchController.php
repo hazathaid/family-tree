@@ -26,6 +26,7 @@ class SearchController extends Controller
             $input['status'] ?? null,
             $input['root_member_uuid'] ?? null,
             isset($input['limit']) ? (int) $input['limit'] : 15,
+            isset($input['page']) ? (int) $input['page'] : 1,
         ));
 
         return response()->json(['success' => true, 'message' => 'Success', 'data' => new SearchResource($result)]);

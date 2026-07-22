@@ -145,14 +145,15 @@ Lazy expansion uses `replace_depth`: repeat the same root/mode/layout request wi
 
 | Method/path | Request / filters | Response |
 |---|---|---|
-| GET `/search` | keyword/family UUID/name/city/generation with root UUID/status alive/deceased/limit<=100 | grouped authorized SearchResource results; 60/min |
+| GET `/search` | keyword/family UUID/name/city/generation with root UUID/status alive/deceased/page/limit<=100 | grouped authorized SearchResource results plus `{page,limit,has_more}` pagination; 60/min |
 | GET `/families/{family}/reports/family-statistics` | none | counts and demographic/generation aggregates |
 | GET `/families/{family}/reports/activity` | `date_from`, `date_to` | bounded activity report |
+| GET `/families/{family}/reports/insights` | `from`, `to` | top cities, monthly member growth, and daily activity trend; cached 15 minutes |
 | GET `/families/{family}/gamification` | none | current user's points/badges in family |
 | GET `/families/{family}/leaderboard` | limit<=100 | user leaderboard |
 | GET `/leaderboard/families` | limit<=100 | family leaderboard |
 
-Generation report/search parity remains an explicit contract gap API-G05.
+FT-API-401 closes API-G05: generation search is server-computed through BFS, and the mobile report contract now includes the city, growth, and activity-trend series used by web.
 
 ### Super-admin (web-console support, excluded from mobile)
 
@@ -193,3 +194,7 @@ All v1 endpoints use `throttle:api`. Additional route limits are: login named li
 | API-G08 | Web article upload route name differs but REST capability exists; no gap. Web-only super-admin console is intentionally excluded. | Documented decision |
 
 Historical phase API documents remain implementation history. This file is the sole Flutter contract; when routes/requests/resources change, update this file and tests in the same task.
+
+## Phase 6 mobile usage note
+
+FT-MOB-501 through FT-MOB-508 consume the existing article, photo, event, timeline, notification and push-device contracts above without an API or schema change. Lists remain server-paginated; multipart media reports client progress; rich text is sanitized by Laravel; deep-link routing accepts only known target types and UUIDs.

@@ -347,42 +347,44 @@ Semua task fase ini adalah blocker. Jangan memulai implementasi parity sebelum F
 
 # Phase 6 — Family Content and Engagement
 
-## FT-MOB-501 — Article Categories and Article List
+**Status fase:** ✅ Complete and verified (2026-07-22). FT-MOB-501 sampai FT-MOB-508 lulus seluruh gate backend/mobile bersama verifikasi Phase 7.
+
+## FT-MOB-501 — Article Categories and Article List ✅ Complete (2026-07-22)
 
 - List/filter/search/paginate article dan featured articles.
 - Hormati draft visibility, author, dan family scope dari API.
 
-## FT-MOB-502 — Article Detail and Engagement
+## FT-MOB-502 — Article Detail and Engagement ✅ Complete (2026-07-22)
 
 - Render sanitized rich text, comments, like/unlike, comment edit/delete, dan moderation controls.
 - Jangan mengeksekusi script atau URL tidak aman dari article HTML.
 
-## FT-MOB-503 — Article Editor and Publishing
+## FT-MOB-503 — Article Editor and Publishing ✅ Complete (2026-07-22)
 
 - Create/edit/delete draft, featured image upload, publish, feature/unfeature sesuai role.
 - Gunakan editor yang menghasilkan subset HTML yang didukung sanitizer server.
 
-## FT-MOB-504 — Photo Albums and Gallery
+## FT-MOB-504 — Photo Albums and Gallery ✅ Complete (2026-07-22)
 
 - List/create/view/update/delete albums dan paginated gallery.
 - Album deletion confirmation menjelaskan bahwa foto dipertahankan bila aturan API demikian.
 
-## FT-MOB-505 — Photo Upload, Detail, and Member Tags
+## FT-MOB-505 — Photo Upload, Detail, and Member Tags ✅ Complete (2026-07-22)
 
 - Image picker/camera, compression preview, upload progress, caption, capture date, album, dan tags.
 - Enforce UX limit 10 MB dan format yang didukung; API tetap validator final.
 
-## FT-MOB-506 — Events and RSVP
+## FT-MOB-506 — Events and RSVP ✅ Complete (2026-07-22)
 
 - Upcoming/all/search list, detail, attendee list, create/edit/delete, dan RSVP yes/no/maybe.
 - Format waktu menggunakan timezone aplikasi dan tampilkan timezone secara jelas.
 
-## FT-MOB-507 — Family Timeline
+## FT-MOB-507 — Family Timeline ✅ Complete (2026-07-22)
 
 - Paginated timeline dengan filter members, photos, articles, dan events.
 - Notification/deep-link target membuka resource terkait bila masih dapat diakses.
 
-## FT-MOB-508 — Notifications and Push Completion
+## FT-MOB-508 — Notifications and Push Completion ✅ Complete (2026-07-22)
 
 - Paginated read/unread list, mark one/all read, badge count, device registration/removal, foreground/background handling, dan deep links.
 - Registrasi push dilakukan setelah login/permission dan dilepas saat logout.
@@ -391,20 +393,22 @@ Semua task fase ini adalah blocker. Jangan memulai implementasi parity sebelum F
 
 # Phase 7 — Discovery, Reports, and Gamification
 
-## FT-MOB-601 — Global and Advanced Search
+**Status fase:** ✅ Complete and verified (2026-07-22). FT-MOB-601, FT-API-401, FT-MOB-602, dan FT-MOB-603 selesai; 184 backend tests/848 assertions, PHPStan, Pint, Vite build, Flutter analyze, dan 24 Flutter tests lulus. Phase 8 tidak dikerjakan.
+
+## FT-MOB-601 — Global and Advanced Search ✅ Complete (2026-07-22)
 
 - Grouped, paginated member/article/event results.
 - Support name, city, living status, dan generation-relative-to-root filters.
 - Generation calculation hanya berasal dari API.
 
-## FT-API-401 — Report Contract Parity Audit
+## FT-API-401 — Report Contract Parity Audit ✅ Complete (2026-07-22)
 
 **Required before:** FT-MOB-602
 
 - Audit kebutuhan web untuk statistics, generation, city, growth, activity trend, dan accessibility data table terhadap endpoint REST saat ini.
 - Tambahkan response field/endpoint yang kurang dengan cache 15 menit dan family isolation.
 
-## FT-MOB-602 — Reports and Insights
+## FT-MOB-602 — Reports and Insights ✅ Complete (2026-07-22)
 
 **Depends on:** FT-API-401
 
@@ -412,7 +416,7 @@ Semua task fase ini adalah blocker. Jangan memulai implementasi parity sebelum F
 - Setiap chart mempunyai semantic/data-table alternative.
 - Filter periode menggunakan timezone aplikasi.
 
-## FT-MOB-603 — Gamification and Leaderboards
+## FT-MOB-603 — Gamification and Leaderboards ✅ Complete (2026-07-22)
 
 - Profile points, badges, family user leaderboard, dan family leaderboard.
 - Gunakan server rank dan jangan menghitung ulang award/ranking di Flutter.

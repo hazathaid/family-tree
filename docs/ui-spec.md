@@ -77,6 +77,10 @@ Phase 4 uses member cards on phones and a horizontally safe data table on tablet
 
 Phase 5 adds root/mode/depth/layout controls, pan/zoom/center, search/focus, bounded expand/collapse, living filter, node detail sheet and PNG/PDF export. At most 250 node widgets are active. A semantic list exposes name, server relationship, generation and memorial state independently of canvas gestures.
 
+Phase 6 adds searchable/filterable article and event lists, safe article detail/editor/engagement, adaptive album/photo grids, upload preview/progress, member tagging, RSVP controls, a paginated activity feed and notification inbox. Owner/admin mutation controls are conditional, media has contextual semantics, destructive actions name the resource, and event timestamps show the active device timezone.
+
+Phase 7 adds grouped member/article/event search with expandable advanced filters and explicit next-page loading. Reports use adaptive statistic cards and labelled bar rows whose text is the semantic data-table equivalent. The period filter displays the device timezone. Gamification shows server points, badge descriptions, family-user ranks, and family ranks without client-side award or ranking calculations.
+
 ## Accessibility
 
 Every image has contextual semantics or is excluded if decorative. Icon-only controls have labels/tooltips. Traversal order follows visual order. Dynamic status changes use polite announcements. Contrast targets WCAG AA (4.5:1 normal, 3:1 large/UI). Tree nodes expose name, relationship to root, living/deceased status and expand action independent of canvas gestures. Pinch/drag has button alternatives for zoom/reset and keyboard/focus alternatives on supported devices.

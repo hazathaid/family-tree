@@ -113,6 +113,7 @@ Route::prefix('v1')->middleware('throttle:api')->group(function (): void {
         Route::get('search', [SearchController::class, 'index'])->middleware('throttle:60,1');
         Route::get('families/{family}/reports/family-statistics', [ReportController::class, 'familyStatistics']);
         Route::get('families/{family}/reports/activity', [ReportController::class, 'activity']);
+        Route::get('families/{family}/reports/insights', [ReportController::class, 'insights']);
         Route::get('families/{family}/gamification', [GamificationController::class, 'profile']);
         Route::get('families/{family}/leaderboard', [GamificationController::class, 'users']);
         Route::get('leaderboard/families', [GamificationController::class, 'families']);

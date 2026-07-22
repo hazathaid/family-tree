@@ -64,6 +64,22 @@ class ReportApiTest extends TestCase
         Sanctum::actingAs(User::factory()->create());
 
         $this->getJson("/api/v1/families/{$family->uuid}/reports/family-statistics")->assertForbidden();
+        $this->getJson("/api/v1/families/{$family->uuid}/reports/insights")->assertForbidden();
+    }
+
+    public function test_insights_return_city_growth_and_activity_trends_for_period(): void
+    {
+        [$user, $family] = $this->familyUser();
+        FamilyMember::factory()->create(['family_id' => $family->id, 'birth_place' => 'Bandung']);
+        ActivityLog::factory()->create(['family_id' => $family->id, 'user_id' => $user->id]);
+        Sanctum::actingAs($user);
+
+        $this->getJson("/api/v1/families/{$family->uuid}/reports/insights?from=".now()->subDay()->toDateString().'&to='.now()->toDateString())
+            ->assertOk()
+            ->assertJsonPath('data.cities.0.label', 'Bandung')
+            ->assertJsonPath('data.cities.0.total', 1)
+            ->assertJsonCount(1, 'data.growth')
+            ->assertJsonCount(1, 'data.activity');
     }
 
     private function familyUser(): array

@@ -19,6 +19,7 @@ class SearchRequest extends ApiFormRequest
             'status' => ['nullable', Rule::in(['alive', 'deceased'])],
             'root_member_uuid' => ['nullable', 'uuid', 'exists:family_members,uuid', 'required_with:generation'],
             'limit' => ['nullable', 'integer', 'min:1', 'max:100'],
+            'page' => ['nullable', 'integer', 'min:1'],
         ];
     }
 }

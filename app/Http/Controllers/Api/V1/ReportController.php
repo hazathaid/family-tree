@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Report\ActivityReportRequest;
 use App\Http\Resources\ActivityReportResource;
 use App\Http\Resources\FamilyStatisticsResource;
+use App\Http\Resources\ReportInsightsResource;
 use App\Models\Family;
 use App\Services\ReportService;
 use Illuminate\Http\JsonResponse;
@@ -39,6 +40,20 @@ class ReportController extends Controller
             'success' => true,
             'message' => 'Success',
             'data' => new ActivityReportResource($this->reports->activity($family, new ReportCriteria($from, $to))),
+        ]);
+    }
+
+    public function insights(ActivityReportRequest $request, Family $family): JsonResponse
+    {
+        Gate::authorize('view', $family);
+        $input = $request->validated();
+        $from = isset($input['from']) ? Carbon::parse($input['from'])->startOfDay() : now()->subDays(29)->startOfDay();
+        $to = isset($input['to']) ? Carbon::parse($input['to'])->endOfDay() : now()->endOfDay();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Success',
+            'data' => new ReportInsightsResource($this->reports->webInsights($family, new ReportCriteria($from, $to))),
         ]);
     }
 }

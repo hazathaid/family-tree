@@ -23,14 +23,22 @@ class EloquentSearchRepository implements SearchRepositoryInterface
 
     public function members(User $user, SearchCriteria $criteria): Collection
     {
-        return FamilyMember::query()->with(['family', 'branch'])
+        $query = FamilyMember::query()->with(['family', 'branch'])
             ->whereHas('family.userRoles', fn (Builder $query) => $query->where('user_id', $user->id))
             ->tap(fn (Builder $query) => $this->familyScope($query, $criteria))
             ->when($criteria->keyword, fn (Builder $query, string $keyword) => $this->memberText($query, $keyword))
             ->when($criteria->name, fn (Builder $query, string $name) => $query->where(fn (Builder $nested) => $nested->where('full_name', 'like', '%'.$name.'%')->orWhere('nickname', 'like', '%'.$name.'%')))
             ->when($criteria->city, fn (Builder $query, string $city) => $query->where(fn (Builder $nested) => $nested->where('birth_place', 'like', '%'.$city.'%')->orWhere('death_place', 'like', '%'.$city.'%')))
             ->when($criteria->status, fn (Builder $query, string $status) => $query->where('is_alive', $status === 'alive'))
-            ->orderBy('full_name')->limit($criteria->generation === null ? $criteria->limit : 100000)->get();
+            ->orderBy('full_name');
+
+        if ($criteria->generation === null) {
+            $query->offset(($criteria->page - 1) * $criteria->limit)->limit($criteria->limit);
+        } else {
+            $query->limit(100000);
+        }
+
+        return $query->get();
     }
 
     public function articles(User $user, SearchCriteria $criteria): Collection
@@ -46,7 +54,7 @@ class EloquentSearchRepository implements SearchRepositoryInterface
                 ->orWhereHas('family.userRoles', fn (Builder $roles) => $roles->where('user_id', $user->id)->whereIn('role', [FamilyUserRole::ROLE_OWNER, FamilyUserRole::ROLE_ADMIN])))
             ->tap(fn (Builder $query) => $this->familyScope($query, $criteria))
             ->where(fn (Builder $query) => $query->where('title', 'like', '%'.$criteria->keyword.'%')->orWhere('content', 'like', '%'.$criteria->keyword.'%'))
-            ->latest()->limit($criteria->limit)->get();
+            ->latest()->offset(($criteria->page - 1) * $criteria->limit)->limit($criteria->limit)->get();
     }
 
     public function events(User $user, SearchCriteria $criteria): Collection
@@ -59,7 +67,7 @@ class EloquentSearchRepository implements SearchRepositoryInterface
             ->whereHas('family.userRoles', fn (Builder $query) => $query->where('user_id', $user->id))
             ->tap(fn (Builder $query) => $this->familyScope($query, $criteria))
             ->where(fn (Builder $query) => $query->where('title', 'like', '%'.$criteria->keyword.'%')->orWhere('description', 'like', '%'.$criteria->keyword.'%')->orWhere('location', 'like', '%'.$criteria->keyword.'%'))
-            ->orderBy('event_date')->limit($criteria->limit)->get();
+            ->orderBy('event_date')->offset(($criteria->page - 1) * $criteria->limit)->limit($criteria->limit)->get();
     }
 
     private function familyScope(Builder $query, SearchCriteria $criteria): void

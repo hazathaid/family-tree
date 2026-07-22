@@ -75,6 +75,19 @@ class SearchApiTest extends TestCase
         $this->getJson('/api/v1/search?generation=1')->assertUnprocessable()->assertJsonValidationErrors('root_member_uuid');
     }
 
+    public function test_grouped_search_supports_bounded_pagination(): void
+    {
+        [$user, $family] = $this->familyUser();
+        FamilyMember::factory()->count(3)->create(['family_id' => $family->id, 'full_name' => 'Budi']);
+        Sanctum::actingAs($user);
+
+        $this->getJson('/api/v1/search?'.http_build_query(['family_uuid' => $family->uuid, 'name' => 'Budi', 'limit' => 2, 'page' => 2]))
+            ->assertOk()
+            ->assertJsonCount(1, 'data.members')
+            ->assertJsonPath('data.pagination.page', 2)
+            ->assertJsonPath('data.pagination.limit', 2);
+    }
+
     private function familyUser(): array
     {
         $user = User::factory()->create();

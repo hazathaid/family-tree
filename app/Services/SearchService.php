@@ -58,6 +58,6 @@ class SearchService
             $member->setAttribute('generation', $generation);
 
             return $generation === $criteria->generation;
-        })->take($criteria->limit)->values();
+        })->slice(($criteria->page - 1) * $criteria->limit, $criteria->limit)->values();
     }
 }

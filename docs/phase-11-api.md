@@ -19,6 +19,7 @@ Parameters:
 | `generation` | Generation from -100 to 100 relative to `root_member_uuid`. |
 | `root_member_uuid` | Required with `generation`; generation 0 is this member. |
 | `limit` | Maximum results per type, 1-100; default 15. |
+| `page` | Group page, minimum 1; default 1. |
 
 Only families assigned to the authenticated user are searched. Without `keyword`, only member advanced filters return results.
 
@@ -29,7 +30,8 @@ Only families assigned to the authenticated user are searched. Without `keyword`
   "data": {
     "members": [],
     "articles": [],
-    "events": []
+    "events": [],
+    "pagination": {"page": 1, "limit": 15, "has_more": false}
   }
 }
 ```

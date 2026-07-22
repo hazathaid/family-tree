@@ -247,7 +247,8 @@ class FamilyMember {
       this.deathDate,
       this.deathPlace,
       this.biography,
-      this.photoUrl});
+      this.photoUrl,
+      this.generation});
   final String uuid;
   final String familyUuid;
   final String fullName;
@@ -262,6 +263,7 @@ class FamilyMember {
   final String? deathPlace;
   final String? biography;
   final String? photoUrl;
+  final int? generation;
 
   factory FamilyMember.fromJson(Map<String, dynamic> json) => FamilyMember(
         uuid: json['uuid'] as String,
@@ -279,6 +281,7 @@ class FamilyMember {
         biography: json['biography'] as String?,
         photoUrl: (json['profile_photo_thumbnail_url'] ??
             json['profile_photo_url']) as String?,
+        generation: json['generation'] as int?,
       );
 }
 
@@ -344,17 +347,39 @@ class RelationshipPathStep {
 
 class TimelineItem {
   const TimelineItem(
-      {required this.uuid, required this.message, required this.createdAt});
+      {required this.uuid,
+      required this.message,
+      required this.createdAt,
+      this.type,
+      this.targetPath});
 
   final String uuid;
   final String message;
   final DateTime? createdAt;
+  final String? type;
+  final String? targetPath;
 
   factory TimelineItem.fromJson(Map<String, dynamic> json) => TimelineItem(
         uuid: json['uuid'] as String,
         message: json['message'] as String,
         createdAt: DateTime.tryParse(json['created_at'] as String? ?? ''),
+        type: json['type'] as String?,
+        targetPath: _activityTarget(json['type'] as String?,
+            json['payload'] as Map<String, dynamic>? ?? const {}),
       );
+
+  static String? _activityTarget(String? type, Map<String, dynamic> payload) {
+    final uuid = (payload['article_uuid'] ??
+        payload['photo_uuid'] ??
+        payload['event_uuid'] ??
+        payload['member_uuid']) as String?;
+    if (uuid == null) return null;
+    if (type?.contains('ARTICLE') == true) return '/articles/$uuid';
+    if (type?.contains('PHOTO') == true) return '/photos/$uuid';
+    if (type?.contains('EVENT') == true) return '/events/$uuid';
+    if (type?.contains('MEMBER') == true) return '/members/$uuid';
+    return null;
+  }
 }
 
 class AppNotification {
@@ -363,12 +388,31 @@ class AppNotification {
     required this.title,
     required this.body,
     required this.isRead,
+    this.type,
+    this.data = const {},
+    this.createdAt,
   });
 
   final String uuid;
   final String title;
   final String body;
   final bool isRead;
+  final String? type;
+  final Map<String, dynamic> data;
+  final DateTime? createdAt;
+
+  String? get targetPath {
+    final targetType = (data['target_type'] ?? data['type']) as String?;
+    final uuid = (data['target_uuid'] ?? data['uuid']) as String?;
+    if (uuid == null) return null;
+    return switch (targetType) {
+      'article' => '/articles/$uuid',
+      'event' => '/events/$uuid',
+      'member' => '/members/$uuid',
+      'photo' => '/photos/$uuid',
+      _ => null,
+    };
+  }
 
   factory AppNotification.fromJson(Map<String, dynamic> json) =>
       AppNotification(
@@ -376,6 +420,9 @@ class AppNotification {
         title: json['title'] as String,
         body: json['body'] as String,
         isRead: json['is_read'] as bool? ?? false,
+        type: json['type'] as String?,
+        data: json['data'] as Map<String, dynamic>? ?? const {},
+        createdAt: DateTime.tryParse(json['created_at'] as String? ?? ''),
       );
 }
 

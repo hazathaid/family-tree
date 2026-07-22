@@ -12,6 +12,10 @@ import '../features/members/data/api_member_repository.dart';
 import '../features/members/domain/member_repository.dart';
 import '../features/tree/data/api_tree_repository.dart';
 import '../features/tree/domain/tree_repository.dart';
+import '../features/content/data/api_content_repository.dart';
+import '../features/content/domain/content_repository.dart';
+import '../features/discovery/data/api_discovery_repository.dart';
+import '../features/discovery/domain/discovery_repository.dart';
 
 final apiClientProvider =
     Provider<ApiClient>((ref) => throw UnimplementedError());
@@ -33,6 +37,10 @@ final memberRepositoryProvider = Provider<MemberRepository>(
     (ref) => ApiMemberRepository(ref.watch(apiClientProvider)));
 final treeRepositoryProvider = Provider<TreeRepository>(
     (ref) => ApiTreeRepository(ref.watch(apiClientProvider)));
+final contentRepositoryProvider = Provider<ContentRepository>(
+    (ref) => ApiContentRepository(ref.watch(apiClientProvider)));
+final discoveryRepositoryProvider = Provider<DiscoveryRepository>(
+    (ref) => ApiDiscoveryRepository(ref.watch(apiClientProvider)));
 final currentUserProvider = StateProvider<User?>((ref) => null);
 
 final currentFamilyProvider = StateProvider<Family?>((ref) => null);
@@ -61,7 +69,8 @@ final timelineProvider = FutureProvider<List<TimelineItem>>((ref) {
 });
 
 final notificationsProvider = FutureProvider<List<AppNotification>>(
-    (ref) => ref.watch(notificationRepositoryProvider).all());
+    (ref) async =>
+        (await ref.watch(notificationRepositoryProvider).all()).items);
 
 final treeProvider = FutureProvider<FamilyTree>((ref) {
   final memberUuid = ref.watch(currentMemberUuidProvider);

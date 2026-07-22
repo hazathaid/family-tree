@@ -14,5 +14,6 @@ final readonly class SearchCriteria
         public ?string $status,
         public ?string $rootMemberUuid,
         public int $limit,
+        public int $page = 1,
     ) {}
 }

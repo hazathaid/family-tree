@@ -14,6 +14,9 @@ import '../../features/diagnostics/presentation/diagnostics_screen.dart';
 import '../../features/notifications/notifications_screen.dart';
 import '../../features/members/presentation/member_screens.dart';
 import '../../features/tree/tree_screen.dart';
+import '../../features/content/domain/content_models.dart';
+import '../../features/content/presentation/content_screens.dart';
+import '../../features/discovery/presentation/discovery_screens.dart';
 
 GoRouter createAppRouter(
         {required SessionController session,
@@ -107,11 +110,36 @@ GoRouter createAppRouter(
         GoRoute(
             path: '/relationship-resolver',
             builder: (_, __) => const RelationshipResolverScreen()),
-        for (final route in const ['/articles', '/photos', '/events'])
-          GoRoute(
-              path: route,
-              builder: (_, state) =>
-                  _Placeholder(title: 'Fitur ${state.uri.path.substring(1)}')),
+        GoRoute(
+            path: '/articles', builder: (_, __) => const ArticleListScreen()),
+        GoRoute(
+            path: '/articles/new',
+            builder: (_, __) => const ArticleEditorScreen()),
+        GoRoute(
+            path: '/articles/:uuid/edit',
+            builder: (_, state) =>
+                ArticleEditorScreen(article: state.extra as Article?)),
+        GoRoute(path: '/photos', builder: (_, __) => const GalleryScreen()),
+        GoRoute(
+            path: '/photos/upload',
+            builder: (_, __) => const PhotoUploadScreen()),
+        GoRoute(
+            path: '/photos/:uuid',
+            builder: (_, state) =>
+                PhotoDetailScreen(uuid: state.pathParameters['uuid']!)),
+        GoRoute(path: '/events', builder: (_, __) => const EventListScreen()),
+        GoRoute(
+            path: '/events/new', builder: (_, __) => const EventFormScreen()),
+        GoRoute(
+            path: '/events/:uuid/edit',
+            builder: (_, state) =>
+                EventFormScreen(event: state.extra as FamilyEvent?)),
+        GoRoute(
+            path: '/search', builder: (_, __) => const DiscoverySearchScreen()),
+        GoRoute(path: '/reports', builder: (_, __) => const ReportsScreen()),
+        GoRoute(
+            path: '/gamification',
+            builder: (_, __) => const GamificationScreen()),
         StatefulShellRoute.indexedStack(
           builder: (context, state, shell) => _AdaptiveShell(shell: shell),
           branches: [
@@ -128,8 +156,7 @@ GoRouter createAppRouter(
             StatefulShellBranch(routes: [
               GoRoute(
                   path: '/activity',
-                  builder: (context, state) =>
-                      const _Placeholder(title: 'Aktivitas'))
+                  builder: (context, state) => const TimelineScreen())
             ]),
             StatefulShellBranch(routes: [
               GoRoute(
@@ -146,16 +173,17 @@ GoRouter createAppRouter(
             ]),
           ],
         ),
-        for (final route in const [
-          '/articles/:uuid',
-          '/events/:uuid',
-          '/notifications/:uuid'
-        ])
-          GoRoute(
-              path: route,
-              builder: (context, state) => _Placeholder(
-                  title: 'Tujuan tautan',
-                  detail: state.pathParameters['uuid'])),
+        GoRoute(
+            path: '/articles/:uuid',
+            builder: (_, state) =>
+                ArticleDetailScreen(uuid: state.pathParameters['uuid']!)),
+        GoRoute(
+            path: '/events/:uuid',
+            builder: (_, state) =>
+                EventDetailScreen(uuid: state.pathParameters['uuid']!)),
+        GoRoute(
+            path: '/notifications/:uuid',
+            builder: (_, __) => const NotificationsScreen()),
         GoRoute(
             path: '/members/:uuid',
             builder: (_, state) =>
@@ -229,18 +257,6 @@ class _SplashScreen extends StatelessWidget {
               child: CircularProgressIndicator())));
 }
 
-class _Placeholder extends StatelessWidget {
-  const _Placeholder({required this.title, this.detail});
-  final String title;
-  final String? detail;
-  @override
-  Widget build(BuildContext context) => Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: Center(
-          child: Text(detail == null ? title : '$title\n$detail',
-              textAlign: TextAlign.center)));
-}
-
 class _MoreScreen extends StatelessWidget {
   const _MoreScreen();
   @override
@@ -274,5 +290,47 @@ class _MoreScreen extends StatelessWidget {
                 title: const Text('Notifikasi'),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => context.go('/account/notifications'))),
+        Card(
+            child: ListTile(
+                minTileHeight: 56,
+                leading: const Icon(Icons.article_outlined),
+                title: const Text('Artikel'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.go('/articles'))),
+        Card(
+            child: ListTile(
+                minTileHeight: 56,
+                leading: const Icon(Icons.photo_library_outlined),
+                title: const Text('Foto & album'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.go('/photos'))),
+        Card(
+            child: ListTile(
+                minTileHeight: 56,
+                leading: const Icon(Icons.event_outlined),
+                title: const Text('Acara'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.go('/events'))),
+        Card(
+            child: ListTile(
+                minTileHeight: 56,
+                leading: const Icon(Icons.search),
+                title: const Text('Pencarian'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.go('/search'))),
+        Card(
+            child: ListTile(
+                minTileHeight: 56,
+                leading: const Icon(Icons.insights_outlined),
+                title: const Text('Laporan'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.go('/reports'))),
+        Card(
+            child: ListTile(
+                minTileHeight: 56,
+                leading: const Icon(Icons.emoji_events_outlined),
+                title: const Text('Kontribusi & peringkat'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.go('/gamification'))),
       ]);
 }

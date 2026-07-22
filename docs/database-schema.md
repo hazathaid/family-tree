@@ -69,6 +69,10 @@ Status: audited against all migrations present on 2026-07-22. Migrations are aut
 
 Schema changes require a new task, forward migration, model/repository/service/API and tests. Phase 0 records discrepancies only and does not edit migrations.
 
+## Phase 7 mobile parity note
+
+Phase 7 adds no migration. Discovery, report insights, points, badges, and leaderboards are projections from existing family-scoped tables. Report responses use application cache entries for 15 minutes; generation remains derived from the base relationship graph and is never persisted as a relationship.
+
 ## Phase 3 mobile parity note
 
 FT-API-201 and FT-API-202 require no migration. Dashboard sections are bounded projections from existing family-scoped tables and use the application cache with a family/user key. Family logo and cover continue to use the existing `families.logo` and `families.cover_image` storage paths. There is no mutable family privacy or family notification-settings column: family data remains membership-only and notification preferences remain on `users.notification_preferences`.
@@ -80,3 +84,7 @@ Phase 4 adds no migration. Member directory filtering uses existing family, bran
 ## Phase 5 mobile parity note
 
 Phase 5 adds no migration. Layout-independent graphs remain in `member_tree_cache` by root/mode/depth. Layout, boundary/expansion metadata and relationship-to-root labels are derived presentation and never new graph edges.
+
+## Phase 6 mobile parity note
+
+Phase 6 adds no migration. Flutter consumes the existing article/comment/like, album/photo/tag, event/attendee, activity, notification and push-device tables exclusively through `/api/v1`; UUIDs remain public identifiers and all family isolation remains server enforced.

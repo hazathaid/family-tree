@@ -90,9 +90,23 @@ Install locked dependencies, run `composer test`, `composer analyse`, `composer 
 - Flutter uses a tree repository, repeat-and-replace depth expansion, a 250-node render budget, pan/zoom/focus controls and a semantic list alternative.
 - Authenticated PNG/PDF byte streams support progress/cancellation; PNG preview and native sharing use `share_plus` without broad shared-storage writes.
 
+## Phase 6 implementation
+
+- Flutter adds a typed content repository for server-paginated articles, comments/likes, albums/photos/tags, events/RSVP, timeline and notifications.
+- Article input emits an escaped paragraph-only HTML subset; Laravel sanitization and policies remain authoritative. Rendered content removes executable/style markup and never opens arbitrary HTML URLs.
+- Media selection provides camera/gallery preview, advisory 10 MB/type checks, multipart progress, album/capture metadata and same-family member tags. Event times are converted to the device timezone and labelled explicitly.
+- Timeline and notification payloads navigate only through an allowlisted resource-type-to-route mapping. Push permission and registration remain post-login; device removal and scoped cache cleanup remain part of logout/session handling.
+
+## Phase 7 implementation
+
+- A typed discovery repository owns grouped server-paginated search, family report aggregates, gamification profile, and leaderboards.
+- Generation filters send the selected root UUID to Laravel; Dart displays the returned generation and never traverses the family graph.
+- Reports request statistics, activity, and insight series concurrently. Period values are device-local calendar dates and the visible filter identifies the device timezone.
+- Points, badges, awards, and ranks are rendered verbatim from the server. Charts use bounded progress visuals with equivalent labelled rows for assistive technology.
+
 ## Current gaps
 
-- Phase 5 interactive tree/export parity is implemented; family content remains Phase 6 work.
+- Phase 7 discovery, reports, and gamification parity is implemented; administration remains intentionally web-only and Phase 8 is not implemented.
 - No refresh-token API; expiry means re-login.
 - Firebase native configuration is absent and must remain environment-specific.
 - Existing prototype stores the token in memory and has ad-hoc navigation; it is not the target architecture.

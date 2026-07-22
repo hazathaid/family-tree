@@ -47,9 +47,14 @@ class ApiClient {
               queryParameters: query, cancelToken: cancelToken),
           idempotent: true);
 
-  Future<dynamic> post(String path, {dynamic data, CancelToken? cancelToken}) =>
-      _request(
-          () => _dio.post<dynamic>(path, data: data, cancelToken: cancelToken));
+  Future<dynamic> post(String path,
+          {dynamic data,
+          CancelToken? cancelToken,
+          ProgressCallback? onSendProgress}) =>
+      _request(() => _dio.post<dynamic>(path,
+          data: data,
+          cancelToken: cancelToken,
+          onSendProgress: onSendProgress));
 
   Future<dynamic> put(String path, {dynamic data, CancelToken? cancelToken}) =>
       _request(

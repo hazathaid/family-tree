@@ -1,19 +1,29 @@
 import '../../../core/api_client.dart';
 import '../../../core/models.dart';
 import '../domain/notification_repository.dart';
+import '../../../core/http/page_data.dart';
 
 class ApiNotificationRepository implements NotificationRepository {
   const ApiNotificationRepository(this.api);
   final ApiClient api;
   @override
-  Future<List<AppNotification>> all() async {
-    final result = await api.get('/notifications');
-    final items = result is Map<String, dynamic>
-        ? result['data'] as List<dynamic>? ?? const []
-        : result as List<dynamic>;
-    return items
-        .map((item) => AppNotification.fromJson(item as Map<String, dynamic>))
-        .toList(growable: false);
+  Future<PageData<AppNotification>> all({int page = 1, String? status}) async {
+    final result = await api.get('/notifications', query: {
+      'page': page,
+      'limit': 20,
+      if (status != null) 'status': status
+    });
+    if (result is List<dynamic>) {
+      return PageData(
+          items: result
+              .map((e) => AppNotification.fromJson(e as Map<String, dynamic>))
+              .toList(),
+          currentPage: 1,
+          lastPage: 1,
+          total: result.length);
+    }
+    return PageData.fromJson(
+        result as Map<String, dynamic>, AppNotification.fromJson);
   }
 
   @override
@@ -25,4 +35,7 @@ class ApiNotificationRepository implements NotificationRepository {
   Future<void> registerDevice(
           {required String platform, required String token}) async =>
       api.post('/push-devices', data: {'platform': platform, 'token': token});
+  @override
+  Future<void> removeDevice(String uuid) async =>
+      api.delete('/push-devices/$uuid');
 }
