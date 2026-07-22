@@ -64,6 +64,12 @@
 	<string>Main</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Pilih foto untuk avatar profil keluarga Anda.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Ambil foto keluarga atau foto profil.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Simpan hasil ekspor silsilah keluarga yang Anda pilih.</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

@@ -452,7 +452,9 @@ Fase ini hanya dikerjakan jika FT-DOC-001 menetapkan console super-admin sebagai
 
 # Phase 9 — Quality, Security, and Release
 
-## FT-MOB-801 — Automated Test Matrix
+**Status fase:** 🟡 In progress (2026-07-22). Audit, hardening platform, regression test konfigurasi, parity matrix, dan gate backend/web selesai. Phase 9 belum complete karena Flutter SDK/coverage driver tidak tersedia, localization ARB dan crash provider belum diselesaikan, serta signed build dan acceptance perangkat nyata memerlukan credential/infrastruktur eksternal. Bukti: `docs/mobile-phase-9.md`.
+
+## FT-MOB-801 — Automated Test Matrix 🟡 Verification Pending (2026-07-22)
 
 - Unit test untuk API parsing, repository, state transitions, cache, dan error mapping.
 - Widget test untuk seluruh screen state dan RBAC visibility.
@@ -460,34 +462,34 @@ Fase ini hanya dikerjakan jika FT-DOC-001 menetapkan console super-admin sebagai
 - Backend contract tests harus menjaga response yang digunakan Flutter.
 - Tetapkan coverage minimum 80%; code relationship/tree Laravel tetap minimum 95%.
 
-## FT-MOB-802 — Security and Privacy Review
+## FT-MOB-802 — Security and Privacy Review 🟡 Device Verification Pending (2026-07-22)
 
 - Audit secure storage, screenshots pada layar sensitif, logs, cache clearing, TLS, certificate policy, upload, deep link, WebView/rich text, dan token expiration.
 - Verifikasi family isolation dan RBAC melalui negative integration tests.
 - Jangan hardcode secret atau Firebase server credential di aplikasi.
 
-## FT-MOB-803 — Performance and Reliability
+## FT-MOB-803 — Performance and Reliability 🟡 Mobile Profiling Pending (2026-07-22)
 
 - Profil startup, dashboard, scrolling, image memory, upload, search, dan tree rendering.
 - Uji keluarga besar menggunakan fixture realistis dan paginated API.
 - Tambahkan crash reporting dengan PII scrubbing dan opt-in/consent sesuai PRD.
 
-## FT-MOB-804 — Accessibility and Localization
+## FT-MOB-804 — Accessibility and Localization 🟡 Localization/Audit Pending (2026-07-22)
 
 - Audit screen reader, keyboard/tablet navigation, contrast, text scaling, reduced motion, touch targets, dan semantic charts/tree alternative.
 - Semua user-facing string masuk localization; Bahasa Indonesia menjadi locale utama.
 
-## FT-MOB-805 — Android Release Readiness
+## FT-MOB-805 — Android Release Readiness 🟡 External Release Gates Pending (2026-07-22)
 
 - Production signing, app links, Firebase, notification channels, network security, permissions, icon/splash, versioning, release build, dan store metadata.
 - Verifikasi clean install, upgrade, background push, dan deep link pada perangkat nyata.
 
-## FT-MOB-806 — iOS Release Readiness
+## FT-MOB-806 — iOS Release Readiness 🟡 External Release Gates Pending (2026-07-22)
 
 - Signing/capabilities, universal links, APNs/Firebase, privacy manifest, permissions, icon/splash, versioning, release build, dan store metadata.
 - Verifikasi clean install, upgrade, background push, dan deep link pada perangkat nyata.
 
-## FT-MOB-807 — End-to-End Parity Acceptance
+## FT-MOB-807 — End-to-End Parity Acceptance 🟡 Device/Role Acceptance Pending (2026-07-22)
 
 - Jalankan setiap acceptance flow web dan mobile dengan role owner, admin, member, outsider, dan super-admin bila in scope.
 - Buat parity matrix final yang menunjuk screen Flutter, endpoint API, automated test, dan known limitation.

@@ -46,3 +46,5 @@ flutter test
 flutter build apk --debug --flavor development --dart-define=APP_FLAVOR=development --dart-define=API_BASE_URL=http://10.0.2.2:8000/api/v1
 flutter build ios --simulator --debug --no-codesign --dart-define=APP_FLAVOR=development --dart-define=API_BASE_URL=http://127.0.0.1:8000/api/v1
 ```
+
+Checklist produksi dan matriks parity berada di `docs/mobile-phase-9.md`. Build distribusi wajib memakai signing/Firebase yang diinjeksi CI, domain association yang sudah dipublikasikan, dan verifikasi perangkat nyata; file rahasia tersebut tidak boleh ditambahkan ke repository.

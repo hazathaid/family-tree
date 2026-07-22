@@ -111,3 +111,7 @@ Install locked dependencies, run `composer test`, `composer analyse`, `composer 
 - Firebase native configuration is absent and must remain environment-specific.
 - Existing prototype stores the token in memory and has ad-hoc navigation; it is not the target architecture.
 - Tree exports execute synchronously despite historical docs recommending queues; preserve actual API until an approved change.
+
+## Phase 9 release audit
+
+Android production denies clear-text traffic, declares only required runtime capabilities, and uses a private notification channel. iOS declares APNs/universal-link entitlements, privacy manifest, and permission purpose strings. `docs/mobile-phase-9.md` is the release evidence and parity matrix; it also records external device/signing/Firebase gates that must not be represented as passed by repository configuration alone.
