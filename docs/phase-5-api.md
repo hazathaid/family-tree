@@ -1,6 +1,6 @@
 # Phase 5 API Documentation
 
-Phase 5 covers FT-501 through FT-508. This document is an implementation blueprint; the endpoints are not implemented yet.
+Status: implemented and aligned by FT-API-301 / mobile Phase 5 on 2026-07-22.
 
 Base URL:
 
@@ -23,7 +23,7 @@ Query parameters:
 | `member_uuid` | Yes | - | Accessible family member UUID |
 | `mode` | No | `full` | `ancestor`, `descendant`, `full` |
 | `depth` | No | `5` | Integer, 1-20 |
-| `layout` | No | `vertical` | `vertical`, `horizontal`, `radial` |
+| `layout` | No | `vertical` | `vertical`, `horizontal`, `radial`, `compact` |
 
 `depth` limits the number of BFS edges from the root. For ancestor and descendant modes it represents the maximum displayed generations. Full mode also uses it as a safety boundary; clients can request another segment from a selected node.
 
@@ -48,7 +48,10 @@ Example response:
         "is_alive": true,
         "profile_photo_url": null,
         "generation": 0,
+        "distance": 0,
         "is_root": true,
+        "is_boundary": false,
+        "relationship_to_root": "Saya",
         "position": {"x": 480, "y": 80}
       }
     ],
@@ -60,6 +63,13 @@ Example response:
       }
     ],
     "viewport": {"width": 960, "height": 720},
+    "expansion": {
+      "strategy": "replace_depth",
+      "can_expand": true,
+      "next_depth": 6,
+      "can_collapse": true,
+      "previous_depth": 4
+    },
     "statistics": {
       "members": 1,
       "generations": 1,
@@ -70,7 +80,7 @@ Example response:
 }
 ```
 
-The API exposes base relationship labels only. Derived kinship labels remain the responsibility of the Relationship Engine.
+The API exposes a nullable server-derived `relationship_to_root` per node. Flutter displays it verbatim. Expansion repeats the same root/mode/layout with the indicated depth and replaces the prior graph.
 
 ## Export PNG
 
@@ -84,7 +94,7 @@ Query parameters:
 member_uuid
 mode=ancestor|descendant|full
 depth=1..20
-layout=vertical|horizontal|radial
+layout=vertical|horizontal|radial|compact
 paper_size=A4|A3|A2
 ```
 

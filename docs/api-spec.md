@@ -98,11 +98,11 @@ Islam, `†` for Christian/Catholic, and `Mendiang` otherwise.
 
 | Method/path | Query | Response |
 |---|---|---|
-| GET `/tree/generate` | root member UUID, mode ancestor/descendant/full, depth 1–20, layout accepted by request | Tree resource: root/mode/depth/layout/nodes/edges/viewport/statistics/cached |
+| GET `/tree/generate` | `member_uuid`; mode ancestor/descendant/full; depth 1–20; layout vertical/horizontal/radial/compact | Tree resource plus expansion metadata, boundary flags and per-node relationship-to-root |
 | GET `/tree/export/png` | root/mode/depth/layout/paper_size | `image/png` bytes with attachment disposition; 10/min |
 | GET `/tree/export/pdf` | same | `application/pdf` bytes with attachment disposition; 10/min |
 
-Binary endpoints do not use the JSON success envelope on success. Errors remain safe JSON. See API-G04 for layout/lazy expansion alignment.
+Lazy expansion uses `replace_depth`: repeat the same root/mode/layout request with `next_depth`, then atomically replace the graph. Collapse repeats with `previous_depth`. Depth remains bounded at 20. Binary successes are bytes; errors remain safe JSON.
 
 ### Articles
 
@@ -186,7 +186,7 @@ All v1 endpoints use `throttle:api`. Additional route limits are: login named li
 | API-G01 | Notification preferences plus safe session list/revoke | Closed by FT-API-101 (2026-07-22) |
 | API-G02 | Family logo, cover, privacy/settings audit against web | Closed by FT-API-202 (2026-07-22): asset upload added; privacy remains membership-only and notification preferences remain account-scoped |
 | API-G03 | Member directory parity for gender/living/branch/sort server-side filters | Closed by FT-MOB-301 (2026-07-22) |
-| API-G04 | Tree layouts differ (web request omits radial), no lazy expansion or stable relationship-to-root label | FT-API-301 |
+| API-G04 | Tree layout, expansion and relationship-to-root alignment | Closed by FT-API-301 (2026-07-22) |
 | API-G05 | Generation-aware search/report contract needs alignment and bounded output | FT-API-401 |
 | API-G06 | Rich mobile dashboard content exceeds current summary (activity/birthdays/events/notification/facts/recent members contract) | Closed by FT-API-201 (2026-07-22) |
 | API-G07 | No explicit active-family REST selection is needed for stateless mobile, but onboarding create/select semantics must be defined client-side from memberships | FT-MOB-103; add API only if server state is approved |

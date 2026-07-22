@@ -20,7 +20,7 @@ No recursive traversal or derived relationship rows are used.
 
 ## Nodes, edges and labels
 
-Nodes include public identity/display fields needed by the tree, generation/distance, living state and photo where available. Deceased nodes remain present and UI adds a memorial marker. Edges include source UUID, target UUID and stored/normalized relationship. A relationship-to-root label for every node is not currently guaranteed by the generate response; FT-API-301 must define it before mobile relies on it.
+Nodes include public identity/display fields, generation/distance, living state, root/boundary flags, photo and nullable `relationship_to_root`. Labels use the authoritative PHP resolver over the already traversed path, avoiding a second BFS per node. Deceased nodes remain present with a memorial marker. Edges use member UUIDs and normalized base relationships.
 
 Web rendering and PNG/PDF exports use the server-derived memorial prefix:
 `Alm.`/`Almh.` for Islam, `†` for Christian/Catholic, and `Mendiang` for other
@@ -35,12 +35,7 @@ Web controls currently expose the supported layouts through the tree viewer. API
 
 ## Lazy expansion
 
-Current endpoint generates a bounded tree by depth in one request; there is no explicit slice cursor/expand contract. Mobile must not simulate expansion by downloading the whole family. FT-API-301 must specify either:
-
-1. repeat generation with the same root and larger bounded depth, or
-2. a new node expansion endpoint returning a deduplicatable slice (`nodes`, `edges`, boundary/has_more).
-
-Until then, mobile uses only documented bounded generation and replaces the graph on parameter changes.
+FT-API-301 selects repeat-and-replace expansion. Responses include `strategy=replace_depth`, expand/collapse flags and next/previous depth. Mobile repeats the same root/mode/layout at the indicated depth and atomically replaces the graph; it never merges unbounded slices. Depth 20 remains the hard maximum.
 
 ## Cache and invalidation
 
@@ -68,7 +63,6 @@ Tests cover each mode, depth boundaries, root isolation, parent/child/spouse gra
 
 ## Known gaps
 
-- No explicit lazy slice/expand protocol.
-- Relationship-to-root label is not a stable per-node contract.
-- Layout validation may differ between generate/export/web paths and must be reconciled by FT-API-301.
+- Broad graphs can still produce large bounded-depth responses; response-size profiling remains required.
+- Ambiguous paths may have a null relationship label and clients display a neutral fallback.
 - Export is synchronous and not production-grade high-resolution headless rendering.

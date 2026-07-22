@@ -76,3 +76,7 @@ FT-API-201 and FT-API-202 require no migration. Dashboard sections are bounded p
 ## Phase 4 mobile parity note
 
 Phase 4 adds no migration. Member directory filtering uses existing family, branch, gender, living-status, name and timestamp fields. Only the five existing base relationship values are written; resolver results remain derived/cache data. Public contracts use member UUIDs rather than internal IDs.
+
+## Phase 5 mobile parity note
+
+Phase 5 adds no migration. Layout-independent graphs remain in `member_tree_cache` by root/mode/depth. Layout, boundary/expansion metadata and relationship-to-root labels are derived presentation and never new graph edges.

@@ -84,9 +84,15 @@ Install locked dependencies, run `composer test`, `composer analyse`, `composer 
 - The adaptive directory, detail, form/photo/delete, five-type relationship manager, and resolver remain scoped to the active family and Laravel authorization.
 - Flutter displays derived kinship/path verbatim; Laravel retains graph traversal, cycle checks, inverse spouses, logging, and cache invalidation.
 
+## Phase 5 implementation
+
+- `TreePresentationService` aligns all four layouts, expansion metadata and server relationship labels for generate/export.
+- Flutter uses a tree repository, repeat-and-replace depth expansion, a 250-node render budget, pan/zoom/focus controls and a semantic list alternative.
+- Authenticated PNG/PDF byte streams support progress/cancellation; PNG preview and native sharing use `share_plus` without broad shared-storage writes.
+
 ## Current gaps
 
-- Phase 4 member and relationship parity is implemented; interactive tree alignment remains Phase 5 work.
+- Phase 5 interactive tree/export parity is implemented; family content remains Phase 6 work.
 - No refresh-token API; expiry means re-login.
 - Firebase native configuration is absent and must remain environment-specific.
 - Existing prototype stores the token in memory and has ad-hoc navigation; it is not the target architecture.

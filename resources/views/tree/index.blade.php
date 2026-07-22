@@ -48,6 +48,7 @@
                     <select id="tree-layout" name="layout" class="form-select">
                         <option value="vertical" @selected($filters['layout'] === 'vertical')>Vertikal</option>
                         <option value="horizontal" @selected($filters['layout'] === 'horizontal')>Horizontal</option>
+                        <option value="radial" @selected($filters['layout'] === 'radial')>Radial</option>
                         <option value="compact" @selected($filters['layout'] === 'compact')>Ringkas</option>
                     </select>
                 </div>

@@ -75,6 +75,8 @@ Phase 3 realizes the dashboard as an adaptive 2-column phone / 3-column tablet s
 
 Phase 4 uses member cards on phones and a horizontally safe data table on tablets, with server-side search/filter/sort and explicit pagination. Deceased members use an icon and text memorial marker. Detail groups identity, branch, biography, base relationships and related-content empty states. Mutation controls expose only the five base relationship types; the resolver displays the server label/path.
 
+Phase 5 adds root/mode/depth/layout controls, pan/zoom/center, search/focus, bounded expand/collapse, living filter, node detail sheet and PNG/PDF export. At most 250 node widgets are active. A semantic list exposes name, server relationship, generation and memorial state independently of canvas gestures.
+
 ## Accessibility
 
 Every image has contextual semantics or is excluded if decorative. Icon-only controls have labels/tooltips. Traversal order follows visual order. Dynamic status changes use polite announcements. Contrast targets WCAG AA (4.5:1 normal, 3:1 large/UI). Tree nodes expose name, relationship to root, living/deceased status and expand action independent of canvas gestures. Pinch/drag has button alternatives for zoom/reset and keyboard/focus alternatives on supported devices.

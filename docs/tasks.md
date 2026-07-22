@@ -314,7 +314,9 @@ Semua task fase ini adalah blocker. Jangan memulai implementasi parity sebelum F
 
 # Phase 5 — Interactive Family Tree
 
-## FT-API-301 — Tree Contract Alignment
+**Status fase:** ✅ Complete and verified (2026-07-22). FT-API-301 dan FT-MOB-401 sampai FT-MOB-403 selesai; backend/mobile tests, PHPStan, Pint, Dart format/analyze, dan production asset build lulus. Phase 6 belum dikerjakan.
+
+## FT-API-301 — Tree Contract Alignment ✅ Complete (2026-07-22)
 
 **Required before:** FT-MOB-401
 
@@ -322,7 +324,7 @@ Semua task fase ini adalah blocker. Jangan memulai implementasi parity sebelum F
 - Dokumentasikan lazy slice/expand contract dan relationship-to-root label.
 - Pastikan UUID digunakan secara konsisten pada relationship-engine request.
 
-## FT-MOB-401 — Tree Viewer Parity
+## FT-MOB-401 — Tree Viewer Parity ✅ Complete (2026-07-22)
 
 **Depends on:** FT-API-301
 
@@ -330,13 +332,13 @@ Semua task fase ini adalah blocker. Jangan memulai implementasi parity sebelum F
 - Tambahkan pan, zoom, center, search/focus, expand/collapse, filter, dan detail sheet.
 - Render graph dari API; jangan melakukan traversal domain di Flutter.
 
-## FT-MOB-402 — Large Tree Performance and Accessibility
+## FT-MOB-402 — Large Tree Performance and Accessibility ✅ Complete (2026-07-22)
 
 - Lazy-load slice, batasi object/widget aktif, dan ukur jank/memory.
 - Target generation tetap kurang dari lima detik; UI harus tetap responsif untuk segment tree besar.
 - Sediakan semantic alternative berupa daftar anggota/relationship untuk graph visual.
 
-## FT-MOB-403 — Tree PNG/PDF Export
+## FT-MOB-403 — Tree PNG/PDF Export ✅ Complete (2026-07-22)
 
 - Download/preview/share PNG dan PDF dari endpoint binary.
 - Tangani permission, progress, cancellation, expired authentication, rate limit, dan storage failure.

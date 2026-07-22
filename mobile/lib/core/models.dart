@@ -384,12 +384,26 @@ class TreeNode {
       {required this.uuid,
       required this.name,
       required this.x,
-      required this.y});
+      required this.y,
+      required this.generation,
+      required this.distance,
+      required this.isAlive,
+      required this.isRoot,
+      required this.isBoundary,
+      this.relationshipToRoot,
+      this.photoUrl});
 
   final String uuid;
   final String name;
   final double x;
   final double y;
+  final int generation;
+  final int distance;
+  final bool isAlive;
+  final bool isRoot;
+  final bool isBoundary;
+  final String? relationshipToRoot;
+  final String? photoUrl;
 
   factory TreeNode.fromJson(Map<String, dynamic> json) {
     final position = json['position'] as Map<String, dynamic>? ?? const {};
@@ -398,34 +412,78 @@ class TreeNode {
       name: (json['full_name'] ?? json['name'] ?? '') as String,
       x: (position['x'] as num? ?? 0).toDouble(),
       y: (position['y'] as num? ?? 0).toDouble(),
+      generation: json['generation'] as int? ?? 0,
+      distance: json['distance'] as int? ?? 0,
+      isAlive: json['is_alive'] as bool? ?? true,
+      isRoot: json['is_root'] as bool? ?? false,
+      isBoundary: json['is_boundary'] as bool? ?? false,
+      relationshipToRoot: json['relationship_to_root'] as String?,
+      photoUrl: json['profile_photo_url'] as String?,
     );
   }
 }
 
 class TreeEdge {
-  const TreeEdge({required this.sourceUuid, required this.targetUuid});
+  const TreeEdge(
+      {required this.sourceUuid,
+      required this.targetUuid,
+      required this.relationship});
 
   final String sourceUuid;
   final String targetUuid;
+  final String relationship;
 
   factory TreeEdge.fromJson(Map<String, dynamic> json) => TreeEdge(
         sourceUuid: (json['source_uuid'] ?? json['source']) as String,
         targetUuid: (json['target_uuid'] ?? json['target']) as String,
+        relationship: json['relationship'] as String? ?? '',
       );
 }
 
 class FamilyTree {
-  const FamilyTree({required this.nodes, required this.edges});
+  const FamilyTree(
+      {required this.rootUuid,
+      required this.mode,
+      required this.depth,
+      required this.layout,
+      required this.nodes,
+      required this.edges,
+      required this.viewportWidth,
+      required this.viewportHeight,
+      required this.canExpand,
+      required this.canCollapse,
+      required this.cached});
 
+  final String rootUuid;
+  final String mode;
+  final int depth;
+  final String layout;
   final List<TreeNode> nodes;
   final List<TreeEdge> edges;
+  final double viewportWidth;
+  final double viewportHeight;
+  final bool canExpand;
+  final bool canCollapse;
+  final bool cached;
 
-  factory FamilyTree.fromJson(Map<String, dynamic> json) => FamilyTree(
+  factory FamilyTree.fromJson(Map<String, dynamic> json) {
+    final viewport = json['viewport'] as Map<String, dynamic>? ?? const {};
+    final expansion = json['expansion'] as Map<String, dynamic>? ?? const {};
+    return FamilyTree(
+        rootUuid: json['root_member_uuid'] as String,
+        mode: json['mode'] as String,
+        depth: json['depth'] as int,
+        layout: json['layout'] as String,
         nodes: (json['nodes'] as List<dynamic>? ?? const [])
             .map((item) => TreeNode.fromJson(item as Map<String, dynamic>))
             .toList(),
         edges: (json['edges'] as List<dynamic>? ?? const [])
             .map((item) => TreeEdge.fromJson(item as Map<String, dynamic>))
             .toList(),
-      );
+        viewportWidth: (viewport['width'] as num? ?? 960).toDouble(),
+        viewportHeight: (viewport['height'] as num? ?? 720).toDouble(),
+        canExpand: expansion['can_expand'] as bool? ?? false,
+        canCollapse: expansion['can_collapse'] as bool? ?? false,
+        cached: json['cached'] as bool? ?? false);
+  }
 }

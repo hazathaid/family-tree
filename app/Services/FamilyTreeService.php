@@ -25,7 +25,7 @@ class FamilyTreeService
         $nodes = $edges = [];
         while (! $queue->isEmpty()) {
             [$id, $distance, $generation] = $queue->dequeue();
-            $nodes[$id] = [...$graph['nodes'][$id], 'generation' => $generation, 'is_root' => $id === $root->id];
+            $nodes[$id] = [...$graph['nodes'][$id], 'distance' => $distance, 'generation' => $generation, 'is_root' => $id === $root->id];
             if ($distance >= $depth) {
                 continue;
             }

@@ -51,6 +51,20 @@ class RelationshipResolverService
     }
 
     /**
+     * Resolve a relationship name from an already traversed server-side path.
+     *
+     * @param  array<int, array<string, mixed>>  $path
+     */
+    public function nameFromPath(FamilyMember $source, FamilyMember $target, array $path): ?string
+    {
+        if ($source->id === $target->id) {
+            return 'Saya';
+        }
+
+        return $path === [] ? null : $this->relationshipName($source, $target, $path);
+    }
+
+    /**
      * @param  array<int, array<string, mixed>>  $path
      */
     private function relationshipName(FamilyMember $source, FamilyMember $target, array $path): ?string
@@ -65,12 +79,36 @@ class RelationshipResolverService
             return 'Ibu';
         }
 
+        if ($sequence === ['child']) {
+            return match ($target->gender) {
+                'male' => 'Anak Laki-Laki',
+                'female' => 'Anak Perempuan',
+                default => 'Anak',
+            };
+        }
+
+        if ($sequence === ['spouse']) {
+            return match ($target->gender) {
+                'male' => 'Suami',
+                'female' => 'Istri',
+                default => 'Pasangan',
+            };
+        }
+
         if ($this->isParentSequence($sequence, 2)) {
             return $target->gender === 'female' ? 'Nenek' : 'Kakek';
         }
 
         if ($this->isParentSequence($sequence, 3)) {
             return 'Buyut';
+        }
+
+        if ($this->isChildSequence($sequence, 2)) {
+            return match ($target->gender) {
+                'male' => 'Cucu Laki-Laki',
+                'female' => 'Cucu Perempuan',
+                default => 'Cucu',
+            };
         }
 
         if ($this->isChildSequence($sequence, 3)) {

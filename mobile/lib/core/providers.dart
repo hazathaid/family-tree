@@ -10,6 +10,8 @@ import 'storage/scoped_cache.dart';
 import '../features/account/data/api_account_repository.dart';
 import '../features/members/data/api_member_repository.dart';
 import '../features/members/domain/member_repository.dart';
+import '../features/tree/data/api_tree_repository.dart';
+import '../features/tree/domain/tree_repository.dart';
 
 final apiClientProvider =
     Provider<ApiClient>((ref) => throw UnimplementedError());
@@ -29,6 +31,8 @@ final accountRepositoryProvider =
     Provider((ref) => ApiAccountRepository(ref.watch(apiClientProvider)));
 final memberRepositoryProvider = Provider<MemberRepository>(
     (ref) => ApiMemberRepository(ref.watch(apiClientProvider)));
+final treeRepositoryProvider = Provider<TreeRepository>(
+    (ref) => ApiTreeRepository(ref.watch(apiClientProvider)));
 final currentUserProvider = StateProvider<User?>((ref) => null);
 
 final currentFamilyProvider = StateProvider<Family?>((ref) => null);
@@ -65,5 +69,7 @@ final treeProvider = FutureProvider<FamilyTree>((ref) {
     throw const ApiException(
         AppErrorType.validation, 'Pilih anggota sebagai pusat pohon.');
   }
-  return ref.watch(familyRepositoryProvider).tree(memberUuid);
+  return ref
+      .watch(treeRepositoryProvider)
+      .generate(memberUuid, mode: 'full', depth: 3, layout: 'vertical');
 });

@@ -40,6 +40,9 @@ FT-MOB-301 closes the directory gap with required family UUID scope and bounded 
 - Generation uses iterative BFS and visited sets, not unbounded recursion.
 - Layout is presentation over server graph; exports use the same authoritative generated tree.
 - Deceased members remain visible and receive a memorial indicator.
+- Generate and export accept vertical, horizontal, radial and compact layouts.
+- Expansion replaces the graph at a new bounded depth; maximum depth remains 20.
+- Laravel produces relationship-to-root from the traversed server path.
 
 Sources: `FamilyTreeService`, `TreeGraphBuilderService`, `TreeLayoutService`, tree requests/controllers.
 

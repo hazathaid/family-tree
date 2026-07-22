@@ -1,6 +1,6 @@
 # Phase 5 Database Documentation
 
-Phase 5 adds only the FT-508 cache table. Family tree source data remains `family_members` and `member_relationships`.
+The cache table already exists; mobile parity/FT-API-301 adds no migration. Family tree source data remains `family_members` and `member_relationships`.
 
 ## `member_tree_cache`
 
@@ -26,7 +26,7 @@ member_id, mode, depth UNIQUE
 family_id, expires_at
 ```
 
-The initial cache stores layout-independent tree data. Layout coordinates are calculated for each request so one cached graph can serve vertical, horizontal, and radial rendering.
+The cache stores layout-independent tree data. Layout, relationship labels and expansion metadata are calculated after retrieval so one cached graph serves vertical, horizontal, radial and compact rendering.
 
 ## Cache Lifecycle
 

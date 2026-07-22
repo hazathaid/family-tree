@@ -1,6 +1,6 @@
 # Phase 5 Service Documentation
 
-Phase 5 covers FT-501 through FT-508 and follows Repository Pattern, Service Layer Pattern, Form Requests, API Resources, and thin controllers. This document defines the intended implementation order and responsibilities.
+Status: implemented; FT-API-301 alignment and Flutter Phase 5 completed 2026-07-22.
 
 ## FT-501 Graph Builder
 
@@ -59,12 +59,21 @@ Transforms layout-independent tree data into responsive coordinates:
 * `vertical`: generation on the Y axis.
 * `horizontal`: generation on the X axis.
 * `radial`: root at the center and generations on expanding rings.
+* `compact`: reduced vertical and horizontal spacing.
 
 Coordinates are deterministic. Node spacing and viewport size grow from the node count, with minimum dimensions suitable for mobile. Layout calculation does not change graph relationships.
 
 ### `TreeResource`
 
 Returns node display data, base edges, positions, viewport, root marker, memorial state, and statistics. Profile paths are converted to public URLs by the resource layer.
+
+### `TreePresentationService`
+
+Combines cached BFS output with one of four layouts, boundary/replace-depth metadata and relationship-to-root labels derived from each already traversed path. It is shared by JSON generation and PNG/PDF export so controllers remain thin and no per-node BFS is repeated.
+
+## Flutter tree feature
+
+`TreeRepository` isolates generate and binary export calls. The viewer caps active node widgets at 250, supports root/mode/depth/layout controls, pan/zoom/focus, semantic list, node detail, filters and atomic depth replacement. Binary exports stream with progress/cancellation and use native sharing.
 
 ## FT-506 PNG Export
 
@@ -131,3 +140,5 @@ Feature tests:
 * Cache reuse and invalidation after member or relationship changes.
 
 Performance tests must cover representative 1,000-, 10,000-, and 100,000-node graphs against the targets in `tree-generation-engine.md`.
+
+Current automated verification includes the documented bounded interactive-tree fixture and asserts completion below five seconds; the Phase 5 run completed successfully. Larger 1,000/10,000/100,000 production-like profiling remains part of the Phase 9 performance program and does not change the bounded mobile render budget.

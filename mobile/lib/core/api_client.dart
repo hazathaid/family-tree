@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 
@@ -61,6 +62,26 @@ class ApiClient {
 
   Future<dynamic> delete(String path, {dynamic data}) =>
       _request(() => _dio.delete<dynamic>(path, data: data));
+
+  Future<Uint8List> download(String path,
+      {Map<String, dynamic>? query,
+      CancelToken? cancelToken,
+      ProgressCallback? onReceiveProgress}) async {
+    try {
+      final response = await _dio.get<List<int>>(path,
+          queryParameters: query,
+          cancelToken: cancelToken,
+          onReceiveProgress: onReceiveProgress,
+          options: Options(responseType: ResponseType.bytes));
+      final bytes = response.data;
+      if (bytes == null || bytes.isEmpty) {
+        throw const AppError(AppErrorType.server, 'File ekspor kosong.');
+      }
+      return Uint8List.fromList(bytes);
+    } on DioException catch (error) {
+      throw await _mapDio(error);
+    }
+  }
 
   Future<void> saveToken(String token) => _tokenStore.write(token);
   Future<void> clearToken() => _tokenStore.clear();

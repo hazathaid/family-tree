@@ -13,7 +13,7 @@ class TreeViewerRequest extends FormRequest
             'root' => ['nullable', 'uuid'],
             'mode' => ['nullable', Rule::in(['ancestor', 'descendant', 'full'])],
             'depth' => ['nullable', 'integer', 'between:1,20'],
-            'layout' => ['nullable', Rule::in(['vertical', 'horizontal', 'compact'])],
+            'layout' => ['nullable', Rule::in(['vertical', 'horizontal', 'radial', 'compact'])],
             'member_search' => ['nullable', 'string', 'max:100'],
             'living_only' => ['nullable', Rule::in(['0', '1'])],
             'show_photos' => ['nullable', Rule::in(['0', '1'])],

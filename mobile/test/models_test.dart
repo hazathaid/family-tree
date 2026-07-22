@@ -37,11 +37,23 @@ void main() {
 
   test('tree response maps nodes and edges', () {
     final tree = FamilyTree.fromJson({
+      'root_member_uuid': 'root',
+      'mode': 'full',
+      'depth': 3,
+      'layout': 'compact',
+      'viewport': {'width': 960, 'height': 720},
+      'expansion': {'can_expand': true, 'can_collapse': true},
       'nodes': [
         {
           'uuid': 'root',
           'name': 'Ahmad',
-          'position': {'x': 10, 'y': 20}
+          'position': {'x': 10, 'y': 20},
+          'relationship_to_root': 'Saya',
+          'is_root': true,
+          'is_boundary': false,
+          'distance': 0,
+          'generation': 0,
+          'is_alive': true,
         }
       ],
       'edges': [
@@ -49,6 +61,8 @@ void main() {
       ],
     });
     expect(tree.nodes.single.name, 'Ahmad');
+    expect(tree.nodes.single.relationshipToRoot, 'Saya');
+    expect(tree.canExpand, isTrue);
     expect(tree.edges.single.targetUuid, 'child');
   });
 
