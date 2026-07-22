@@ -427,21 +427,23 @@ Semua task fase ini adalah blocker. Jangan memulai implementasi parity sebelum F
 
 Fase ini hanya dikerjakan jika FT-DOC-001 menetapkan console super-admin sebagai bagian dari mobile parity.
 
-## FT-MOB-701 — Admin Guard and Dashboard
+**Status fase:** ⏭️ Not applicable (2026-07-22). FT-DOC-001 menetapkan console super-admin tetap web-only. Sesuai `prd.md`, `api-spec.md`, dan `ui-spec.md`, mobile tidak menyediakan navigasi/screen super-admin dan tidak memanggil `/api/v1/admin/*`. Phase 9 belum dikerjakan.
+
+## FT-MOB-701 — Admin Guard and Dashboard ⏭️ Not Applicable (2026-07-22)
 
 - Super-admin-only navigation dan route guard.
 - Non-admin tidak boleh melihat entry point; server tetap melakukan authorization final.
 
-## FT-MOB-702 — User Administration
+## FT-MOB-702 — User Administration ⏭️ Not Applicable (2026-07-22)
 
 - Paginated user list/detail, status filter, suspend/activate, self-suspension prevention, dan confirmation.
 
-## FT-MOB-703 — Family Moderation
+## FT-MOB-703 — Family Moderation ⏭️ Not Applicable (2026-07-22)
 
 - Family review dan targeted article/photo/event removal dengan explicit confirmation.
 - Tampilkan audit reference setelah aksi berhasil.
 
-## FT-MOB-704 — Audit Logs and CSV Export
+## FT-MOB-704 — Audit Logs and CSV Export ⏭️ Not Applicable (2026-07-22)
 
 - Filterable audit log list dan secure CSV download/share.
 - Batasi render/list sesuai pagination dan jangan log payload sensitif di perangkat.

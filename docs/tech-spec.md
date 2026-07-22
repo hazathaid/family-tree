@@ -106,7 +106,7 @@ Install locked dependencies, run `composer test`, `composer analyse`, `composer 
 
 ## Current gaps
 
-- Phase 7 discovery, reports, and gamification parity is implemented; administration remains intentionally web-only and Phase 8 is not implemented.
+- Phase 7 discovery, reports, and gamification parity is implemented. Phase 8 is closed as not applicable because administration remains intentionally web-only; Flutter has no super-admin navigation/screens and must not call `/api/v1/admin/*`.
 - No refresh-token API; expiry means re-login.
 - Firebase native configuration is absent and must remain environment-specific.
 - Existing prototype stores the token in memory and has ad-hoc navigation; it is not the target architecture.
