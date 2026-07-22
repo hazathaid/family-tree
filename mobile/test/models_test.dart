@@ -26,4 +26,39 @@ void main() {
     expect(tree.nodes.single.name, 'Ahmad');
     expect(tree.edges.single.targetUuid, 'child');
   });
+
+  test('user exposes verification and safe account fields', () {
+    final user = User.fromJson({
+      'uuid': 'user-uuid',
+      'name': 'Siti',
+      'email': 'siti@example.com',
+      'phone': '0812',
+      'email_verified_at': '2026-07-22T00:00:00Z',
+      'status': 'active',
+    });
+    expect(user.isVerified, isTrue);
+    expect(user.phone, '0812');
+  });
+
+  test('notification preferences round-trip API fields', () {
+    final value = NotificationPreferences.fromJson({
+      'email': false,
+      'push': true,
+      'event_reminders': false,
+      'family_updates': true,
+    });
+    expect(value.toJson()['event_reminders'], isFalse);
+    expect(value.push, isTrue);
+  });
+
+  test('account session parser does not require sensitive details', () {
+    final session = AccountSession.fromJson({
+      'uuid': 'session-uuid',
+      'device_name': 'Pixel',
+      'is_current': true,
+      'last_active_at': '2026-07-22T00:00:00Z',
+    });
+    expect(session.deviceName, 'Pixel');
+    expect(session.isCurrent, isTrue);
+  });
 }

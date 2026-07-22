@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\V1\AccountController;
 use App\Http\Controllers\Api\V1\Admin\AuditLogController;
 use App\Http\Controllers\Api\V1\Admin\FamilyModerationController;
 use App\Http\Controllers\Api\V1\Admin\UserManagementController;
@@ -57,6 +58,10 @@ Route::prefix('v1')->middleware('throttle:api')->group(function (): void {
         Route::put('/', [ProfileController::class, 'update']);
         Route::patch('password', [ProfileController::class, 'changePassword']);
         Route::post('avatar', [ProfileController::class, 'uploadAvatar']);
+        Route::get('notification-preferences', [AccountController::class, 'preferences']);
+        Route::put('notification-preferences', [AccountController::class, 'updatePreferences']);
+        Route::get('sessions', [AccountController::class, 'sessions']);
+        Route::delete('sessions/{session}', [AccountController::class, 'revoke']);
     });
 
     Route::middleware('auth:sanctum')->group(function (): void {

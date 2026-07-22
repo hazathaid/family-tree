@@ -1,0 +1,2 @@
+<?php if($member->profile_photo_thumbnail): ?><img class="member-avatar" src="<?php echo e(Storage::url($member->profile_photo_thumbnail)); ?>" alt="Foto <?php echo e($member->full_name); ?>"><?php else: ?><div class="member-avatar member-avatar-placeholder" aria-hidden="true"><?php echo e(mb_strtoupper(mb_substr($member->full_name, 0, 1))); ?></div><?php endif; ?>
+<?php /**PATH /var/www/html/resources/views/members/partials/avatar.blade.php ENDPATH**/ ?>

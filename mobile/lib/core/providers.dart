@@ -7,6 +7,7 @@ import 'errors/app_error.dart';
 import 'models.dart';
 import 'repositories.dart';
 import 'storage/scoped_cache.dart';
+import '../features/account/data/api_account_repository.dart';
 
 final apiClientProvider =
     Provider<ApiClient>((ref) => throw UnimplementedError());
@@ -22,12 +23,19 @@ final familyRepositoryProvider =
     Provider((ref) => ApiFamilyRepository(ref.watch(apiClientProvider)));
 final notificationRepositoryProvider =
     Provider((ref) => ApiNotificationRepository(ref.watch(apiClientProvider)));
+final accountRepositoryProvider =
+    Provider((ref) => ApiAccountRepository(ref.watch(apiClientProvider)));
+final currentUserProvider = StateProvider<User?>((ref) => null);
 
 final currentFamilyProvider = StateProvider<Family?>((ref) => null);
 final currentMemberUuidProvider = StateProvider<String?>((ref) => null);
 
 final familiesProvider = FutureProvider<List<Family>>(
     (ref) => ref.watch(familyRepositoryProvider).all());
+final accountSessionsProvider = FutureProvider<List<AccountSession>>(
+    (ref) => ref.watch(accountRepositoryProvider).sessions());
+final notificationPreferencesProvider = FutureProvider<NotificationPreferences>(
+    (ref) => ref.watch(accountRepositoryProvider).preferences());
 
 final dashboardProvider = FutureProvider<DashboardSummary>((ref) {
   final family = ref.watch(currentFamilyProvider);

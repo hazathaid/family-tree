@@ -66,7 +66,8 @@ Sources: upload Form Requests, `MemberPhotoService`, `FamilyMemberService`, medi
 - Notifications belong to one user; only that user may list/read them.
 - Read sets `is_read` and `read_at`; read-all is scoped to the authenticated user.
 - Push device token belongs to the authenticated user, platform is Android/iOS, and unregister/deactivate must not affect another user.
-- User notification preferences are stored as JSON and currently have a web update flow but no REST endpoint.
+- User notification preferences are stored as normalized JSON and are available through owner-only account REST endpoints.
+- Mobile device sessions are Sanctum personal access tokens. Lists expose only public UUID, device name, current flag, and timestamps; revoke is restricted to the authenticated user's token.
 - Payloads use safe target metadata and must not expose private family data on a locked screen.
 
 Sources: `NotificationService`, `PushDeviceService`, profile web service/controller.
@@ -93,5 +94,5 @@ Sources: `NotificationService`, `PushDeviceService`, profile web service/control
 | BR-I02 | Historical minimum parent age gap/gender enforcement is not evidenced consistently in current `RelationshipService`. | Add only with product approval, migration/request/service tests. |
 | BR-I03 | Duplicate detection/merge and member documents are described historically but not implemented. | Non-goal until backlog tasks exist. |
 | BR-I04 | Privacy taxonomy in old docs may not exactly match actual family request enum/default. | API actual values govern; FT-API-202 must reconcile. |
-| BR-I05 | Account session list/revoke and REST preferences are absent. | FT-API-101. |
+| BR-I05 | Account session list/revoke and REST preferences were absent. | Closed by FT-API-101 (2026-07-22). |
 | BR-I06 | Not every critical action currently has both activity and audit records. | Security hardening task must inventory coverage. |

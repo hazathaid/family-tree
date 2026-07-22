@@ -47,11 +47,14 @@ Legend: Public means no bearer token; all others require authentication and appl
 | Method/path | Request | Response |
 |---|---|---|
 | GET `/profile` | none | User resource |
-| PUT `/profile` | name/email/phone fields accepted by `UpdateProfileRequest` | updated User |
+| PUT `/profile` | name/email/phone; `current_password` required when email changes | updated User |
 | PATCH `/profile/password` | current password, password + confirmation | null |
 | POST `/profile/avatar` | multipart `avatar`, image jpg/jpeg/png/webp <=5 MB | updated User |
+| GET/PUT `/profile/notification-preferences` | PUT requires boolean `email`, `push`, `event_reminders`, `family_updates` | normalized preferences |
+| GET `/profile/sessions` | none | current user's bounded Sanctum device sessions; safe UUID/device/time/current fields only |
+| DELETE `/profile/sessions/{session_uuid}` | public session UUID | `{revoked_current}`; only the authenticated user's token |
 
-There is no REST notification-preference or session list/revoke endpoint; see API-G01/FT-API-101.
+Session responses never expose database IDs, token values, IP addresses, or full request/session payloads. Revoking the active token requires immediate client logout.
 
 ### Families, roles, branches and dashboard
 
@@ -174,7 +177,7 @@ All v1 endpoints use `throttle:api`. Additional route limits are: login named li
 
 | ID | Missing/misaligned REST capability | Owning task |
 |---|---|---|
-| API-G01 | Notification preferences plus safe session list/revoke | FT-API-101 |
+| API-G01 | Notification preferences plus safe session list/revoke | Closed by FT-API-101 (2026-07-22) |
 | API-G02 | Family logo, cover, privacy/settings audit against web | FT-API-202 |
 | API-G03 | Member directory parity for gender/living/branch/sort server-side filters | Must be closed before/within FT-MOB-301 via approved API work |
 | API-G04 | Tree layouts differ (web request omits radial), no lazy expansion or stable relationship-to-root label | FT-API-301 |

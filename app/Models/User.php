@@ -23,6 +23,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @property Carbon|null $email_verified_at
  * @property Carbon|null $last_login_at
  * @property string $status
+ * @property array<string, bool>|null $notification_preferences
  */
 class User extends Authenticatable implements MustVerifyEmail
 {

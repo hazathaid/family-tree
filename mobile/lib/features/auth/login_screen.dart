@@ -1,87 +1,109 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../core/errors/app_error.dart';
 import '../../core/providers.dart';
-import '../../core/push_notification_service.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
-  const LoginScreen({required this.onLoggedIn, super.key});
-  final VoidCallback onLoggedIn;
-
+  const LoginScreen({super.key});
   @override
   ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
-  final _email = TextEditingController();
-  final _password = TextEditingController();
-  bool _loading = false;
+  final email = TextEditingController();
+  final password = TextEditingController();
+  bool loading = false;
+  bool obscure = true;
+  String? emailError;
 
-  Future<void> _login() async {
-    setState(() => _loading = true);
+  Future<void> submit() async {
+    setState(() {
+      loading = true;
+      emailError = null;
+    });
     try {
-      await ref
+      final user = await ref
           .read(authRepositoryProvider)
-          .login(_email.text.trim(), _password.text);
-      await PushNotificationService(
-        ref.read(notificationRepositoryProvider),
-        FirebaseMessaging.instance,
-      ).initialize();
-      widget.onLoggedIn();
-    } catch (error) {
+          .login(email.text.trim(), password.text);
+      ref.read(currentUserProvider.notifier).state = user;
+      final families = await ref.read(familyRepositoryProvider).all();
+      ref.read(sessionControllerProvider).resolveUser(
+          uuid: user.uuid,
+          verified: user.isVerified,
+          familyCount: families.length);
+      final activeUuid = ref.read(sessionControllerProvider).activeFamilyUuid;
+      for (final family in families) {
+        if (family.uuid == activeUuid) {
+          ref.read(currentFamilyProvider.notifier).state = family;
+        }
+      }
+    } on AppError catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('$error')));
+        setState(() =>
+            emailError = error.fieldErrors['email']?.first ?? error.message);
       }
     } finally {
-      if (mounted) {
-        setState(() => _loading = false);
-      }
+      if (mounted) setState(() => loading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        body: SafeArea(
+      body: SafeArea(
           child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 420),
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const Icon(Icons.account_tree,
-                          size: 72, color: Color(0xff1e88e5)),
-                      const SizedBox(height: 16),
-                      Text('Family Tree Indonesia',
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.headlineSmall),
-                      const SizedBox(height: 32),
-                      TextField(
-                          controller: _email,
-                          keyboardType: TextInputType.emailAddress,
-                          autofillHints: const [AutofillHints.email],
-                          textInputAction: TextInputAction.next,
-                          decoration:
-                              const InputDecoration(labelText: 'Email')),
-                      const SizedBox(height: 12),
-                      TextField(
-                          controller: _password,
-                          obscureText: true,
-                          autofillHints: const [AutofillHints.password],
-                          onSubmitted: (_) => _loading ? null : _login(),
-                          decoration:
-                              const InputDecoration(labelText: 'Password')),
-                      const SizedBox(height: 24),
-                      FilledButton(
-                          onPressed: _loading ? null : _login,
-                          child: Text(_loading ? 'Memuat…' : 'Masuk')),
-                    ]),
-              ),
-            ),
-          ),
-        ),
-      );
+              child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(24),
+                  child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 420),
+                      child: AutofillGroup(
+                          child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                            const Icon(Icons.account_tree,
+                                size: 72, color: Color(0xff1e88e5)),
+                            const SizedBox(height: 16),
+                            Text('Family Tree Indonesia',
+                                textAlign: TextAlign.center,
+                                style:
+                                    Theme.of(context).textTheme.headlineSmall),
+                            const SizedBox(height: 32),
+                            TextField(
+                                controller: email,
+                                keyboardType: TextInputType.emailAddress,
+                                autofillHints: const [AutofillHints.email],
+                                textInputAction: TextInputAction.next,
+                                decoration: InputDecoration(
+                                    labelText: 'Email', errorText: emailError)),
+                            const SizedBox(height: 12),
+                            TextField(
+                                controller: password,
+                                obscureText: obscure,
+                                autofillHints: const [AutofillHints.password],
+                                onSubmitted: (_) => loading ? null : submit(),
+                                decoration: InputDecoration(
+                                    labelText: 'Kata sandi',
+                                    suffixIcon: IconButton(
+                                        tooltip: obscure
+                                            ? 'Tampilkan kata sandi'
+                                            : 'Sembunyikan kata sandi',
+                                        onPressed: () =>
+                                            setState(() => obscure = !obscure),
+                                        icon: Icon(obscure
+                                            ? Icons.visibility
+                                            : Icons.visibility_off)))),
+                            Align(
+                                alignment: Alignment.centerRight,
+                                child: TextButton(
+                                    onPressed: () =>
+                                        context.go('/forgot-password'),
+                                    child: const Text('Lupa kata sandi?'))),
+                            FilledButton(
+                                onPressed: loading ? null : submit,
+                                child: Text(loading ? 'Memuat…' : 'Masuk')),
+                            TextButton(
+                                onPressed: () => context.go('/register'),
+                                child: const Text('Buat akun baru')),
+                          ])))))));
 }

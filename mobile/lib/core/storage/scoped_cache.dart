@@ -50,6 +50,10 @@ class ScopedCache {
   }
 
   Future<void> clearAll() => _box.clear();
+  Future<void> saveActiveFamily(String userUuid, String familyUuid) =>
+      _box.put('$userUuid:account:active-family', familyUuid);
+  String? activeFamily(String userUuid) =>
+      _box.get('$userUuid:account:active-family');
   Future<void> clearScope(
       {required String userUuid, String? familyUuid}) async {
     final prefix = familyUuid == null ? '$userUuid:' : '$userUuid:$familyUuid:';

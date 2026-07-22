@@ -86,7 +86,7 @@ Product: monthly/daily active users, activated families, members documented, con
 
 ## Open product decisions
 
-- Account session-list/revoke and notification-preference REST behavior: FT-API-101.
+- Account session-list/revoke and notification-preference REST behavior was approved and delivered by FT-API-101.
 - Dashboard aggregation contract: FT-API-201.
 - Family media/privacy settings exposed to mobile: FT-API-202.
 - Tree layout/lazy expansion contract: FT-API-301.

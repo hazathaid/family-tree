@@ -10,8 +10,10 @@ use App\Models\Family;
 use App\Models\FamilyBranch;
 use App\Models\FamilyMember;
 use App\Models\MemberPhoto;
+use App\Models\PersonalAccessToken;
 use App\Models\PhotoAlbum;
 use App\Models\User;
+use App\Policies\AccountPolicy;
 use App\Policies\ArticleCategoryPolicy;
 use App\Policies\ArticleCommentPolicy;
 use App\Policies\ArticlePolicy;
@@ -21,6 +23,7 @@ use App\Policies\FamilyMemberPolicy;
 use App\Policies\FamilyPolicy;
 use App\Policies\MemberPhotoPolicy;
 use App\Policies\PhotoAlbumPolicy;
+use App\Repositories\Contracts\AccountSessionRepositoryInterface;
 use App\Repositories\Contracts\ActivityLogRepositoryInterface;
 use App\Repositories\Contracts\AdministrationRepositoryInterface;
 use App\Repositories\Contracts\ArticleCategoryRepositoryInterface;
@@ -45,6 +48,7 @@ use App\Repositories\Contracts\SearchRepositoryInterface;
 use App\Repositories\Contracts\SystemHealthRepositoryInterface;
 use App\Repositories\Contracts\TreeRepositoryInterface;
 use App\Repositories\Contracts\UserRepositoryInterface;
+use App\Repositories\Eloquent\EloquentAccountSessionRepository;
 use App\Repositories\Eloquent\EloquentActivityLogRepository;
 use App\Repositories\Eloquent\EloquentAdministrationRepository;
 use App\Repositories\Eloquent\EloquentArticleCategoryRepository;
@@ -78,12 +82,14 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Sanctum\Sanctum;
 
 class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
         $this->app->bind(ActivityLogRepositoryInterface::class, EloquentActivityLogRepository::class);
+        $this->app->bind(AccountSessionRepositoryInterface::class, EloquentAccountSessionRepository::class);
         $this->app->bind(AdministrationRepositoryInterface::class, EloquentAdministrationRepository::class);
         $this->app->bind(AuditLogRepositoryInterface::class, EloquentAuditLogRepository::class);
         $this->app->bind(UserRepositoryInterface::class, EloquentUserRepository::class);
@@ -135,6 +141,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(PhotoAlbum::class, PhotoAlbumPolicy::class);
         Gate::policy(MemberPhoto::class, MemberPhotoPolicy::class);
         Gate::policy(Event::class, EventPolicy::class);
+        Gate::policy(User::class, AccountPolicy::class);
+        Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
 
         ResetPassword::createUrlUsing(function (object $user, string $token): string {
             return route('password.reset', ['token' => $token, 'email' => $user->email]);

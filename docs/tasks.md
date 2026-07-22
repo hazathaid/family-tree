@@ -192,7 +192,7 @@ Semua task fase ini adalah blocker. Jangan memulai implementasi parity sebelum F
 
 # Phase 2 — Authentication, Onboarding, and Account
 
-## FT-MOB-101 — Authentication Parity
+## FT-MOB-101 — Authentication Parity ✅ Complete (2026-07-22)
 
 **API:** register, login, logout, me, forgot/reset password
 
@@ -200,19 +200,19 @@ Semua task fase ini adalah blocker. Jangan memulai implementasi parity sebelum F
 - Tangani suspended account, invalid credential, rate limit, offline, dan expired token.
 - Tambahkan password visibility dan validation feedback dari API.
 
-## FT-MOB-102 — Email Verification and Deep-Link Completion
+## FT-MOB-102 — Email Verification and Deep-Link Completion ✅ Complete (2026-07-22)
 
 - Tambahkan verification notice, resend cooldown, dan signed-link handling.
 - Setelah sukses, refresh user lalu teruskan onboarding/deep link tujuan.
 
-## FT-MOB-103 — Family Onboarding and Active Family
+## FT-MOB-103 — Family Onboarding and Active Family ✅ Complete (2026-07-22)
 
 - Implementasikan zero/one/multiple family flow setara web.
 - Tambahkan create family dan family selector.
 - Persist UUID keluarga aktif per user, validasi ulang ke API saat startup.
 - Account/family switch harus menginvalidasi provider dan cache scoped.
 
-## FT-API-101 — Account Preferences and Session API Gap
+## FT-API-101 — Account Preferences and Session API Gap ✅ Complete (2026-07-22)
 
 **Required before:** FT-MOB-104
 
@@ -220,7 +220,7 @@ Semua task fase ini adalah blocker. Jangan memulai implementasi parity sebelum F
 - Gunakan service, repository, Form Request, Resource, Policy, dan test.
 - Jangan mengekspos session ID, token, IP detail sensitif, atau exception internal.
 
-## FT-MOB-104 — Profile, Avatar, Preferences, and Security
+## FT-MOB-104 — Profile, Avatar, Preferences, and Security ✅ Complete (2026-07-22)
 
 **Depends on:** FT-API-101
 

@@ -74,7 +74,7 @@ Install locked dependencies, run `composer test`, `composer analyse`, `composer 
 
 ## Current gaps
 
-- Domain screens beyond existing prototypes remain assigned to Phase 2 and later tasks.
+- Phase 2 authentication, onboarding, active-family, and account screens are implemented; domain screens from Phase 3 onward remain assigned to later tasks.
 - No refresh-token API; expiry means re-login.
 - Firebase native configuration is absent and must remain environment-specific.
 - Existing prototype stores the token in memory and has ad-hoc navigation; it is not the target architecture.

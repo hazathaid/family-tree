@@ -46,10 +46,21 @@ class ApiClient {
               queryParameters: query, cancelToken: cancelToken),
           idempotent: true);
 
-  Future<dynamic> post(String path,
-          {Map<String, dynamic>? data, CancelToken? cancelToken}) =>
+  Future<dynamic> post(String path, {dynamic data, CancelToken? cancelToken}) =>
       _request(
           () => _dio.post<dynamic>(path, data: data, cancelToken: cancelToken));
+
+  Future<dynamic> put(String path, {dynamic data, CancelToken? cancelToken}) =>
+      _request(
+          () => _dio.put<dynamic>(path, data: data, cancelToken: cancelToken));
+
+  Future<dynamic> patch(String path,
+          {dynamic data, CancelToken? cancelToken}) =>
+      _request(() =>
+          _dio.patch<dynamic>(path, data: data, cancelToken: cancelToken));
+
+  Future<dynamic> delete(String path, {dynamic data}) =>
+      _request(() => _dio.delete<dynamic>(path, data: data));
 
   Future<void> saveToken(String token) => _tokenStore.write(token);
   Future<void> clearToken() => _tokenStore.clear();

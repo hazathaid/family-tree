@@ -17,6 +17,15 @@ class ApiFamilyRepository implements FamilyRepository {
   }
 
   @override
+  Future<Family> create(String name,
+          {String? description, String? originCity}) async =>
+      Family.fromJson(await api.post('/families', data: {
+        'name': name,
+        'description': description,
+        'origin_city': originCity,
+      }) as Map<String, dynamic>);
+
+  @override
   Future<DashboardSummary> dashboard(String familyUuid) async =>
       DashboardSummary.fromJson(await api.get('/families/$familyUuid/dashboard')
           as Map<String, dynamic>);

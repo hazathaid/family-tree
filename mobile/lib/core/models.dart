@@ -1,14 +1,32 @@
 class User {
-  const User({required this.uuid, required this.name, required this.email});
+  const User(
+      {required this.uuid,
+      required this.name,
+      required this.email,
+      this.phone,
+      this.avatarUrl,
+      this.emailVerifiedAt,
+      this.status = 'active'});
 
   final String uuid;
   final String name;
   final String email;
+  final String? phone;
+  final String? avatarUrl;
+  final DateTime? emailVerifiedAt;
+  final String status;
+
+  bool get isVerified => emailVerifiedAt != null;
 
   factory User.fromJson(Map<String, dynamic> json) => User(
         uuid: json['uuid'] as String,
         name: json['name'] as String,
         email: json['email'] as String,
+        phone: json['phone'] as String?,
+        avatarUrl: json['avatar_url'] as String?,
+        emailVerifiedAt:
+            DateTime.tryParse(json['email_verified_at'] as String? ?? ''),
+        status: json['status'] as String? ?? 'active',
       );
 }
 
@@ -22,6 +40,47 @@ class Family {
         uuid: json['uuid'] as String,
         name: json['name'] as String,
       );
+}
+
+class NotificationPreferences {
+  const NotificationPreferences(
+      {required this.email,
+      required this.push,
+      required this.eventReminders,
+      required this.familyUpdates});
+  final bool email;
+  final bool push;
+  final bool eventReminders;
+  final bool familyUpdates;
+  factory NotificationPreferences.fromJson(Map<String, dynamic> json) =>
+      NotificationPreferences(
+          email: json['email'] as bool? ?? true,
+          push: json['push'] as bool? ?? true,
+          eventReminders: json['event_reminders'] as bool? ?? true,
+          familyUpdates: json['family_updates'] as bool? ?? true);
+  Map<String, dynamic> toJson() => {
+        'email': email,
+        'push': push,
+        'event_reminders': eventReminders,
+        'family_updates': familyUpdates
+      };
+}
+
+class AccountSession {
+  const AccountSession(
+      {required this.uuid,
+      required this.deviceName,
+      required this.isCurrent,
+      this.lastActiveAt});
+  final String uuid;
+  final String deviceName;
+  final bool isCurrent;
+  final DateTime? lastActiveAt;
+  factory AccountSession.fromJson(Map<String, dynamic> json) => AccountSession(
+      uuid: json['uuid'] as String,
+      deviceName: json['device_name'] as String,
+      isCurrent: json['is_current'] as bool? ?? false,
+      lastActiveAt: DateTime.tryParse(json['last_active_at'] as String? ?? ''));
 }
 
 class DashboardSummary {

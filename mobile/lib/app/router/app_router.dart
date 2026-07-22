@@ -4,6 +4,9 @@ import 'package:go_router/go_router.dart';
 import '../../core/auth/session_controller.dart';
 import '../../core/config/app_environment.dart';
 import '../../features/auth/login_screen.dart';
+import '../../features/auth/auth_screens.dart';
+import '../../features/account/presentation/account_screen.dart';
+import '../../features/family/presentation/family_onboarding_screen.dart';
 import '../../features/dashboard/dashboard_screen.dart';
 import '../../features/diagnostics/presentation/diagnostics_screen.dart';
 import '../../features/notifications/notifications_screen.dart';
@@ -18,6 +21,8 @@ GoRouter createAppRouter(
       redirect: (context, state) {
         final location = state.uri.toString();
         final public = location.startsWith('/login') ||
+            location.startsWith('/register') ||
+            location.startsWith('/forgot-password') ||
             location.startsWith('/reset-password') ||
             location.startsWith('/verify-email');
         if (session.status == SessionStatus.bootstrapping) {
@@ -55,27 +60,28 @@ GoRouter createAppRouter(
             path: '/splash',
             builder: (context, state) => const _SplashScreen()),
         GoRoute(
-            path: '/login',
-            builder: (context, state) =>
-                LoginScreen(onLoggedIn: session.authenticated)),
+            path: '/login', builder: (context, state) => const LoginScreen()),
+        GoRoute(path: '/register', builder: (_, __) => const RegisterScreen()),
+        GoRoute(
+            path: '/forgot-password',
+            builder: (_, __) => const ForgotPasswordScreen()),
         GoRoute(
             path: '/reset-password',
-            builder: (context, state) => _Placeholder(
-                title: 'Reset password',
-                detail: state.uri.queryParameters['token'])),
+            builder: (context, state) => ResetPasswordScreen(
+                token: state.uri.queryParameters['token'] ?? '',
+                email: state.uri.queryParameters['email'] ?? '')),
         GoRoute(
             path: '/verify-email',
-            builder: (context, state) => _Placeholder(
-                title: 'Verifikasi email',
-                detail: state.uri.queryParameters['id'])),
+            builder: (context, state) => VerificationScreen(
+                id: state.uri.queryParameters['id'],
+                hash: state.uri.queryParameters['hash'],
+                query: state.uri.queryParameters)),
         GoRoute(
             path: '/onboarding',
-            builder: (context, state) =>
-                const _Placeholder(title: 'Onboarding')),
+            builder: (context, state) => const FamilyOnboardingScreen()),
         GoRoute(
             path: '/families/select',
-            builder: (context, state) =>
-                const _Placeholder(title: 'Pilih keluarga')),
+            builder: (context, state) => const FamilySelectorScreen()),
         GoRoute(
             path: '/diagnostics',
             builder: (context, state) =>
@@ -101,8 +107,13 @@ GoRouter createAppRouter(
             ]),
             StatefulShellBranch(routes: [
               GoRoute(
-                  path: '/notifications',
-                  builder: (context, state) => const NotificationsScreen())
+                  path: '/account',
+                  builder: (context, state) => const AccountScreen(),
+                  routes: [
+                    GoRoute(
+                        path: 'notifications',
+                        builder: (_, __) => const NotificationsScreen()),
+                  ])
             ]),
           ],
         ),
@@ -146,7 +157,7 @@ class _AdaptiveShell extends StatelessWidget {
       appBar: AppBar(title: const Text('Family Tree Indonesia'), actions: [
         IconButton(
             tooltip: 'Notifikasi',
-            onPressed: () => context.go('/notifications'),
+            onPressed: () => context.go('/account/notifications'),
             icon: const Icon(Icons.notifications_outlined))
       ]),
       body: tablet
