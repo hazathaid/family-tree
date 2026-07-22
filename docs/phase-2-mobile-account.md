@@ -17,3 +17,5 @@ Forms are scrollable and width-bounded for phone/tablet layouts, support 200% te
 ## Verification
 
 Flutter model/widget coverage includes API parsing, large-text registration layout, and invalid reset-link state. Laravel feature coverage includes preference validation/defaults, safe session serialization, cross-user revoke denial, current-token revoke, existing profile/password/avatar flows, and authentication flows.
+
+Final verification on 2026-07-22 passed 175 PHPUnit tests (769 assertions), PHPStan, Laravel Pint, the Vite production build, Flutter analyze, and all 12 Flutter tests. The PHPUnit process requires a CLI memory limit above the container's 128 MB default for the pre-existing tree PNG export suite.

@@ -6,3 +6,6 @@
 /bootstrap/cache
 /storage/*.key
 /storage/logs
+/storage/framework
+/public/storage
+/mobile/test/failures

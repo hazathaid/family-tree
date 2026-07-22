@@ -1,1 +1,0 @@
-<x-layouts.app title="Dashboard"><h1>Dashboard keluarga</h1></x-layouts.app>
