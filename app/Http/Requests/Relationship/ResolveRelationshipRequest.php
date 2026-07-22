@@ -9,8 +9,8 @@ class ResolveRelationshipRequest extends ApiFormRequest
     public function rules(): array
     {
         return [
-            'source_member_id' => ['required', 'integer', 'exists:family_members,id'],
-            'target_member_id' => ['required', 'integer', 'exists:family_members,id'],
+            'source_member_uuid' => ['required', 'uuid', 'exists:family_members,uuid'],
+            'target_member_uuid' => ['required', 'uuid', 'exists:family_members,uuid'],
         ];
     }
 }

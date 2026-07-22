@@ -49,7 +49,7 @@ class FamilyMemberApiTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.nickname', 'Siti');
 
-        $this->getJson('/api/v1/family-members')
+        $this->getJson('/api/v1/family-members?family_uuid='.$family->uuid)
             ->assertOk()
             ->assertJsonFragment(['uuid' => $memberUuid]);
 
@@ -154,6 +154,43 @@ class FamilyMemberApiTest extends TestCase
 
         Storage::disk('public')->assertExists($response->json('data.profile_photo'));
         Storage::disk('public')->assertExists($response->json('data.profile_photo_thumbnail'));
+    }
+
+    public function test_directory_filters_sorts_and_paginates_with_family_isolation(): void
+    {
+        $owner = User::factory()->create();
+        $family = Family::factory()->create(['created_by' => $owner->id]);
+        $otherFamily = Family::factory()->create();
+        $branch = FamilyBranch::factory()->create(['family_id' => $family->id]);
+        FamilyUserRole::factory()->owner()->create(['family_id' => $family->id, 'user_id' => $owner->id]);
+        FamilyMember::factory()->create(['family_id' => $family->id, 'family_branch_id' => $branch->id, 'full_name' => 'Budi Hidup', 'gender' => 'male', 'is_alive' => true]);
+        FamilyMember::factory()->deceased()->create(['family_id' => $family->id, 'family_branch_id' => $branch->id, 'full_name' => 'Budi Wafat', 'gender' => 'male']);
+        FamilyMember::factory()->create(['family_id' => $otherFamily->id, 'full_name' => 'Budi Rahasia', 'gender' => 'male', 'is_alive' => true]);
+        Sanctum::actingAs($owner);
+
+        $this->getJson('/api/v1/family-members?'.http_build_query([
+            'family_uuid' => $family->uuid,
+            'search' => 'Budi',
+            'gender' => 'male',
+            'is_alive' => true,
+            'branch_uuid' => $branch->uuid,
+            'sort' => 'name_desc',
+            'limit' => 1,
+        ]))->assertOk()
+            ->assertJsonCount(1, 'data.data')
+            ->assertJsonPath('data.data.0.full_name', 'Budi Hidup')
+            ->assertJsonPath('data.total', 1)
+            ->assertJsonMissing(['full_name' => 'Budi Rahasia']);
+    }
+
+    public function test_directory_requires_an_authorized_family_uuid(): void
+    {
+        $user = User::factory()->create();
+        $foreignFamily = Family::factory()->create();
+        Sanctum::actingAs($user);
+
+        $this->getJson('/api/v1/family-members?family_uuid='.$foreignFamily->uuid)
+            ->assertForbidden();
     }
 
     private function tinyPng(): string

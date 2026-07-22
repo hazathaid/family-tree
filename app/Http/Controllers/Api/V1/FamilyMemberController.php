@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\FamilyMember\ListFamilyMemberRequest;
 use App\Http\Requests\FamilyMember\StoreFamilyMemberRequest;
 use App\Http\Requests\FamilyMember\UpdateFamilyMemberRequest;
 use App\Http\Requests\FamilyMember\UploadFamilyMemberPhotoRequest;
@@ -13,7 +14,6 @@ use App\Repositories\Contracts\FamilyMemberRepositoryInterface;
 use App\Repositories\Contracts\FamilyRepositoryInterface;
 use App\Services\FamilyMemberService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
 class FamilyMemberController extends Controller
@@ -24,19 +24,30 @@ class FamilyMemberController extends Controller
         private readonly FamilyMemberService $memberService,
     ) {}
 
-    public function index(Request $request): JsonResponse
+    public function index(ListFamilyMemberRequest $request): JsonResponse
     {
         Gate::authorize('viewAny', FamilyMember::class);
 
-        $members = $this->members->paginateForUser(
-            $request->user(),
+        $family = $this->families->findByUuid($request->validated('family_uuid'));
+        abort_if(! $family instanceof Family, 404);
+        Gate::authorize('view', $family);
+
+        $members = $this->members->paginateForFamily(
+            $family,
+            $request->safe()->except(['family_uuid', 'page', 'limit']),
             (int) $request->integer('limit', 15),
         );
 
         return response()->json([
             'success' => true,
             'message' => 'Success',
-            'data' => FamilyMemberResource::collection($members),
+            'data' => [
+                'data' => FamilyMemberResource::collection($members->items()),
+                'current_page' => $members->currentPage(),
+                'last_page' => $members->lastPage(),
+                'per_page' => $members->perPage(),
+                'total' => $members->total(),
+            ],
         ]);
     }
 

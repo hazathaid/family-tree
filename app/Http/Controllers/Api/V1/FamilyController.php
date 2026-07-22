@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\DTOs\FamilyData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Family\StoreFamilyRequest;
+use App\Http\Requests\Family\UpdateFamilyAssetsRequest;
 use App\Http\Requests\Family\UpdateFamilyRequest;
 use App\Http\Resources\FamilyResource;
 use App\Models\Family;
@@ -84,6 +85,24 @@ class FamilyController extends Controller
             'success' => true,
             'message' => 'Family deleted',
             'data' => null,
+        ]);
+    }
+
+    public function updateAssets(UpdateFamilyAssetsRequest $request, Family $family): JsonResponse
+    {
+        Gate::authorize('update', $family);
+
+        $family = $this->familyService->updateIdentityAssets(
+            $family,
+            $request->user(),
+            $request->file('logo'),
+            $request->file('cover_image'),
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Family assets updated',
+            'data' => new FamilyResource($family),
         ]);
     }
 }

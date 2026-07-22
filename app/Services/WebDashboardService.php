@@ -22,7 +22,7 @@ class WebDashboardService
             "web-dashboard:family:{$family->id}",
             now()->addMinutes(5),
             fn (): array => [
-                'statistics' => $this->statistics->summary($family),
+                'statistics' => $this->statistics->statistics($family),
                 'recent_activity' => $this->dashboard->recentActivity($family, 6),
                 'upcoming_birthdays' => $this->dashboard->upcomingBirthdays($family, 7, 5),
                 'upcoming_events' => $this->dashboard->upcomingEvents($family, 5),

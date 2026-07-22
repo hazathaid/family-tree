@@ -69,7 +69,8 @@ Session responses never expose database IDs, token values, IP addresses, or full
 | DELETE `/families/{family}/roles/{membership}` | none | null; last-owner protected |
 | GET/POST `/families/{family}/branches` | POST name, optional description | paginated branches / created branch |
 | GET/PUT/DELETE `/families/{family}/branches/{branch}` | update name/description | branch / updated / null; nested family invariant |
-| GET `/families/{family}/dashboard` | none | totals/generations/living/deceased/birthdays/recent activity summary |
+| GET `/families/{family}/dashboard` | none | six totals plus bounded recent activity (8), birthdays in 30 days (8), events (5), user-scoped notification summary (5), family facts and recent members (6); cached 5 minutes per family/user |
+| POST `/families/{family}/assets` | multipart optional `logo` jpg/jpeg/png/webp <=5 MB and/or `cover_image` <=10 MB | updated Family; owner/admin; 10/min |
 
 Family logo/cover web multipart behavior is not represented by the current REST update contract; see API-G02.
 
@@ -77,7 +78,7 @@ Family logo/cover web multipart behavior is not represented by the current REST 
 
 | Method/path | Request / filters | Response |
 |---|---|---|
-| GET `/family-members` | `family_uuid` plus supported search/filter/page parameters | paginated FamilyMember resources |
+| GET `/family-members` | required `family_uuid`; optional `search`, `gender`, `is_alive`, `branch_uuid`, `sort` name/name_desc/newest/oldest, `page`, `limit` <=100 | paginated FamilyMember resources; family membership required |
 | POST `/family-members` | `family_uuid`, `full_name`; optional branch UUID, nickname, gender, religion, birth, `is_alive`, death, biography | created member |
 | GET/PUT/DELETE `/family-members/{family_member}` | PUT member fields; death required when not alive | member / updated / soft-deleted null |
 | POST `/family-members/{family_member}/photo` | multipart `photo`, image <=10 MB in current request | updated member with photo |
@@ -86,7 +87,7 @@ Family logo/cover web multipart behavior is not represented by the current REST 
 | GET/PUT/DELETE `/relationships/{relationship}` | update base-edge fields | relationship / updated / null |
 | GET `/relationship-engine` | `source_member_uuid`, `target_member_uuid` | `{relationship,path}`; same family; derived server-side |
 
-The member REST list does not yet expose all server-side filters/sorts used by the Phase 17 web directory; see API-G03.
+Member directory filters and sorting execute server-side. Relationship resolver inputs are public member UUIDs; numeric IDs are not accepted.
 
 Member `religion` accepts `islam`, `christian`, `catholic`, `hindu`,
 `buddhist`, `confucian`, `belief`, or `other`, and may be null. Member
@@ -183,11 +184,11 @@ All v1 endpoints use `throttle:api`. Additional route limits are: login named li
 | ID | Missing/misaligned REST capability | Owning task |
 |---|---|---|
 | API-G01 | Notification preferences plus safe session list/revoke | Closed by FT-API-101 (2026-07-22) |
-| API-G02 | Family logo, cover, privacy/settings audit against web | FT-API-202 |
-| API-G03 | Member directory parity for gender/living/branch/sort server-side filters | Must be closed before/within FT-MOB-301 via approved API work |
+| API-G02 | Family logo, cover, privacy/settings audit against web | Closed by FT-API-202 (2026-07-22): asset upload added; privacy remains membership-only and notification preferences remain account-scoped |
+| API-G03 | Member directory parity for gender/living/branch/sort server-side filters | Closed by FT-MOB-301 (2026-07-22) |
 | API-G04 | Tree layouts differ (web request omits radial), no lazy expansion or stable relationship-to-root label | FT-API-301 |
 | API-G05 | Generation-aware search/report contract needs alignment and bounded output | FT-API-401 |
-| API-G06 | Rich mobile dashboard content exceeds current summary (activity/birthdays/events/notification/facts/recent members contract) | FT-API-201 |
+| API-G06 | Rich mobile dashboard content exceeds current summary (activity/birthdays/events/notification/facts/recent members contract) | Closed by FT-API-201 (2026-07-22) |
 | API-G07 | No explicit active-family REST selection is needed for stateless mobile, but onboarding create/select semantics must be defined client-side from memberships | FT-MOB-103; add API only if server state is approved |
 | API-G08 | Web article upload route name differs but REST capability exists; no gap. Web-only super-admin console is intentionally excluded. | Documented decision |
 

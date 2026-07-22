@@ -5,8 +5,10 @@ namespace Tests\Unit;
 use App\DTOs\FamilyData;
 use App\Models\FamilyUserRole;
 use App\Models\User;
+use App\Repositories\Eloquent\EloquentActivityLogRepository;
 use App\Repositories\Eloquent\EloquentFamilyRepository;
 use App\Repositories\Eloquent\EloquentFamilyUserRoleRepository;
+use App\Services\ActivityLogService;
 use App\Services\FamilyRoleCatalogService;
 use App\Services\FamilyService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -23,6 +25,7 @@ class FamilyServiceTest extends TestCase
             new EloquentFamilyRepository,
             new EloquentFamilyUserRoleRepository,
             new FamilyRoleCatalogService,
+            new ActivityLogService(new EloquentActivityLogRepository),
         );
 
         $family = $service->create($user, new FamilyData(

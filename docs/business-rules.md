@@ -31,6 +31,8 @@ Sources: `FamilyPolicy`, family resource policies, `FamilyRoleService`, `EnsureA
 
 Sources: `RelationshipService`, `RelationshipRepositoryInterface`, relationship requests, `FamilyMemberService`.
 
+FT-MOB-301 closes the directory gap with required family UUID scope and bounded server-side filters. FT-MOB-305 standardizes resolver input on source/target member UUID; internal IDs are rejected at the public boundary.
+
 ## Family tree
 
 - Root is a member in the authorized family.
@@ -59,6 +61,8 @@ Sources: article services/policies/requests and `RichTextSanitizer`.
 - Family privacy values supported by the actual family request/model govern public visibility; private data is never returned merely because a client hides it.
 
 Sources: upload Form Requests, `MemberPhotoService`, `FamilyMemberService`, media policies.
+
+FT-API-202 confirms that the current family privacy contract is fixed to active membership; there is no family privacy mutation field. Owners/admins may update family identity, logo (5 MB) and cover (10 MB), while notification preferences remain user-scoped. Asset updates are policy guarded and logged as `FAMILY_ASSETS_UPDATED`.
 
 ## Events and RSVP
 

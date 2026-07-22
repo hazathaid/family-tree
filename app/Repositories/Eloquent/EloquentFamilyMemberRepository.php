@@ -58,10 +58,11 @@ class EloquentFamilyMemberRepository implements FamilyMemberRepositoryInterface
             })
             ->when($filters['gender'] ?? null, fn (Builder $query, string $gender) => $query->where('gender', $gender))
             ->when(isset($filters['is_alive']) && $filters['is_alive'] !== '', fn (Builder $query) => $query->where('is_alive', (bool) $filters['is_alive']))
-            ->when($filters['branch'] ?? null, fn (Builder $query, string $branch) => $query->whereHas('branch', fn (Builder $query) => $query->where('uuid', $branch)))
+            ->when($filters['branch_uuid'] ?? null, fn (Builder $query, string $branch) => $query->whereHas('branch', fn (Builder $query) => $query->where('uuid', $branch)))
             ->when($sort === 'name', fn (Builder $query) => $query->orderBy('full_name'))
+            ->when($sort === 'name_desc', fn (Builder $query) => $query->orderByDesc('full_name'))
             ->when($sort === 'oldest', fn (Builder $query) => $query->oldest())
-            ->when(! in_array($sort, ['name', 'oldest'], true), fn (Builder $query) => $query->latest())
+            ->when(! in_array($sort, ['name', 'name_desc', 'oldest'], true), fn (Builder $query) => $query->latest())
             ->paginate($perPage)
             ->withQueryString();
     }

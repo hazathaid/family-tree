@@ -22,6 +22,7 @@ class FamilyMemberResource extends JsonResource
             'uuid' => $member->uuid,
             'family_uuid' => $member->family->uuid,
             'family_branch_uuid' => $member->branch?->uuid,
+            'family_branch_name' => $member->branch?->name,
             'full_name' => $member->full_name,
             'nickname' => $member->nickname,
             'gender' => $member->gender,

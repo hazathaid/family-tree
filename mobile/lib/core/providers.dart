@@ -8,6 +8,8 @@ import 'models.dart';
 import 'repositories.dart';
 import 'storage/scoped_cache.dart';
 import '../features/account/data/api_account_repository.dart';
+import '../features/members/data/api_member_repository.dart';
+import '../features/members/domain/member_repository.dart';
 
 final apiClientProvider =
     Provider<ApiClient>((ref) => throw UnimplementedError());
@@ -25,6 +27,8 @@ final notificationRepositoryProvider =
     Provider((ref) => ApiNotificationRepository(ref.watch(apiClientProvider)));
 final accountRepositoryProvider =
     Provider((ref) => ApiAccountRepository(ref.watch(apiClientProvider)));
+final memberRepositoryProvider = Provider<MemberRepository>(
+    (ref) => ApiMemberRepository(ref.watch(apiClientProvider)));
 final currentUserProvider = StateProvider<User?>((ref) => null);
 
 final currentFamilyProvider = StateProvider<Family?>((ref) => null);

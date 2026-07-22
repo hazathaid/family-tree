@@ -6,6 +6,8 @@ use App\Models\Family;
 use App\Models\FamilyUserRole;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -82,5 +84,44 @@ class FamilyApiTest extends TestCase
             'name' => 'Tidak Boleh',
         ])->assertForbidden()
             ->assertJsonPath('success', false);
+    }
+
+    public function test_owner_can_upload_validated_family_assets_and_member_cannot(): void
+    {
+        Storage::fake('public');
+        [$owner, $member] = User::factory()->count(2)->create();
+        $family = Family::factory()->create(['created_by' => $owner->id]);
+        FamilyUserRole::factory()->owner()->create(['family_id' => $family->id, 'user_id' => $owner->id]);
+        FamilyUserRole::factory()->create(['family_id' => $family->id, 'user_id' => $member->id, 'role' => FamilyUserRole::ROLE_MEMBER]);
+        Sanctum::actingAs($owner);
+
+        $this->postJson('/api/v1/families/'.$family->uuid.'/assets', [
+            'logo' => UploadedFile::fake()->image('logo.jpg', 200, 200),
+            'cover_image' => UploadedFile::fake()->image('cover.png', 1200, 400),
+        ])->assertOk()
+            ->assertJsonPath('data.privacy', 'members_only')
+            ->assertJsonStructure(['data' => ['logo_url', 'cover_image_url']]);
+
+        $family->refresh();
+        Storage::disk('public')->assertExists($family->logo);
+        Storage::disk('public')->assertExists($family->cover_image);
+        $this->assertDatabaseHas('activity_logs', ['family_id' => $family->id, 'activity_type' => 'FAMILY_ASSETS_UPDATED']);
+
+        Sanctum::actingAs($member);
+        $this->postJson('/api/v1/families/'.$family->uuid.'/assets', [
+            'logo' => UploadedFile::fake()->image('blocked.jpg'),
+        ])->assertForbidden();
+    }
+
+    public function test_family_assets_reject_invalid_files(): void
+    {
+        $owner = User::factory()->create();
+        $family = Family::factory()->create(['created_by' => $owner->id]);
+        FamilyUserRole::factory()->owner()->create(['family_id' => $family->id, 'user_id' => $owner->id]);
+        Sanctum::actingAs($owner);
+
+        $this->postJson('/api/v1/families/'.$family->uuid.'/assets', [
+            'logo' => UploadedFile::fake()->create('payload.pdf', 10, 'application/pdf'),
+        ])->assertUnprocessable()->assertJsonValidationErrors('logo');
     }
 }

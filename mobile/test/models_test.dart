@@ -8,6 +8,31 @@ void main() {
     expect(summary.totalMembers, 100);
     expect(summary.livingMembers, 80);
     expect(summary.deceasedMembers, 0);
+    expect(summary.totalPhotos, 0);
+  });
+
+  test('rich dashboard sections and family role are parsed', () {
+    final family = Family.fromJson({
+      'uuid': 'family',
+      'name': 'Besar',
+      'current_user_role': 'owner',
+      'privacy': 'members_only'
+    });
+    final summary = DashboardSummary.fromJson({
+      'recent_activity': [
+        {
+          'uuid': 'a',
+          'message': 'Anggota ditambah',
+          'created_at': '2026-07-22T00:00:00Z'
+        }
+      ],
+      'notification_summary': {'unread_count': 2, 'recent': []},
+      'family_facts': {'origin_city': 'Bandung'},
+    });
+    expect(family.canManageRoles, isTrue);
+    expect(summary.activity.single.title, 'Anggota ditambah');
+    expect(summary.unreadNotifications, 2);
+    expect(summary.originCity, 'Bandung');
   });
 
   test('tree response maps nodes and edges', () {

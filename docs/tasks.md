@@ -234,7 +234,9 @@ Semua task fase ini adalah blocker. Jangan memulai implementasi parity sebelum F
 
 # Phase 3 — Dashboard and Family Management
 
-## FT-API-201 — Rich Mobile Dashboard Contract
+**Status fase:** ✅ Complete and verified (2026-07-22). Seluruh FT-API-201, FT-MOB-201, FT-API-202, FT-MOB-202, FT-MOB-203, dan FT-MOB-204 selesai. Phase 4 belum dikerjakan.
+
+## FT-API-201 — Rich Mobile Dashboard Contract ✅ Complete (2026-07-22)
 
 **Required before:** FT-MOB-201
 
@@ -242,14 +244,14 @@ Semua task fase ini adalah blocker. Jangan memulai implementasi parity sebelum F
 - Sediakan statistik, activity, birthday, upcoming event, notification summary, family facts, dan recent members dengan query bounded.
 - Pertahankan target respons dashboard kurang dari dua detik dan cache isolation per keluarga/user.
 
-## FT-MOB-201 — Dashboard Parity
+## FT-MOB-201 — Dashboard Parity ✅ Complete (2026-07-22)
 
 **Depends on:** FT-API-201
 
 - Implementasikan welcome banner, enam statistik, activity feed, birthday, upcoming event, notification summary, family facts, dan recent members.
 - Semua widget mempunyai loading, empty, error, pull-to-refresh, dan target-navigation state.
 
-## FT-API-202 — Family Settings API Gap Audit and Closure
+## FT-API-202 — Family Settings API Gap Audit and Closure ✅ Complete (2026-07-22)
 
 **Required before:** FT-MOB-202
 
@@ -257,19 +259,19 @@ Semua task fase ini adalah blocker. Jangan memulai implementasi parity sebelum F
 - Tambahkan hanya kontrak yang disetujui PRD dan belum tersedia.
 - Terapkan upload validation, Policy, logging, Resource, dan test isolation.
 
-## FT-MOB-202 — Family Settings
+## FT-MOB-202 — Family Settings ✅ Complete (2026-07-22)
 
 **Depends on:** FT-API-202
 
 - Tampilkan/update family identity, logo, cover, privacy, dan setting yang didukung API.
 - Owner/admin-only controls harus disembunyikan dan tetap ditolak server jika dipanggil langsung.
 
-## FT-MOB-203 — Branch Management
+## FT-MOB-203 — Branch Management ✅ Complete (2026-07-22)
 
 - List, create, update, dan delete family branches.
 - Tangani branch in-use sesuai error business rule dari API.
 
-## FT-MOB-204 — Family Access and Role Management
+## FT-MOB-204 — Family Access and Role Management ✅ Complete (2026-07-22)
 
 - List memberships, invite by email, assign role, dan remove membership.
 - Konfirmasi destructive action dan tampilkan aturan last-owner.
@@ -278,29 +280,31 @@ Semua task fase ini adalah blocker. Jangan memulai implementasi parity sebelum F
 
 # Phase 4 — Members and Relationships
 
-## FT-MOB-301 — Member Directory
+**Status fase:** ✅ Complete and verified (2026-07-22). Seluruh FT-MOB-301 sampai FT-MOB-305 selesai dan lulus test backend/mobile, PHPStan, Pint, Dart analyze/format, serta production asset build. Phase 5 belum dikerjakan.
+
+## FT-MOB-301 — Member Directory ✅ Complete (2026-07-22)
 
 - Server-side pagination, search, gender, living status, branch, dan sort.
 - Sediakan table-friendly tablet layout dan card layout untuk ponsel.
 - Jangan memuat seluruh family member ke memory.
 
-## FT-MOB-302 — Member Detail
+## FT-MOB-302 — Member Detail ✅ Complete (2026-07-22)
 
 - Tampilkan basic info, family info, biography, photo, base relationships, dan related-content states.
 - Gunakan memorial marker yang konsisten untuk anggota meninggal.
 
-## FT-MOB-303 — Member Create, Edit, Photo, and Delete
+## FT-MOB-303 — Member Create, Edit, Photo, and Delete ✅ Complete (2026-07-22)
 
 - Form create/edit sesuai API, upload/replace photo, dan soft-delete confirmation.
 - Tampilkan field kematian secara kondisional tetapi biarkan API menjadi validator otoritatif.
 
-## FT-MOB-304 — Base Relationship Management
+## FT-MOB-304 — Base Relationship Management ✅ Complete (2026-07-22)
 
 - List/create/update/delete hanya `father`, `mother`, `child`, `husband`, dan `wife`.
 - Member picker harus paginated dan scoped ke keluarga aktif.
 - Jangan menyediakan input untuk Pakde, Bude, Om, Tante, Sepupu, Keponakan, Menantu, Mertua, atau relationship turunan lain.
 
-## FT-MOB-305 — Relationship Resolver
+## FT-MOB-305 — Relationship Resolver ✅ Complete (2026-07-22)
 
 - Pilih source dan target member lalu tampilkan hasil relationship dan path dari API.
 - Tidak boleh menghitung relationship di Dart.

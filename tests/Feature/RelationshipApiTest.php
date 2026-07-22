@@ -217,11 +217,13 @@ class RelationshipApiTest extends TestCase
         ]);
         Sanctum::actingAs($owner);
 
-        $this->getJson('/api/v1/relationship-engine?source_member_id='.$source->id.'&target_member_id='.$cousin->id)
+        $this->getJson('/api/v1/relationship-engine?source_member_uuid='.$source->uuid.'&target_member_uuid='.$cousin->uuid)
             ->assertOk()
             ->assertJsonPath('data.relationship', 'Sepupu')
             ->assertJsonCount(4, 'data.path')
             ->assertJsonPath('data.path.0.relationship', 'father')
-            ->assertJsonPath('data.path.3.relationship', 'child');
+            ->assertJsonPath('data.path.3.relationship', 'child')
+            ->assertJsonMissingPath('data.path.0.from_member_id')
+            ->assertJsonMissingPath('data.path.0.relationship_id');
     }
 }

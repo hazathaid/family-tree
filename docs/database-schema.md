@@ -68,3 +68,11 @@ Status: audited against all migrations present on 2026-07-22. Migrations are aut
 ## Migration policy
 
 Schema changes require a new task, forward migration, model/repository/service/API and tests. Phase 0 records discrepancies only and does not edit migrations.
+
+## Phase 3 mobile parity note
+
+FT-API-201 and FT-API-202 require no migration. Dashboard sections are bounded projections from existing family-scoped tables and use the application cache with a family/user key. Family logo and cover continue to use the existing `families.logo` and `families.cover_image` storage paths. There is no mutable family privacy or family notification-settings column: family data remains membership-only and notification preferences remain on `users.notification_preferences`.
+
+## Phase 4 mobile parity note
+
+Phase 4 adds no migration. Member directory filtering uses existing family, branch, gender, living-status, name and timestamp fields. Only the five existing base relationship values are written; resolver results remain derived/cache data. Public contracts use member UUIDs rather than internal IDs.

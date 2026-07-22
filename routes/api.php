@@ -66,6 +66,7 @@ Route::prefix('v1')->middleware('throttle:api')->group(function (): void {
 
     Route::middleware('auth:sanctum')->group(function (): void {
         Route::apiResource('families', FamilyController::class);
+        Route::post('families/{family}/assets', [FamilyController::class, 'updateAssets'])->middleware('throttle:10,1');
 
         Route::get('families/{family}/roles', [FamilyRoleController::class, 'index']);
         Route::post('families/{family}/roles/invite', [FamilyRoleController::class, 'invite']);

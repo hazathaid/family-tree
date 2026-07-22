@@ -22,7 +22,7 @@ class FamilyDashboardController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Success',
-            'data' => new FamilyDashboardResource($this->dashboard->summary($family)),
+            'data' => new FamilyDashboardResource($this->dashboard->summary($family, request()->user())),
         ]);
     }
 }

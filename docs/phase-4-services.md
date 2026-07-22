@@ -59,3 +59,7 @@ Responsibilities:
 * Invalidate all cached lookups for a family when member data changes.
 
 Derived relationship labels are calculated dynamically and are never stored in `member_relationships`.
+
+## Flutter member feature
+
+`MemberRepository` separates presentation from HTTP. Its API implementation maps bounded member/relationship pages, CRUD and photo multipart calls, and the UUID resolver response. The directory, member detail/form, base relationship manager, and resolver consume this contract. Flutter performs no graph traversal or kinship classification.

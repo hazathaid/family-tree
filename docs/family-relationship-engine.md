@@ -65,6 +65,6 @@ Unit/feature coverage must include Ayah, Ibu, Kakek, Nenek, Pakde, Bude, Om, Tan
 
 ## Known alignment issues
 
-- Current API route is GET `/api/v1/relationship-engine`; query UUID naming must remain consistent with its Form Request and is finalized for mobile by FT-MOB-305/FT-API-301 as applicable.
+- GET `/api/v1/relationship-engine` accepts `source_member_uuid` and `target_member_uuid`; FT-MOB-305 aligns the Form Request, controller, feature tests and Flutter repository on this public contract.
 - Exact labels for very deep/ambiguous and equal-length paths are implementation-defined today; add contract tests before localization expansion.
 - Historical specifications included unsupported adoptive/guardian/step edges; these are explicitly out of current scope.

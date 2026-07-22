@@ -20,6 +20,7 @@ class FamilyService
         private readonly FamilyRepositoryInterface $families,
         private readonly FamilyUserRoleRepositoryInterface $familyRoles,
         private readonly FamilyRoleCatalogService $roleCatalog,
+        private readonly ActivityLogService $activities,
     ) {}
 
     public function create(User $creator, FamilyData $data): Family
@@ -52,7 +53,7 @@ class FamilyService
         return $updated;
     }
 
-    public function updateIdentityAssets(Family $family, ?UploadedFile $logo, ?UploadedFile $coverImage): Family
+    public function updateIdentityAssets(Family $family, User $actor, ?UploadedFile $logo, ?UploadedFile $coverImage): Family
     {
         $attributes = [];
 
@@ -68,7 +69,17 @@ class FamilyService
             $attributes[$field] = $file->store('families/'.$family->uuid, 'public');
         }
 
-        return $attributes === [] ? $family : $this->families->update($family, $attributes);
+        if ($attributes === []) {
+            return $family;
+        }
+
+        $updated = $this->families->update($family, $attributes);
+        $this->activities->record($family->id, $actor, 'FAMILY_ASSETS_UPDATED', [
+            'subject_uuid' => $family->uuid,
+            'fields' => array_keys($attributes),
+        ]);
+
+        return $updated;
     }
 
     public function delete(Family $family): void
@@ -77,9 +88,9 @@ class FamilyService
         Cache::forget($this->dashboardCacheKey($family));
     }
 
-    public function dashboardCacheKey(Family $family): string
+    public function dashboardCacheKey(Family $family, ?User $user = null): string
     {
-        return 'families.'.$family->id.'.dashboard';
+        return 'families.'.$family->id.'.dashboard'.($user ? '.user.'.$user->id : '');
     }
 
     private function uniqueSlug(string $name, ?int $ignoreId = null): string

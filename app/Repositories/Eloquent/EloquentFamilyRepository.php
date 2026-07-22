@@ -37,6 +37,7 @@ class EloquentFamilyRepository implements FamilyRepositoryInterface
     {
         return Family::query()
             ->whereHas('userRoles', fn ($query) => $query->where('user_id', $user->id))
+            ->with(['userRoles' => fn ($query) => $query->where('user_id', $user->id)])
             ->latest()
             ->paginate($perPage);
     }
@@ -45,6 +46,7 @@ class EloquentFamilyRepository implements FamilyRepositoryInterface
     {
         return Family::query()
             ->whereHas('userRoles', fn ($query) => $query->where('user_id', $user->id))
+            ->with(['userRoles' => fn ($query) => $query->where('user_id', $user->id)])
             ->orderBy('name')
             ->get();
     }

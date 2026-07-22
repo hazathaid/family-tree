@@ -4,9 +4,11 @@ namespace Tests\Unit;
 
 use App\Models\Family;
 use App\Models\User;
+use App\Repositories\Eloquent\EloquentActivityLogRepository;
 use App\Repositories\Eloquent\EloquentFamilyDashboardRepository;
 use App\Repositories\Eloquent\EloquentFamilyRepository;
 use App\Repositories\Eloquent\EloquentFamilyUserRoleRepository;
+use App\Services\ActivityLogService;
 use App\Services\FamilyDashboardService;
 use App\Services\FamilyRoleCatalogService;
 use App\Services\FamilyService;
@@ -42,7 +44,7 @@ class FamilyDashboardServiceTest extends TestCase
             ],
         ]);
 
-        $summary = $this->service()->summary($family);
+        $summary = $this->service()->summary($family, $user);
 
         $this->assertSame(2, $summary->totalMembers);
         $this->assertSame(1, $summary->livingMembers);
@@ -57,6 +59,7 @@ class FamilyDashboardServiceTest extends TestCase
                 new EloquentFamilyRepository,
                 new EloquentFamilyUserRoleRepository,
                 new FamilyRoleCatalogService,
+                new ActivityLogService(new EloquentActivityLogRepository),
             ),
         );
     }

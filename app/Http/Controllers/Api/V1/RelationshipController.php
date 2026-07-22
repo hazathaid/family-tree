@@ -39,7 +39,13 @@ class RelationshipController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Success',
-            'data' => MemberRelationshipResource::collection($relationships),
+            'data' => [
+                'data' => MemberRelationshipResource::collection($relationships->items()),
+                'current_page' => $relationships->currentPage(),
+                'last_page' => $relationships->lastPage(),
+                'per_page' => $relationships->perPage(),
+                'total' => $relationships->total(),
+            ],
         ]);
     }
 

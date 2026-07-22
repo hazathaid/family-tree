@@ -3,13 +3,16 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/auth/session_controller.dart';
 import '../../core/config/app_environment.dart';
+import '../../core/models.dart';
 import '../../features/auth/login_screen.dart';
 import '../../features/auth/auth_screens.dart';
 import '../../features/account/presentation/account_screen.dart';
 import '../../features/family/presentation/family_onboarding_screen.dart';
+import '../../features/family/presentation/family_management_screen.dart';
 import '../../features/dashboard/dashboard_screen.dart';
 import '../../features/diagnostics/presentation/diagnostics_screen.dart';
 import '../../features/notifications/notifications_screen.dart';
+import '../../features/members/presentation/member_screens.dart';
 import '../../features/tree/tree_screen.dart';
 
 GoRouter createAppRouter(
@@ -86,6 +89,29 @@ GoRouter createAppRouter(
             path: '/diagnostics',
             builder: (context, state) =>
                 DiagnosticsScreen(environment: environment)),
+        GoRoute(
+            path: '/family/manage',
+            builder: (_, __) => const FamilyManagementScreen()),
+        GoRoute(
+            path: '/members',
+            builder: (_, __) => const MemberDirectoryScreen()),
+        GoRoute(
+            path: '/members/new', builder: (_, __) => const MemberFormScreen()),
+        GoRoute(
+            path: '/members/:uuid/edit',
+            builder: (_, state) =>
+                MemberFormScreen(member: state.extra as FamilyMember?)),
+        GoRoute(
+            path: '/relationships',
+            builder: (_, __) => const RelationshipManagementScreen()),
+        GoRoute(
+            path: '/relationship-resolver',
+            builder: (_, __) => const RelationshipResolverScreen()),
+        for (final route in const ['/articles', '/photos', '/events'])
+          GoRoute(
+              path: route,
+              builder: (_, state) =>
+                  _Placeholder(title: 'Fitur ${state.uri.path.substring(1)}')),
         StatefulShellRoute.indexedStack(
           builder: (context, state, shell) => _AdaptiveShell(shell: shell),
           branches: [
@@ -108,8 +134,11 @@ GoRouter createAppRouter(
             StatefulShellBranch(routes: [
               GoRoute(
                   path: '/account',
-                  builder: (context, state) => const AccountScreen(),
+                  builder: (context, state) => const _MoreScreen(),
                   routes: [
+                    GoRoute(
+                        path: 'profile',
+                        builder: (_, __) => const AccountScreen()),
                     GoRoute(
                         path: 'notifications',
                         builder: (_, __) => const NotificationsScreen()),
@@ -118,7 +147,6 @@ GoRouter createAppRouter(
           ],
         ),
         for (final route in const [
-          '/members/:uuid',
           '/articles/:uuid',
           '/events/:uuid',
           '/notifications/:uuid'
@@ -128,6 +156,10 @@ GoRouter createAppRouter(
               builder: (context, state) => _Placeholder(
                   title: 'Tujuan tautan',
                   detail: state.pathParameters['uuid'])),
+        GoRoute(
+            path: '/members/:uuid',
+            builder: (_, state) =>
+                MemberDetailScreen(uuid: state.pathParameters['uuid']!)),
       ],
     );
 
@@ -207,4 +239,40 @@ class _Placeholder extends StatelessWidget {
       body: Center(
           child: Text(detail == null ? title : '$title\n$detail',
               textAlign: TextAlign.center)));
+}
+
+class _MoreScreen extends StatelessWidget {
+  const _MoreScreen();
+  @override
+  Widget build(BuildContext context) =>
+      ListView(padding: const EdgeInsets.all(16), children: [
+        Card(
+            child: ListTile(
+                minTileHeight: 56,
+                leading: const Icon(Icons.people_outline),
+                title: const Text('Anggota keluarga'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.go('/members'))),
+        Card(
+            child: ListTile(
+                minTileHeight: 56,
+                leading: const Icon(Icons.settings),
+                title: const Text('Pengaturan keluarga'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.go('/family/manage'))),
+        Card(
+            child: ListTile(
+                minTileHeight: 56,
+                leading: const Icon(Icons.person),
+                title: const Text('Akun'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.go('/account/profile'))),
+        Card(
+            child: ListTile(
+                minTileHeight: 56,
+                leading: const Icon(Icons.notifications),
+                title: const Text('Notifikasi'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.go('/account/notifications'))),
+      ]);
 }

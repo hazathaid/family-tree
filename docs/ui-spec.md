@@ -71,6 +71,10 @@ Controls have >=48x48dp target, visible focus, enabled/disabled/loading states a
 | Reports | Family statistics and activity reports |
 | Admin console | Web-only; intentionally no Flutter screen |
 
+Phase 3 realizes the dashboard as an adaptive 2-column phone / 3-column tablet statistic grid followed by bounded sections for activity, birthdays, events, notifications, family facts and recent members. Family management uses three tabs (Profil, Cabang, Akses); mutation controls are hidden from unauthorized roles and destructive access/branch actions require named confirmation.
+
+Phase 4 uses member cards on phones and a horizontally safe data table on tablets, with server-side search/filter/sort and explicit pagination. Deceased members use an icon and text memorial marker. Detail groups identity, branch, biography, base relationships and related-content empty states. Mutation controls expose only the five base relationship types; the resolver displays the server label/path.
+
 ## Accessibility
 
 Every image has contextual semantics or is excluded if decorative. Icon-only controls have labels/tooltips. Traversal order follows visual order. Dynamic status changes use polite announcements. Contrast targets WCAG AA (4.5:1 normal, 3:1 large/UI). Tree nodes expose name, relationship to root, living/deceased status and expand action independent of canvas gestures. Pinch/drag has button alternatives for zoom/reset and keyboard/focus alternatives on supported devices.

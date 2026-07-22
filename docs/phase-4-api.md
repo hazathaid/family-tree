@@ -81,8 +81,8 @@ GET /relationship-engine
 Query parameters:
 
 ```text
-source_member_id
-target_member_id
+source_member_uuid
+target_member_uuid
 ```
 
 Response:
@@ -95,8 +95,10 @@ Response:
     "relationship": "Sepupu",
     "path": [
       {
-        "from_member_id": 10,
-        "to_member_id": 5,
+        "from_member_uuid": "source-member-public-uuid",
+        "to_member_uuid": "parent-member-public-uuid",
+        "from_member_name": "Anak",
+        "to_member_name": "Orang Tua",
         "relationship": "father"
       }
     ]
@@ -107,3 +109,7 @@ Response:
 The endpoint derives relationship names through BFS graph traversal over stored base edges. It does not read or persist derived relationship fields.
 
 FT-405 caches successful and disconnected relationship-engine lookups for 24 hours in `member_relationship_cache`. The API response shape is unchanged. Cache entries are invalidated when base relationships or family member records change.
+
+## Mobile member directory alignment (FT-MOB-301)
+
+`GET /family-members` requires `family_uuid` and supports bounded `page`/`limit`, `search`, `gender`, boolean `is_alive`, `branch_uuid`, and `sort` (`name`, `name_desc`, `newest`, `oldest`). The response includes items and explicit pagination metadata. Family isolation is authorized before the repository query.

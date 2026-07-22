@@ -72,9 +72,21 @@ Structured logs use correlation/request IDs, environment, operation and sanitize
 
 Install locked dependencies, run `composer test`, `composer analyse`, `composer pint`, `npm run build`, `flutter analyze`, `flutter test`, secret scanning and dependency audit. Release adds signed Android/iOS builds, environment smoke tests, migration review, rollback artifact and store metadata. Deploy migrations before compatible app traffic and preserve backward-compatible API contracts during mobile rollout.
 
+## Phase 3 implementation
+
+- The family/user-isolated dashboard endpoint is the single mobile aggregate for six statistics, recent activity, birthdays, events, notifications, facts and recent members. Every collection is server-bounded and cached for five minutes.
+- Flutter Phase 3 adds adaptive dashboard cards and family management tabs for identity/assets, branches and access. Owner/admin visibility is advisory; Laravel policies remain authoritative.
+- Logo and cover uploads use multipart requests and the existing image picker dependency. Privacy is displayed as the fixed membership-only runtime rule; personal notification preferences remain under Account.
+
+## Phase 4 implementation
+
+- A dedicated member repository uses paginated member/relationship endpoints and the UUID-only resolver contract.
+- The adaptive directory, detail, form/photo/delete, five-type relationship manager, and resolver remain scoped to the active family and Laravel authorization.
+- Flutter displays derived kinship/path verbatim; Laravel retains graph traversal, cycle checks, inverse spouses, logging, and cache invalidation.
+
 ## Current gaps
 
-- Phase 2 authentication, onboarding, active-family, and account screens are implemented; domain screens from Phase 3 onward remain assigned to later tasks.
+- Phase 4 member and relationship parity is implemented; interactive tree alignment remains Phase 5 work.
 - No refresh-token API; expiry means re-login.
 - Firebase native configuration is absent and must remain environment-specific.
 - Existing prototype stores the token in memory and has ad-hoc navigation; it is not the target architecture.

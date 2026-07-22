@@ -19,7 +19,7 @@ class RelationshipResolverService
     {
         if ($source->family_id !== $target->family_id) {
             throw ValidationException::withMessages([
-                'target_member_id' => ['The selected target member does not belong to the same family.'],
+                'target_member_uuid' => ['The selected target member does not belong to the same family.'],
             ]);
         }
 

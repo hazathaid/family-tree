@@ -51,7 +51,7 @@ class FamilySettingsController extends Controller
         $data['logo'] = $family->logo;
         $data['cover_image'] = $family->cover_image;
         $this->families->update($family, FamilyData::fromArray($data));
-        $this->families->updateIdentityAssets($family, $request->file('logo'), $request->file('cover_image'));
+        $this->families->updateIdentityAssets($family, $request->user(), $request->file('logo'), $request->file('cover_image'));
 
         return back()->with('status', 'Profil keluarga berhasil diperbarui.');
     }
