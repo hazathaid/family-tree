@@ -4,10 +4,17 @@
     @endif
 
     <section class="dashboard-welcome mb-4" aria-labelledby="dashboard-title">
-        <div>
-            <p class="mb-1 text-white-50">Keluarga aktif</p>
-            <h1 id="dashboard-title" class="h3 mb-2">Selamat datang, {{ auth()->user()->name }}</h1>
-            <p class="mb-0">Lihat kabar terbaru dari {{ $family->name }} dalam satu tempat.</p>
+        <div class="dashboard-welcome-content">
+            <p class="dashboard-eyebrow mb-2">Ruang keluarga · {{ $family->name }}</p>
+            <h1 id="dashboard-title" class="display-6 fw-semibold mb-2">Selamat datang, {{ auth()->user()->name }}</h1>
+            <p class="mb-4 text-white-75">Rawat cerita, hubungan, dan kenangan keluarga dalam satu ruang yang terus bertumbuh.</p>
+            <div class="d-flex flex-wrap gap-2">
+                <a class="btn btn-light" href="{{ route('members.index') }}">Lihat anggota</a>
+                <a class="btn btn-outline-light" href="{{ route('tree.index') }}">Buka pohon keluarga</a>
+            </div>
+        </div>
+        <div class="dashboard-orbit d-none d-md-grid" aria-hidden="true">
+            <span>KS</span><span>AS</span><span>NS</span>
         </div>
     </section>
 

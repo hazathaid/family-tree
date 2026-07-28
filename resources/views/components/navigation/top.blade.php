@@ -1,12 +1,15 @@
 @props(['variant' => 'public'])
-<header class="navbar navbar-expand border-bottom bg-white sticky-top" aria-label="Navigasi utama">
+<header class="navbar navbar-expand app-topbar sticky-top" aria-label="Navigasi utama">
     <div class="container-fluid px-3 px-lg-4">
         @if ($variant === 'authenticated')
             <button class="btn btn-outline-primary d-lg-none me-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobile-navigation" aria-controls="mobile-navigation" aria-label="Buka menu navigasi">
                 <span aria-hidden="true">☰</span>
             </button>
         @endif
-        <a class="navbar-brand fw-bold text-primary text-wrap" href="{{ route('home') }}">Family Tree Indonesia</a>
+        <a class="navbar-brand family-brand text-wrap" href="{{ route('home') }}">
+            <span class="family-brand-mark" aria-hidden="true">FT</span>
+            <span>Rumpun</span>
+        </a>
         <nav class="ms-auto d-flex align-items-center gap-2" aria-label="Navigasi akun">
             @if ($variant === 'authenticated')
                 @if(Route::has('search.index'))

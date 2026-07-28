@@ -18,10 +18,19 @@
     }
 @endphp
 <aside class="{{ $mobile ? '' : 'app-sidebar d-none d-lg-block p-3' }}" aria-label="Navigasi aplikasi">
+    @unless($mobile)
+        <div class="sidebar-context">
+            <span class="sidebar-context-label">Ruang keluarga</span>
+            <strong>{{ auth()->user()?->name ?? 'Keluarga Indonesia' }}</strong>
+        </div>
+    @endunless
     <nav class="nav nav-pills flex-column gap-1">
-        @foreach ($items as $item)
+        @foreach ($items as $index => $item)
             @php($active = request()->routeIs($item['pattern']))
-            <a class="nav-link {{ $active ? 'active' : '' }}" href="{{ Route::has($item['route']) ? route($item['route']) : '#' }}" @if($active) aria-current="page" @endif>{{ $item['label'] }}</a>
+            <a class="nav-link {{ $active ? 'active' : '' }}" href="{{ Route::has($item['route']) ? route($item['route']) : '#' }}" @if($active) aria-current="page" @endif>
+                <span class="nav-item-mark" aria-hidden="true">{{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                <span>{{ $item['label'] }}</span>
+            </a>
         @endforeach
     </nav>
 </aside>
