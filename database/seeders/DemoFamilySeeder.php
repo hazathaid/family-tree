@@ -9,11 +9,26 @@ use App\Models\MemberRelationship;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
 
 class DemoFamilySeeder extends Seeder
 {
     public function run(): void
     {
+        $superAdminRole = Role::findOrCreate('super-admin', 'web');
+
+        $superAdmin = User::query()->updateOrCreate(
+            ['email' => 'superadmin@family-tree.test'],
+            [
+                'name' => 'Super Admin Demo',
+                'phone' => '081200000000',
+                'email_verified_at' => now(),
+                'password' => Hash::make('password'),
+                'status' => 'active',
+            ],
+        );
+        $superAdmin->syncRoles($superAdminRole);
+
         $owner = User::query()->updateOrCreate(
             ['email' => 'owner@family-tree.test'],
             [
@@ -47,6 +62,17 @@ class DemoFamilySeeder extends Seeder
             ],
         );
 
+        $guestDemo = User::query()->updateOrCreate(
+            ['email' => 'guest@family-tree.test'],
+            [
+                'name' => 'Guest Demo',
+                'phone' => '081200000004',
+                'email_verified_at' => now(),
+                'password' => Hash::make('password'),
+                'status' => 'active',
+            ],
+        );
+
         $family = Family::query()->updateOrCreate(
             ['slug' => 'keluarga-demo-santoso'],
             [
@@ -60,6 +86,7 @@ class DemoFamilySeeder extends Seeder
         $this->role($family, $owner, FamilyUserRole::ROLE_OWNER);
         $this->role($family, $admin, FamilyUserRole::ROLE_ADMIN);
         $this->role($family, $memberUser, FamilyUserRole::ROLE_MEMBER);
+        $this->role($family, $guestDemo, FamilyUserRole::ROLE_MEMBER);
 
         $members = [
             'great_grand_father' => $this->member($family, $owner, 'Buyut Ahmad Santoso', 'male', '1920-01-01', false, '2000-05-01'),
