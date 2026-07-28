@@ -78,7 +78,7 @@
                                     <div class="d-flex align-items-center gap-3 rounded border p-3 h-100">
                                         <span class="dashboard-avatar" aria-hidden="true">{{ mb_strtoupper(mb_substr($member->full_name, 0, 1)) }}</span>
                                         <div class="min-width-0">
-                                            <p class="mb-0 fw-semibold text-truncate">{{ $member->is_alive ? '' : '† ' }}{{ $member->full_name }}</p>
+                                            <p class="mb-0 fw-semibold text-truncate"><x-member-name :member="$member" /></p>
                                             <small class="text-body-secondary">Ditambahkan {{ $member->created_at->diffForHumans() }}</small>
                                         </div>
                                     </div>

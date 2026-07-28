@@ -74,16 +74,29 @@ class WebFamilyManagementTest extends TestCase
         Storage::fake('public');
 
         $response = $this->active($admin, $family)->post(route('members.store'), [
-            'full_name' => 'Almarhum Hasan',
+            'full_name' => 'Hasan',
             'gender' => 'male',
+            'religion' => 'islam',
             'is_alive' => '0',
             'death_date' => '2020-01-01',
             'photo' => UploadedFile::fake()->image('hasan.jpg'),
         ]);
-        $member = FamilyMember::query()->where('full_name', 'Almarhum Hasan')->firstOrFail();
+        $member = FamilyMember::query()->where('full_name', 'Hasan')->firstOrFail();
         $response->assertRedirect(route('members.show', $member));
-        $this->active($admin, $family)->get(route('members.show', $member))->assertOk()->assertSee('† Almarhum Hasan');
+        $this->active($admin, $family)->get(route('members.show', $member))->assertOk()->assertSeeText('Alm. Hasan');
         Storage::disk('public')->assertExists($member->refresh()->profile_photo_thumbnail);
+
+        $femaleMember = FamilyMember::factory()->deceased()->create([
+            'family_id' => $family->id,
+            'created_by' => $admin->id,
+            'full_name' => 'Siti Aminah',
+            'gender' => 'female',
+            'religion' => 'islam',
+        ]);
+        $this->active($admin, $family)
+            ->get(route('members.show', $femaleMember))
+            ->assertOk()
+            ->assertSeeText('Almh. Siti Aminah');
 
         $this->active($admin, $family)->put(route('members.update', $member), [
             'full_name' => 'Hasan Abdullah', 'is_alive' => '0', 'death_date' => '2020-01-01',

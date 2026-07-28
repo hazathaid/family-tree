@@ -18,6 +18,7 @@ use Illuminate\Support\Carbon;
  * @property string $full_name
  * @property string|null $nickname
  * @property string|null $gender
+ * @property string|null $religion
  * @property Carbon|null $birth_date
  * @property string|null $birth_place
  * @property bool $is_alive
@@ -39,6 +40,17 @@ class FamilyMember extends Model
     use HasUuids;
     use SoftDeletes;
 
+    public const RELIGIONS = [
+        'islam',
+        'christian',
+        'catholic',
+        'hindu',
+        'buddhist',
+        'confucian',
+        'belief',
+        'other',
+    ];
+
     protected $fillable = [
         'uuid',
         'family_id',
@@ -46,6 +58,7 @@ class FamilyMember extends Model
         'full_name',
         'nickname',
         'gender',
+        'religion',
         'birth_date',
         'birth_place',
         'is_alive',

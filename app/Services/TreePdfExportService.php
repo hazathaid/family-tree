@@ -11,7 +11,7 @@ class TreePdfExportService
         };
         $lines = ['Bagan Silsilah', 'Mode: '.$tree['mode'].' | Layout: '.$tree['layout'], 'Jumlah Anggota: '.$tree['statistics']['members'], 'Jumlah Generasi: '.$tree['statistics']['generations']];
         foreach (array_slice($tree['nodes'], 0, 100) as $node) {
-            $lines[] = ($node['is_alive'] ? '' : '+ ').$node['name'].' (Generasi '.$node['generation'].')';
+            $lines[] = $this->displayName($node).' (Generasi '.$node['generation'].')';
         }
         $stream = 'BT /F1 12 Tf 40 '.($height - 50).' Td ';
         foreach ($lines as $index => $line) {
@@ -39,5 +39,14 @@ class TreePdfExportService
     private function escape(string $value): string
     {
         return str_replace(['\\', '(', ')'], ['\\\\', '\\(', '\\)'], $value);
+    }
+
+    private function displayName(array $node): string
+    {
+        if ($node['is_alive']) {
+            return $node['name'];
+        }
+
+        return ($node['memorial_prefix'] ?? 'Mendiang ').$node['name'];
     }
 }

@@ -74,3 +74,7 @@ Controls have >=48x48dp target, visible focus, enabled/disabled/loading states a
 ## Accessibility
 
 Every image has contextual semantics or is excluded if decorative. Icon-only controls have labels/tooltips. Traversal order follows visual order. Dynamic status changes use polite announcements. Contrast targets WCAG AA (4.5:1 normal, 3:1 large/UI). Tree nodes expose name, relationship to root, living/deceased status and expand action independent of canvas gestures. Pinch/drag has button alternatives for zoom/reset and keyboard/focus alternatives on supported devices.
+
+Deceased member names use `Alm.`/`Almh.` for Islam, `†` for
+Christian/Catholic, and `Mendiang` for other or unspecified religions. Religion
+is explicitly selected in the member profile and is never inferred from a name.

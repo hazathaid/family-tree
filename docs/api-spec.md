@@ -78,7 +78,7 @@ Family logo/cover web multipart behavior is not represented by the current REST 
 | Method/path | Request / filters | Response |
 |---|---|---|
 | GET `/family-members` | `family_uuid` plus supported search/filter/page parameters | paginated FamilyMember resources |
-| POST `/family-members` | `family_uuid`, `full_name`; optional branch UUID, nickname, gender, birth, `is_alive`, death, biography | created member |
+| POST `/family-members` | `family_uuid`, `full_name`; optional branch UUID, nickname, gender, religion, birth, `is_alive`, death, biography | created member |
 | GET/PUT/DELETE `/family-members/{family_member}` | PUT member fields; death required when not alive | member / updated / soft-deleted null |
 | POST `/family-members/{family_member}/photo` | multipart `photo`, image <=10 MB in current request | updated member with photo |
 | GET `/relationships` | family/member filters + pagination | base relationship resources |
@@ -87,6 +87,11 @@ Family logo/cover web multipart behavior is not represented by the current REST 
 | GET `/relationship-engine` | `source_member_uuid`, `target_member_uuid` | `{relationship,path}`; same family; derived server-side |
 
 The member REST list does not yet expose all server-side filters/sorts used by the Phase 17 web directory; see API-G03.
+
+Member `religion` accepts `islam`, `christian`, `catholic`, `hindu`,
+`buddhist`, `confucian`, `belief`, or `other`, and may be null. Member
+resources also expose a server-derived `memorial_prefix`: `Alm.`/`Almh.` for
+Islam, `†` for Christian/Catholic, and `Mendiang` otherwise.
 
 ### Tree and binary export
 

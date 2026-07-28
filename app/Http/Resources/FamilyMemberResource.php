@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Models\FamilyMember;
+use App\Services\MemorialNameService;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -24,6 +25,12 @@ class FamilyMemberResource extends JsonResource
             'full_name' => $member->full_name,
             'nickname' => $member->nickname,
             'gender' => $member->gender,
+            'religion' => $member->religion,
+            'memorial_prefix' => app(MemorialNameService::class)->prefix(
+                $member->is_alive,
+                $member->gender,
+                $member->religion,
+            ),
             'birth_date' => $member->birth_date?->toDateString(),
             'birth_place' => $member->birth_place,
             'is_alive' => $member->is_alive,

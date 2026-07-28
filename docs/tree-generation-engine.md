@@ -22,6 +22,11 @@ No recursive traversal or derived relationship rows are used.
 
 Nodes include public identity/display fields needed by the tree, generation/distance, living state and photo where available. Deceased nodes remain present and UI adds a memorial marker. Edges include source UUID, target UUID and stored/normalized relationship. A relationship-to-root label for every node is not currently guaranteed by the generate response; FT-API-301 must define it before mobile relies on it.
 
+Web rendering and PNG/PDF exports use the server-derived memorial prefix:
+`Alm.`/`Almh.` for Islam, `†` for Christian/Catholic, and `Mendiang` for other
+or unspecified religions. The prefix is presentation metadata derived from
+religion, gender, and living state; it is not part of the stored member name.
+
 ## Layouts
 
 Current `TreeLayoutService` supports `vertical`, `horizontal`, `radial`, and `compact` positioning. Vertical is the baseline generation-axis layout; horizontal swaps axes; compact reduces spacing; radial places generations around root. Layout is deterministic presentation metadata over the same graph and does not alter kinship.

@@ -3,6 +3,7 @@
 namespace App\Http\Requests\FamilyMember;
 
 use App\Http\Requests\ApiFormRequest;
+use App\Models\FamilyMember;
 use Illuminate\Validation\Rule;
 
 class StoreFamilyMemberRequest extends ApiFormRequest
@@ -15,6 +16,7 @@ class StoreFamilyMemberRequest extends ApiFormRequest
             'full_name' => ['required', 'string', 'max:255'],
             'nickname' => ['nullable', 'string', 'max:255'],
             'gender' => ['nullable', Rule::in(['male', 'female'])],
+            'religion' => ['nullable', Rule::in(FamilyMember::RELIGIONS)],
             'birth_date' => ['nullable', 'date'],
             'birth_place' => ['nullable', 'string', 'max:255'],
             'is_alive' => ['sometimes', 'boolean'],

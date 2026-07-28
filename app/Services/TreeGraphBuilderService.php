@@ -7,7 +7,10 @@ use App\Repositories\Contracts\TreeRepositoryInterface;
 
 class TreeGraphBuilderService
 {
-    public function __construct(private readonly TreeRepositoryInterface $repository) {}
+    public function __construct(
+        private readonly TreeRepositoryInterface $repository,
+        private readonly MemorialNameService $memorialNames,
+    ) {}
 
     public function build(int $familyId): array
     {
@@ -15,6 +18,12 @@ class TreeGraphBuilderService
         foreach ($this->repository->members($familyId) as $member) {
             $nodes[$member->id] = ['id' => $member->id, 'uuid' => $member->uuid, 'name' => $member->full_name,
                 'nickname' => $member->nickname, 'gender' => $member->gender,
+                'religion' => $member->religion,
+                'memorial_prefix' => $this->memorialNames->prefix(
+                    (bool) $member->is_alive,
+                    $member->gender,
+                    $member->religion,
+                ),
                 'birth_year' => $member->birth_date ? (int) substr((string) $member->birth_date, 0, 4) : null,
                 'death_year' => $member->death_date ? (int) substr((string) $member->death_date, 0, 4) : null,
                 'is_alive' => (bool) $member->is_alive, 'profile_photo' => $member->profile_photo,

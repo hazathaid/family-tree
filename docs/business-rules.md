@@ -16,6 +16,12 @@ Sources: `FamilyPolicy`, family resource policies, `FamilyRoleService`, `EnsureA
 
 - A family member is a genealogical record, not automatically a user account.
 - Required/current request constraints include first name and accepted gender/living values as implemented by `StoreFamilyMemberRequest`/`UpdateFamilyMemberRequest`.
+- Religion is optional and explicitly selected from Islam, Christian,
+  Catholic, Hindu, Buddhist, Confucian, indigenous belief, or other. It must
+  never be inferred from a member's name.
+- Memorial presentation uses `Alm.`/`Almh.` for Islam, `†` for
+  Christian/Catholic, and the neutral `Mendiang` label for other or unspecified
+  religions.
 - A member cannot relate to self. Both endpoints must belong to the same family.
 - Only `father`, `mother`, `child`, `husband`, `wife` are persisted.
 - At most one biological father and one biological mother is allowed; duplicate edges are rejected.

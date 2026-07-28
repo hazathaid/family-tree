@@ -34,6 +34,9 @@ if (viewer && dataElement) {
     const photo = (node) => node.profile_photo_url
         ? `<img class="tree-node-photo" src="${escape(node.profile_photo_url)}" alt="Foto ${escape(node.name)}">`
         : `<span class="tree-node-photo tree-node-photo-placeholder" aria-hidden="true">${escape(node.name.charAt(0))}</span>`;
+    const memorialPrefix = (node) => {
+        return node.memorial_prefix ?? (node.is_alive ? '' : 'Mendiang ');
+    };
 
     edgesLayer.setAttribute('width', tree.viewport.width);
     edgesLayer.setAttribute('height', tree.viewport.height);
@@ -51,9 +54,9 @@ if (viewer && dataElement) {
         button.style.left = `${node.position.x}px`;
         button.style.top = `${node.position.y}px`;
         button.setAttribute('aria-label', `${node.name}, ${node.relationship_label ?? 'anggota keluarga'}`);
-        button.innerHTML = `<span class="d-flex gap-2 align-items-center">${photo(node)}<span class="min-width-0"><strong class="d-block text-truncate">${node.is_alive ? '' : '† '}${escape(node.name)}</strong>${node.nickname ? `<span class="tree-nickname d-block text-body-secondary text-truncate">(${escape(node.nickname)})</span>` : ''}<small>${escape(node.birth_year ?? '?')}${node.is_alive ? '–sekarang' : `–${escape(node.death_year ?? '?')}`}</small>${node.relationship_label ? `<span class="tree-relationship d-block text-primary">${escape(node.relationship_label)}</span>` : ''}</span></span>`;
+        button.innerHTML = `<span class="d-flex gap-2 align-items-center">${photo(node)}<span class="min-width-0"><strong class="d-block text-truncate">${memorialPrefix(node)}${escape(node.name)}</strong>${node.nickname ? `<span class="tree-nickname d-block text-body-secondary text-truncate">(${escape(node.nickname)})</span>` : ''}<small>${escape(node.birth_year ?? '?')}${node.is_alive ? '–sekarang' : `–${escape(node.death_year ?? '?')}`}</small>${node.relationship_label ? `<span class="tree-relationship d-block text-primary">${escape(node.relationship_label)}</span>` : ''}</span></span>`;
         button.addEventListener('click', () => {
-            detail.innerHTML = `<div class="text-center mb-3">${photo(node)}<h3 class="h5 mt-2">${node.is_alive ? '' : '† '}${escape(node.name)}</h3><p class="text-primary">${escape(node.relationship_label ?? 'Hubungan belum dikenali')}</p></div><dl><dt>Pekerjaan</dt><dd>${escape(node.occupation || 'Belum diisi')}</dd><dt>Pendidikan</dt><dd>${escape(node.education || 'Belum diisi')}</dd><dt>Biografi</dt><dd>${escape(node.biography || 'Belum ada biografi.')}</dd></dl><a class="btn btn-primary" href="/members/${encodeURIComponent(node.uuid)}">Lihat profil lengkap</a>`;
+            detail.innerHTML = `<div class="text-center mb-3">${photo(node)}<h3 class="h5 mt-2">${memorialPrefix(node)}${escape(node.name)}</h3><p class="text-primary">${escape(node.relationship_label ?? 'Hubungan belum dikenali')}</p></div><dl><dt>Pekerjaan</dt><dd>${escape(node.occupation || 'Belum diisi')}</dd><dt>Pendidikan</dt><dd>${escape(node.education || 'Belum diisi')}</dd><dt>Biografi</dt><dd>${escape(node.biography || 'Belum ada biografi.')}</dd></dl><a class="btn btn-primary" href="/members/${encodeURIComponent(node.uuid)}">Lihat profil lengkap</a>`;
             Offcanvas.getOrCreateInstance(drawerElement).show();
         });
         nodesLayer.append(button);

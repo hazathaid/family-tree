@@ -91,6 +91,7 @@ class FamilyMemberService
             'full_name' => $data['full_name'],
             'nickname' => $data['nickname'] ?? null,
             'gender' => $data['gender'] ?? null,
+            'religion' => $data['religion'] ?? null,
             'birth_date' => $data['birth_date'] ?? null,
             'birth_place' => $data['birth_place'] ?? null,
             'is_alive' => $data['is_alive'] ?? true,

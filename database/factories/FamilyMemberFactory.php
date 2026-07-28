@@ -22,6 +22,7 @@ class FamilyMemberFactory extends Factory
             'full_name' => fake()->name(),
             'nickname' => fake()->optional()->firstName(),
             'gender' => fake()->randomElement(['male', 'female']),
+            'religion' => null,
             'birth_date' => fake()->date('Y-m-d', '-18 years'),
             'birth_place' => fake()->optional()->city(),
             'is_alive' => true,
