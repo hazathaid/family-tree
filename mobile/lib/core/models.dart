@@ -242,6 +242,8 @@ class FamilyMember {
       this.branchName,
       this.nickname,
       this.gender,
+      this.religion,
+      this.memorialPrefix = '',
       this.birthDate,
       this.birthPlace,
       this.deathDate,
@@ -257,6 +259,8 @@ class FamilyMember {
   final String? branchName;
   final String? nickname;
   final String? gender;
+  final String? religion;
+  final String memorialPrefix;
   final DateTime? birthDate;
   final String? birthPlace;
   final DateTime? deathDate;
@@ -264,6 +268,8 @@ class FamilyMember {
   final String? biography;
   final String? photoUrl;
   final int? generation;
+
+  String get displayName => '$memorialPrefix$fullName';
 
   factory FamilyMember.fromJson(Map<String, dynamic> json) => FamilyMember(
         uuid: json['uuid'] as String,
@@ -274,6 +280,8 @@ class FamilyMember {
         branchName: json['family_branch_name'] as String?,
         nickname: json['nickname'] as String?,
         gender: json['gender'] as String?,
+        religion: json['religion'] as String?,
+        memorialPrefix: json['memorial_prefix'] as String? ?? '',
         birthDate: DateTime.tryParse(json['birth_date'] as String? ?? ''),
         birthPlace: json['birth_place'] as String?,
         deathDate: DateTime.tryParse(json['death_date'] as String? ?? ''),
@@ -438,6 +446,7 @@ class TreeNode {
       required this.isRoot,
       required this.isBoundary,
       this.relationshipToRoot,
+      this.memorialPrefix = '',
       this.photoUrl});
 
   final String uuid;
@@ -450,7 +459,10 @@ class TreeNode {
   final bool isRoot;
   final bool isBoundary;
   final String? relationshipToRoot;
+  final String memorialPrefix;
   final String? photoUrl;
+
+  String get displayName => '$memorialPrefix$name';
 
   factory TreeNode.fromJson(Map<String, dynamic> json) {
     final position = json['position'] as Map<String, dynamic>? ?? const {};
@@ -465,6 +477,7 @@ class TreeNode {
       isRoot: json['is_root'] as bool? ?? false,
       isBoundary: json['is_boundary'] as bool? ?? false,
       relationshipToRoot: json['relationship_to_root'] as String?,
+      memorialPrefix: json['memorial_prefix'] as String? ?? '',
       photoUrl: json['profile_photo_url'] as String?,
     );
   }

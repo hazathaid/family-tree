@@ -34,12 +34,15 @@ class FamilyMemberApiTest extends TestCase
             'full_name' => 'Siti Aminah',
             'nickname' => 'Siti',
             'gender' => 'female',
+            'religion' => 'islam',
             'birth_date' => '1980-01-10',
             'birth_place' => 'Bandung',
             'is_alive' => true,
             'biography' => 'Pendiri arsip keluarga.',
         ])->assertCreated()
             ->assertJsonPath('data.full_name', 'Siti Aminah')
+            ->assertJsonPath('data.religion', 'islam')
+            ->assertJsonPath('data.memorial_prefix', '')
             ->assertJsonPath('data.family_uuid', $family->uuid)
             ->assertJsonPath('data.family_branch_uuid', $branch->uuid);
 
@@ -58,6 +61,7 @@ class FamilyMemberApiTest extends TestCase
             'full_name' => 'Siti Aminah Rahman',
             'nickname' => 'Aminah',
             'gender' => 'female',
+            'religion' => 'islam',
             'birth_date' => '1980-01-10',
             'birth_place' => 'Bandung',
             'is_alive' => false,
@@ -67,6 +71,7 @@ class FamilyMemberApiTest extends TestCase
         ])->assertOk()
             ->assertJsonPath('data.full_name', 'Siti Aminah Rahman')
             ->assertJsonPath('data.is_alive', false)
+            ->assertJsonPath('data.memorial_prefix', 'Almh. ')
             ->assertJsonPath('data.death_date', '2024-05-01');
 
         $member = FamilyMember::query()->where('uuid', $memberUuid)->firstOrFail();

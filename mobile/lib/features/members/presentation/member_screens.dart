@@ -217,10 +217,9 @@ class _MemberDirectoryScreenState extends ConsumerState<MemberDirectoryScreen> {
                             onSelectChanged: (_) =>
                                 context.push('/members/${m.uuid}'),
                             cells: [
-                              DataCell(Text(m.fullName)),
+                              DataCell(Text(m.displayName)),
                               DataCell(Text(_gender(m.gender))),
-                              DataCell(
-                                  Text(m.isAlive ? 'Hidup' : '† Meninggal')),
+                              DataCell(Text(m.isAlive ? 'Hidup' : 'Meninggal')),
                               DataCell(Text(m.branchName ?? '—'))
                             ]))
                     .toList()))
@@ -234,9 +233,9 @@ class _MemberDirectoryScreenState extends ConsumerState<MemberDirectoryScreen> {
                   child: ListTile(
                       minTileHeight: 64,
                       leading: _MemberAvatar(member: m),
-                      title: Text(m.fullName),
+                      title: Text(m.displayName),
                       subtitle: Text(
-                          '${_gender(m.gender)} · ${m.isAlive ? 'Hidup' : '† Meninggal'}'),
+                          '${_gender(m.gender)} · ${m.isAlive ? 'Hidup' : 'Meninggal'}'),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () => context.push('/members/${m.uuid}')));
             });
@@ -292,7 +291,7 @@ class MemberDetailScreen extends ConsumerWidget {
         final relations = snapshot.data![1] as PageData<MemberRelationship>;
         final canManage = ref.read(currentFamilyProvider)?.canManage ?? false;
         return Scaffold(
-          appBar: AppBar(title: Text(member.fullName), actions: [
+          appBar: AppBar(title: Text(member.displayName), actions: [
             if (canManage)
               IconButton(
                   tooltip: 'Edit anggota',
@@ -312,6 +311,7 @@ class MemberDetailScreen extends ConsumerWidget {
               _Info('Nama lengkap', member.fullName),
               _Info('Nama panggilan', member.nickname),
               _Info('Gender', _gender(member.gender)),
+              _Info('Agama/kepercayaan', _religion(member.religion)),
               _Info('Lahir', _datePlace(member.birthDate, member.birthPlace)),
               if (!member.isAlive)
                 _Info('Wafat', _datePlace(member.deathDate, member.deathPlace))
@@ -378,6 +378,7 @@ class _MemberFormScreenState extends ConsumerState<MemberFormScreen> {
   late final deathDate =
       TextEditingController(text: _iso(widget.member?.deathDate));
   String? gender;
+  String? religion;
   String? branch;
   bool alive = true;
   bool saving = false;
@@ -386,6 +387,7 @@ class _MemberFormScreenState extends ConsumerState<MemberFormScreen> {
   void initState() {
     super.initState();
     gender = widget.member?.gender;
+    religion = widget.member?.religion;
     branch = widget.member?.branchUuid;
     alive = widget.member?.isAlive ?? true;
   }
@@ -398,6 +400,7 @@ class _MemberFormScreenState extends ConsumerState<MemberFormScreen> {
       'full_name': name.text.trim(),
       'nickname': _null(nickname.text),
       'gender': gender,
+      'religion': religion,
       'birth_date': _null(birthDate.text),
       'birth_place': _null(birthPlace.text),
       'is_alive': alive,
@@ -506,6 +509,31 @@ class _MemberFormScreenState extends ConsumerState<MemberFormScreen> {
                               value: 'female', child: Text('Perempuan'))
                         ],
                         onChanged: (v) => setState(() => gender = v)),
+                    DropdownButtonFormField<String?>(
+                        initialValue: religion,
+                        decoration: InputDecoration(
+                            labelText: 'Agama/kepercayaan',
+                            errorText: errors['religion']?.first),
+                        items: const [
+                          DropdownMenuItem(
+                              value: null, child: Text('Belum ditentukan')),
+                          DropdownMenuItem(value: 'islam', child: Text('Islam')),
+                          DropdownMenuItem(
+                              value: 'christian', child: Text('Kristen')),
+                          DropdownMenuItem(
+                              value: 'catholic', child: Text('Katolik')),
+                          DropdownMenuItem(value: 'hindu', child: Text('Hindu')),
+                          DropdownMenuItem(
+                              value: 'buddhist', child: Text('Buddha')),
+                          DropdownMenuItem(
+                              value: 'confucian', child: Text('Konghucu')),
+                          DropdownMenuItem(
+                              value: 'belief',
+                              child: Text('Penghayat kepercayaan')),
+                          DropdownMenuItem(
+                              value: 'other', child: Text('Lainnya'))
+                        ],
+                        onChanged: (v) => setState(() => religion = v)),
                     DropdownButtonFormField<String?>(
                         initialValue: branch,
                         decoration: const InputDecoration(labelText: 'Cabang'),
@@ -682,7 +710,7 @@ class _RelationshipResolverScreenState
             if (member != null) {
               setState(() {
                 source = member.uuid;
-                sourceName = member.fullName;
+                sourceName = member.displayName;
               });
             }
           }),
@@ -691,7 +719,7 @@ class _RelationshipResolverScreenState
             if (member != null) {
               setState(() {
                 target = member.uuid;
-                targetName = member.fullName;
+                targetName = member.displayName;
               });
             }
           }),
@@ -748,7 +776,7 @@ Future<void> _relationshipDialog(BuildContext context, WidgetRef ref,
                       if (member != null) {
                         setDialog(() {
                           source = member.uuid;
-                          sourceName = member.fullName;
+                          sourceName = member.displayName;
                         });
                       }
                     }),
@@ -758,7 +786,7 @@ Future<void> _relationshipDialog(BuildContext context, WidgetRef ref,
                       if (member != null) {
                         setDialog(() {
                           target = member.uuid;
-                          targetName = member.fullName;
+                          targetName = member.displayName;
                         });
                       }
                     }),
@@ -887,7 +915,7 @@ class _PaginatedMemberPickerDialogState
                                 child: ListView(
                                     children: result.items
                                         .map((member) => ListTile(
-                                            title: Text(member.fullName),
+                                            title: Text(member.displayName),
                                             subtitle: Text(member.branchName ??
                                                 'Tanpa cabang'),
                                             onTap: () =>
@@ -929,7 +957,7 @@ class _MemberAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     final radius = large ? 48.0 : 24.0;
     return Semantics(
-        label: '${member.fullName}, ${member.isAlive ? 'hidup' : 'meninggal'}',
+        label: '${member.displayName}, ${member.isAlive ? 'hidup' : 'meninggal'}',
         child: CircleAvatar(
             radius: radius,
             foregroundImage:
@@ -975,6 +1003,17 @@ String _gender(String? value) => value == 'male'
     : value == 'female'
         ? 'Perempuan'
         : 'Tidak ditentukan';
+String _religion(String? value) => const {
+      'islam': 'Islam',
+      'christian': 'Kristen',
+      'catholic': 'Katolik',
+      'hindu': 'Hindu',
+      'buddhist': 'Buddha',
+      'confucian': 'Konghucu',
+      'belief': 'Penghayat kepercayaan',
+      'other': 'Lainnya',
+    }[value] ??
+    'Belum ditentukan';
 String _datePlace(DateTime? date, String? place) => [
       if (date != null) _iso(date),
       if (place?.isNotEmpty == true) place!

@@ -222,7 +222,7 @@ class _TreeScreenState extends ConsumerState<TreeScreen> {
               ListTile(
                   leading:
                       Icon(node.isAlive ? Icons.person : Icons.local_florist),
-                  title: Text(node.name),
+                  title: Text(node.displayName),
                   subtitle: Text(
                       '${node.relationshipToRoot ?? 'Relationship tidak tersedia'} · ${node.isAlive ? 'Hidup' : 'Meninggal'}')),
               SizedBox(
@@ -255,7 +255,7 @@ class _TreeScreenState extends ConsumerState<TreeScreen> {
       elevation: 1,
       child: ExpansionTile(
           initiallyExpanded: true,
-          title: Text(root?.fullName ?? 'Pilih pusat pohon'),
+          title: Text(root?.displayName ?? 'Pilih pusat pohon'),
           leading: const Icon(Icons.account_tree),
           childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
           children: [
@@ -393,7 +393,7 @@ class _TreeScreenState extends ConsumerState<TreeScreen> {
             return ListTile(
                 leading: Icon(
                     node.isAlive ? Icons.person_outline : Icons.local_florist),
-                title: Text(node.name),
+                title: Text(node.displayName),
                 subtitle: Text(
                     '${node.relationshipToRoot ?? 'Tidak diketahui'} · Generasi ${node.generation}'),
                 onTap: () => showDetails(node));
@@ -426,7 +426,7 @@ class _TreeScreenState extends ConsumerState<TreeScreen> {
                               child: Semantics(
                                   button: true,
                                   label:
-                                      '${node.name}, ${node.relationshipToRoot ?? 'relationship tidak diketahui'}, ${node.isAlive ? 'hidup' : 'meninggal'}',
+                                      '${node.displayName}, ${node.relationshipToRoot ?? 'relationship tidak diketahui'}, ${node.isAlive ? 'hidup' : 'meninggal'}',
                                   child: InkWell(
                                       onTap: () => showDetails(node),
                                       child: Container(
@@ -450,7 +450,7 @@ class _TreeScreenState extends ConsumerState<TreeScreen> {
                                               mainAxisAlignment:
                                                   MainAxisAlignment.center,
                                               children: [
-                                                Text(node.name,
+                                                Text(node.displayName,
                                                     textAlign: TextAlign.center,
                                                     maxLines: 2,
                                                     overflow:
@@ -558,7 +558,7 @@ class _TreeRootPickerState extends ConsumerState<_TreeRootPicker> {
                                 child: ListView(
                                     children: result.items
                                         .map((member) => ListTile(
-                                            title: Text(member.fullName),
+                                            title: Text(member.displayName),
                                             subtitle: Text(member.isAlive
                                                 ? 'Hidup'
                                                 : 'Meninggal'),

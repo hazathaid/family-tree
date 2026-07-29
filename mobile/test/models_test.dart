@@ -49,6 +49,7 @@ void main() {
           'name': 'Ahmad',
           'position': {'x': 10, 'y': 20},
           'relationship_to_root': 'Saya',
+          'memorial_prefix': 'Alm. ',
           'is_root': true,
           'is_boundary': false,
           'distance': 0,
@@ -62,6 +63,7 @@ void main() {
     });
     expect(tree.nodes.single.name, 'Ahmad');
     expect(tree.nodes.single.relationshipToRoot, 'Saya');
+    expect(tree.nodes.single.memorialPrefix, 'Alm. ');
     expect(tree.canExpand, isTrue);
     expect(tree.edges.single.targetUuid, 'child');
   });

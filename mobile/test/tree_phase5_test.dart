@@ -73,6 +73,7 @@ void main() {
           'is_root': false,
           'is_boundary': true,
           'relationship_to_root': 'Ayah',
+          'memorial_prefix': 'Mendiang ',
           'position': {'x': 10, 'y': 20}
         }
       ],
@@ -81,6 +82,7 @@ void main() {
     expect(parsed.layout, 'radial');
     expect(parsed.nodes.single.isBoundary, isTrue);
     expect(parsed.nodes.single.relationshipToRoot, 'Ayah');
+    expect(parsed.nodes.single.memorialPrefix, 'Mendiang ');
   });
 
   test('100k-node projection keeps active widgets bounded', () {

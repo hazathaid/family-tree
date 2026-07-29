@@ -123,7 +123,7 @@ class _DiscoverySearchScreenState extends ConsumerState<DiscoverySearchScreen> {
             title: 'Anggota',
             children: results!.members.map((m) => ListTile(
                   minTileHeight: 56,
-                  title: Text(m.fullName),
+                  title: Text(m.displayName),
                   subtitle: Text([
                     m.birthPlace,
                     if (m.generation != null) 'Generasi ${m.generation}'

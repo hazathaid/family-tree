@@ -17,6 +17,8 @@ void main() {
       fullName: 'Budi Santoso',
       isAlive: false,
       gender: 'male',
+      religion: 'islam',
+      memorialPrefix: 'Alm. ',
       branchName: 'Utama');
 
   testWidgets('directory renders memorial status in phone cards',
@@ -26,7 +28,7 @@ void main() {
       currentFamilyProvider.overrideWith((ref) => family)
     ], child: const MaterialApp(home: MemberDirectoryScreen())));
     await tester.pumpAndSettle();
-    expect(find.text('Budi Santoso'), findsOneWidget);
+    expect(find.text('Alm. Budi Santoso'), findsOneWidget);
     expect(find.textContaining('Meninggal'), findsOneWidget);
   });
 
@@ -46,7 +48,9 @@ void main() {
       'uuid': 'member-uuid',
       'family_uuid': 'family-uuid',
       'full_name': 'Siti',
-      'is_alive': true,
+      'is_alive': false,
+      'religion': 'islam',
+      'memorial_prefix': 'Almh. ',
       'family_branch_name': 'Barat'
     });
     final resolution = RelationshipResolution.fromJson({
@@ -60,6 +64,8 @@ void main() {
       ]
     });
     expect(parsed.branchName, 'Barat');
+    expect(parsed.religion, 'islam');
+    expect(parsed.memorialPrefix, 'Almh. ');
     expect(resolution.relationship, 'Ibu');
     expect(resolution.path.single.toName, 'Ibu');
   });

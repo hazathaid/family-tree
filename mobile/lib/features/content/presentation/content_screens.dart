@@ -789,7 +789,7 @@ class _PhotoDetailState extends ConsumerState<PhotoDetailScreen> {
                             children: page.items
                                 .map((m) => CheckboxListTile(
                                     value: selected.contains(m.uuid),
-                                    title: Text(m.fullName),
+                                    title: Text(m.displayName),
                                     onChanged: (v) => setLocal(() => v == true
                                         ? selected.add(m.uuid)
                                         : selected.remove(m.uuid))))
