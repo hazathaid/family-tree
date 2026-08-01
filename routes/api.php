@@ -34,7 +34,7 @@ use App\Http\Controllers\Api\V1\TimelineController;
 use App\Http\Controllers\Api\V1\TreeExportController;
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('v1')->middleware('throttle:api')->group(function (): void {
+Route::prefix('v1')->name('api.')->middleware('throttle:api')->group(function (): void {
     Route::get('health', SystemHealthController::class);
 
     Route::prefix('auth')->group(function (): void {
@@ -49,7 +49,7 @@ Route::prefix('v1')->middleware('throttle:api')->group(function (): void {
             Route::post('email/verification-notification', [EmailVerificationController::class, 'send']);
             Route::get('email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])
                 ->middleware('signed')
-                ->name('api.verification.verify');
+                ->name('verification.verify');
         });
     });
 
