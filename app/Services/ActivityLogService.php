@@ -24,6 +24,16 @@ class ActivityLogService
         return $this->record($article->family_id, $user, ActivityLog::ARTICLE_CREATED, ['subject_uuid' => $article->uuid, 'title' => $article->title]);
     }
 
+    public function memberAccountInvited(User $user, FamilyMember $member): ActivityLog
+    {
+        return $this->record($member->family_id, $user, ActivityLog::MEMBER_ACCOUNT_INVITED, ['subject_uuid' => $member->uuid]);
+    }
+
+    public function memberAccountClaimed(User $user, FamilyMember $member): ActivityLog
+    {
+        return $this->record($member->family_id, $user, ActivityLog::MEMBER_ACCOUNT_CLAIMED, ['subject_uuid' => $member->uuid]);
+    }
+
     public function photoUploaded(User $user, MemberPhoto $photo): ActivityLog
     {
         return $this->record($photo->family_id, $user, ActivityLog::PHOTO_UPLOADED, ['subject_uuid' => $photo->uuid, 'caption' => $photo->caption]);

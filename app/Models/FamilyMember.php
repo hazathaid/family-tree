@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 
@@ -15,6 +16,7 @@ use Illuminate\Support\Carbon;
  * @property string $uuid
  * @property int $family_id
  * @property int|null $family_branch_id
+ * @property int|null $user_id
  * @property string $full_name
  * @property string|null $nickname
  * @property string|null $gender
@@ -55,6 +57,7 @@ class FamilyMember extends Model
         'uuid',
         'family_id',
         'family_branch_id',
+        'user_id',
         'full_name',
         'nickname',
         'gender',
@@ -99,6 +102,16 @@ class FamilyMember extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function accountInvitations(): HasMany
+    {
+        return $this->hasMany(MemberAccountInvitation::class);
     }
 
     public function taggedPhotos(): BelongsToMany

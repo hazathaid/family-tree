@@ -24,6 +24,8 @@ class FamilyMemberResource extends JsonResource
             'family_branch_uuid' => $member->branch?->uuid,
             'family_branch_name' => $member->branch?->name,
             'full_name' => $member->full_name,
+            'has_account' => $member->user_id !== null,
+            'is_own_profile' => $request->user()?->id === $member->user_id,
             'nickname' => $member->nickname,
             'gender' => $member->gender,
             'religion' => $member->religion,

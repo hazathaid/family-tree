@@ -34,7 +34,19 @@ class FamilyMemberPolicy
 
     public function update(User $user, FamilyMember $member): bool
     {
+        if ($member->user_id === $user->id) {
+            return true;
+        }
+
         return in_array($this->role($user, $member->family), [
+            FamilyUserRole::ROLE_OWNER,
+            FamilyUserRole::ROLE_ADMIN,
+        ], true);
+    }
+
+    public function inviteAccount(User $user, FamilyMember $member): bool
+    {
+        return $member->user_id === null && in_array($this->role($user, $member->family), [
             FamilyUserRole::ROLE_OWNER,
             FamilyUserRole::ROLE_ADMIN,
         ], true);
@@ -42,7 +54,10 @@ class FamilyMemberPolicy
 
     public function delete(User $user, FamilyMember $member): bool
     {
-        return $this->update($user, $member);
+        return in_array($this->role($user, $member->family), [
+            FamilyUserRole::ROLE_OWNER,
+            FamilyUserRole::ROLE_ADMIN,
+        ], true);
     }
 
     private function role(User $user, Family $family): ?string

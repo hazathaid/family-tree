@@ -9,6 +9,7 @@ use App\Http\Requests\Web\SaveMemberRequest;
 use App\Models\Family;
 use App\Models\FamilyMember;
 use App\Services\FamilyMemberService;
+use App\Services\MemberAccountInvitationService;
 use App\Services\WebFamilyManagementService;
 use App\Services\WebOnboardingService;
 use Illuminate\Contracts\View\View;
@@ -22,6 +23,7 @@ class MemberController extends Controller
         private readonly WebOnboardingService $onboarding,
         private readonly WebFamilyManagementService $presentation,
         private readonly FamilyMemberService $members,
+        private readonly MemberAccountInvitationService $accountInvitations,
     ) {}
 
     public function index(MemberDirectoryRequest $request): View
@@ -58,7 +60,11 @@ class MemberController extends Controller
         $this->ensureActiveFamilyMember($request, $member);
         Gate::authorize('view', $member);
 
-        return view('members.show', ['member' => $member->load(['branch', 'taggedPhotos']), ...$this->presentation->memberDetail($member)]);
+        return view('members.show', [
+            'member' => $member->load(['branch', 'taggedPhotos', 'user']),
+            'accountInvitation' => $this->accountInvitations->latestFor($member),
+            ...$this->presentation->memberDetail($member),
+        ]);
     }
 
     public function edit(Request $request, FamilyMember $member): View

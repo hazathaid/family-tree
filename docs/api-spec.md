@@ -76,6 +76,16 @@ Family logo/cover web multipart behavior is not represented by the current REST 
 
 ### Members and relationships
 
+Member account claim endpoints:
+
+| Method/path | Request / authorization | Response |
+|---|---|---|
+| POST `/family-members/{member}/account-invitations` | `email`; authenticated family owner/admin; member must be unclaimed and email unused | Invitation metadata; sends a single-use 7-day email link |
+| GET `/member-account-invitations/{token}` | Public, throttled API group; valid pending token | Invitation metadata without token hash |
+| POST `/member-account-invitations/{token}` | Public; `name`, password + confirmation, optional device name | Verified linked user and Sanctum token; invitation becomes unusable |
+
+An accepted claim sets `family_members.user_id`, restores/creates a `member` family role, and verifies the invited email. A linked user may update and upload a photo only for their own member profile; owner/admin authority remains unchanged and only owner/admin may delete a member.
+
 | Method/path | Request / filters | Response |
 |---|---|---|
 | GET `/family-members` | required `family_uuid`; optional `search`, `gender`, `is_alive`, `branch_uuid`, `sort` name/name_desc/newest/oldest, `page`, `limit` <=100 | paginated FamilyMember resources; family membership required |

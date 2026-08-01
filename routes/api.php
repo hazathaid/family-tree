@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\V1\FamilyRoleController;
 use App\Http\Controllers\Api\V1\FamilyTreeController;
 use App\Http\Controllers\Api\V1\FeaturedArticleController;
 use App\Http\Controllers\Api\V1\GamificationController;
+use App\Http\Controllers\Api\V1\MemberAccountInvitationController;
 use App\Http\Controllers\Api\V1\MemberPhotoController;
 use App\Http\Controllers\Api\V1\NotificationController;
 use App\Http\Controllers\Api\V1\PhotoAlbumController;
@@ -36,6 +37,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->name('api.')->middleware('throttle:api')->group(function (): void {
     Route::get('health', SystemHealthController::class);
+    Route::get('member-account-invitations/{token}', [MemberAccountInvitationController::class, 'show']);
+    Route::post('member-account-invitations/{token}', [MemberAccountInvitationController::class, 'accept'])->middleware('throttle:6,1');
 
     Route::prefix('auth')->group(function (): void {
         Route::post('register', [AuthController::class, 'register'])->middleware('guest:sanctum');
@@ -78,6 +81,7 @@ Route::prefix('v1')->name('api.')->middleware('throttle:api')->group(function ()
 
         Route::apiResource('family-members', FamilyMemberController::class);
         Route::post('family-members/{family_member}/photo', [FamilyMemberController::class, 'uploadPhoto']);
+        Route::post('family-members/{family_member}/account-invitations', [MemberAccountInvitationController::class, 'store']);
 
         Route::get('relationship-engine', [RelationshipEngineController::class, 'show']);
         Route::apiResource('relationships', RelationshipController::class);

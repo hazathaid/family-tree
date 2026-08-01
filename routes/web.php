@@ -8,6 +8,7 @@ use App\Http\Controllers\Web\EmailVerificationController;
 use App\Http\Controllers\Web\EventController;
 use App\Http\Controllers\Web\FamilySettingsController;
 use App\Http\Controllers\Web\FamilyTreeController;
+use App\Http\Controllers\Web\MemberAccountInvitationController;
 use App\Http\Controllers\Web\MemberController;
 use App\Http\Controllers\Web\OnboardingController;
 use App\Http\Controllers\Web\PasswordController;
@@ -19,6 +20,11 @@ use App\Http\Controllers\Web\TimelineController;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome')->name('home');
+
+Route::middleware('guest')->group(function (): void {
+    Route::get('/member-account-invitations/{token}', [MemberAccountInvitationController::class, 'show'])->name('member-account-invitations.show');
+    Route::post('/member-account-invitations/{token}', [MemberAccountInvitationController::class, 'accept'])->name('member-account-invitations.accept');
+});
 
 Route::middleware('guest')->group(function (): void {
     Route::get('/login', [AuthController::class, 'loginForm'])->name('login');
@@ -74,6 +80,7 @@ Route::middleware('auth')->group(function (): void {
 
             Route::resource('members', MemberController::class)->except('show');
             Route::get('/members/{member}', [MemberController::class, 'show'])->name('members.show');
+            Route::post('/members/{member}/account-invitations', [MemberAccountInvitationController::class, 'store'])->name('members.account-invitations.store');
 
             Route::post('/articles/{article}/publish', [ArticleController::class, 'publish'])->name('articles.publish');
             Route::post('/articles/{article}/image', [ArticleController::class, 'image'])->name('articles.image');

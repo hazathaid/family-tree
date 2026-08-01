@@ -31,8 +31,12 @@ class ActivityLog extends Model
 
     public const EVENT_CREATED = 'EVENT_CREATED';
 
+    public const MEMBER_ACCOUNT_INVITED = 'MEMBER_ACCOUNT_INVITED';
+
+    public const MEMBER_ACCOUNT_CLAIMED = 'MEMBER_ACCOUNT_CLAIMED';
+
     public const FILTERS = [
-        'members' => [self::MEMBER_CREATED],
+        'members' => [self::MEMBER_CREATED, self::MEMBER_ACCOUNT_INVITED, self::MEMBER_ACCOUNT_CLAIMED],
         'articles' => [self::ARTICLE_CREATED],
         'photos' => [self::PHOTO_UPLOADED],
         'events' => [self::EVENT_CREATED],

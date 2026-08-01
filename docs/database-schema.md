@@ -18,7 +18,8 @@ Status: audited against all migrations present on 2026-07-22. Migrations are aut
 | `families` | uuid, name, slug, description, origin_city, logo, cover_image, privacy, created_by | unique uuid/slug; creator FK restrict; soft delete |
 | `family_user_roles` | uuid, family_id, user_id, role | unique family+user; cascade FKs; role index; timestamps |
 | `family_branches` | uuid, family_id, name, description | unique family+name; cascade family; soft delete |
-| `family_members` | uuid, family_id, branch_id, names/titles, gender, religion, birth/death, is_alive, contact, biography, profile_photo, created_by, updated_by | family and search indexes; nullable religion index; branch null-on-delete; actors null-on-delete; soft delete |
+| `family_members` | uuid, family_id, branch_id, nullable user_id, names/titles, gender, religion, birth/death, is_alive, contact, biography, profile_photo, created_by, updated_by | family and search indexes; claimed account null-on-delete; unique family+user; branch null-on-delete; actors null-on-delete; soft delete |
+| `member_account_invitations` | uuid, family_member_id, invited_by, email, token_hash, expires_at, accepted_at | unique UUID/token hash; member/inviter FKs; expiry/pending indexes; soft delete; raw token is never stored |
 | `member_relationships` | uuid, family_id, source_member_id, target_member_id, relationship_type, dates, notes | base enum only; composite edge index; all graph FKs cascade; soft delete |
 | `member_relationship_cache` | uuid, family/source/target IDs, relationship_name, relationship_path, is_connected, expires_at | unique lookup triple; expiry and FK indexes; cascade; no soft delete |
 | `member_tree_cache` | uuid, family_id, member_id, mode, depth, tree_json, generated_at, expires_at | unique member+mode+depth; family+expiry index; cascade |

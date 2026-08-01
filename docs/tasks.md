@@ -499,6 +499,14 @@ Fase ini hanya dikerjakan jika FT-DOC-001 menetapkan console super-admin sebagai
 
 # Current Baseline
 
+## FT-WEB-1801 — Member Account Claim & Invitation ✅ Complete (2026-08-01)
+
+- Owner/admin invites an existing unclaimed family profile by email.
+- Recipient creates their own password through a hashed, single-use, expiring token.
+- Acceptance links user and member, verifies email, and grants the family member role.
+- Linked users can edit/upload their own profile but cannot delete it.
+- Web and REST contracts, policies, activity logs, tests, and documentation are included.
+
 Audit repository pada 2026-07-22 menemukan baseline berikut:
 
 - Flutter source tersedia di `mobile/`, tetapi runner Android/iOS dan `pubspec.lock` belum tersedia.
