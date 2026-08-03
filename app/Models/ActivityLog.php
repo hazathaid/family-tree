@@ -35,8 +35,10 @@ class ActivityLog extends Model
 
     public const MEMBER_ACCOUNT_CLAIMED = 'MEMBER_ACCOUNT_CLAIMED';
 
+    public const TREE_RELATIVE_CREATED = 'TREE_RELATIVE_CREATED';
+
     public const FILTERS = [
-        'members' => [self::MEMBER_CREATED, self::MEMBER_ACCOUNT_INVITED, self::MEMBER_ACCOUNT_CLAIMED],
+        'members' => [self::MEMBER_CREATED, self::MEMBER_ACCOUNT_INVITED, self::MEMBER_ACCOUNT_CLAIMED, self::TREE_RELATIVE_CREATED],
         'articles' => [self::ARTICLE_CREATED],
         'photos' => [self::PHOTO_UPLOADED],
         'events' => [self::EVENT_CREATED],

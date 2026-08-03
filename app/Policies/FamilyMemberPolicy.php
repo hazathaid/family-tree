@@ -52,6 +52,12 @@ class FamilyMemberPolicy
         ], true);
     }
 
+    public function addRelative(User $user, FamilyMember $member): bool
+    {
+        return $member->user_id === $user->id
+            || $this->role($user, $member->family) === FamilyUserRole::ROLE_OWNER;
+    }
+
     public function delete(User $user, FamilyMember $member): bool
     {
         return in_array($this->role($user, $member->family), [

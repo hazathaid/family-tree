@@ -34,6 +34,16 @@ class ActivityLogService
         return $this->record($member->family_id, $user, ActivityLog::MEMBER_ACCOUNT_CLAIMED, ['subject_uuid' => $member->uuid]);
     }
 
+    public function treeRelativeCreated(User $user, FamilyMember $member, FamilyMember $relative, string $relation): ActivityLog
+    {
+        return $this->record($member->family_id, $user, ActivityLog::TREE_RELATIVE_CREATED, [
+            'subject_uuid' => $relative->uuid,
+            'member_uuid' => $member->uuid,
+            'relation' => $relation,
+            'name' => $relative->full_name,
+        ]);
+    }
+
     public function photoUploaded(User $user, MemberPhoto $photo): ActivityLog
     {
         return $this->record($photo->family_id, $user, ActivityLog::PHOTO_UPLOADED, ['subject_uuid' => $photo->uuid, 'caption' => $photo->caption]);

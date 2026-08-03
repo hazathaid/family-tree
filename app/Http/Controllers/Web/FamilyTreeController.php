@@ -25,7 +25,7 @@ class FamilyTreeController extends Controller
 
         return view('tree.index', [
             'family' => $family,
-            ...$this->viewer->present($family, $request->validated(), $request->userAgent() && preg_match('/Mobile|Android|iPhone/i', $request->userAgent())),
+            ...$this->viewer->present($family, $request->validated(), (bool) ($request->userAgent() && preg_match('/Mobile|Android|iPhone/i', $request->userAgent())), $request->user()),
         ]);
     }
 }

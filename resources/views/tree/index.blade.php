@@ -91,6 +91,30 @@
             <div class="offcanvas-header"><h2 class="offcanvas-title h5" id="tree-member-title">Detail anggota</h2><button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Tutup detail"></button></div>
             <div class="offcanvas-body" data-tree-detail></div>
         </div>
+        <div class="modal fade" id="tree-relative-modal" tabindex="-1" aria-labelledby="tree-relative-modal-title" aria-hidden="true" data-relative-url-template="{{ route('tree.relatives.store', ['member' => '__member__']) }}">
+            <div class="modal-dialog modal-lg">
+                <form method="POST" class="modal-content" data-tree-relative-form>
+                    @csrf
+                    @foreach(request()->query() as $name => $value)
+                        @if(in_array($name, ['root', 'mode', 'depth', 'layout', 'member_search', 'living_only', 'show_photos', 'show_nicknames', 'show_relationships'], true))
+                            <input type="hidden" name="{{ $name }}" value="{{ $value }}">
+                        @endif
+                    @endforeach
+                    <div class="modal-header"><h2 class="modal-title h5" id="tree-relative-modal-title">Tambah anggota keluarga</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button></div>
+                    <div class="modal-body row g-3">
+                        <input type="hidden" name="relation" data-tree-relative-relation>
+                        <div class="col-12"><p class="mb-0 text-body-secondary" data-tree-relative-description></p></div>
+                        <div class="col-md-8"><label class="form-label" for="tree-relative-name">Nama lengkap</label><input class="form-control" id="tree-relative-name" name="full_name" required maxlength="255"></div>
+                        <div class="col-md-4"><label class="form-label" for="tree-relative-gender">Jenis kelamin</label><select class="form-select" id="tree-relative-gender" name="gender" required><option value="">Pilih</option><option value="male">Laki-laki</option><option value="female">Perempuan</option></select></div>
+                        <div class="col-md-6"><label class="form-label" for="tree-relative-birth-date">Tanggal lahir</label><input class="form-control" id="tree-relative-birth-date" type="date" name="birth_date"></div>
+                        <div class="col-md-6"><label class="form-label" for="tree-relative-birth-place">Tempat lahir</label><input class="form-control" id="tree-relative-birth-place" name="birth_place" maxlength="255"></div>
+                        <input type="hidden" name="is_alive" value="1">
+                        <div class="col-12"><label class="form-label" for="tree-relative-biography">Biografi singkat</label><textarea class="form-control" id="tree-relative-biography" name="biography" rows="3"></textarea></div>
+                    </div>
+                    <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button><button class="btn btn-primary" type="submit">Tambahkan ke pohon</button></div>
+                </form>
+            </div>
+        </div>
         <script type="application/json" id="tree-data">{!! Illuminate\Support\Js::encode($tree) !!}</script>
     @endif
 </x-layouts.app>

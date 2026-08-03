@@ -27,6 +27,17 @@ Web rendering and PNG/PDF exports use the server-derived memorial prefix:
 or unspecified religions. The prefix is presentation metadata derived from
 religion, gender, and living state; it is not part of the stored member name.
 
+## Web tree member creation
+
+The detail sheet for a tree node may create one new base relative: a parent,
+spouse, or child. The operation creates the member and its base relationship in
+one database transaction; it never creates a derived relationship. The member's
+`created_by` and an `activity_logs` record preserve the actor and the target
+node. A family owner can create a relative from any node; a regular family
+member can do so only from the family-member profile linked to their account.
+Server-side policy authorization is mandatory even when the action is hidden in
+the viewer.
+
 ## Layouts
 
 Current `TreeLayoutService` supports `vertical`, `horizontal`, `radial`, and `compact` positioning. Vertical is the baseline generation-axis layout; horizontal swaps axes; compact reduces spacing; radial places generations around root. Layout is deterministic presentation metadata over the same graph and does not alter kinship.

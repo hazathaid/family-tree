@@ -507,6 +507,12 @@ Fase ini hanya dikerjakan jika FT-DOC-001 menetapkan console super-admin sebagai
 - Linked users can edit/upload their own profile but cannot delete it.
 - Web and REST contracts, policies, activity logs, tests, and documentation are included.
 
+## FT-WEB-1802 — Add Relatives from Interactive Tree ✅ Complete (2026-08-03)
+
+- The tree-node detail sheet creates a new parent, spouse, or child and writes only a base relationship.
+- Creation is atomic, records the acting user through `family_members.created_by` and `activity_logs`, and invalidates tree/relationship caches through existing services.
+- Family owners may add from any node; linked family members may add only from their own profile. Feature tests cover permitted and denied flows.
+
 Audit repository pada 2026-07-22 menemukan baseline berikut:
 
 - Flutter source tersedia di `mobile/`, tetapi runner Android/iOS dan `pubspec.lock` belum tersedia.

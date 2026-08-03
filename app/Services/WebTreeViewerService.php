@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Family;
 use App\Models\FamilyMember;
+use App\Models\User;
 use App\Repositories\Contracts\FamilyMemberRepositoryInterface;
 use Illuminate\Support\Facades\Storage;
 
@@ -16,7 +17,7 @@ class WebTreeViewerService
         private readonly RelationshipResolverService $relationships,
     ) {}
 
-    public function present(Family $family, array $filters, bool $compactDefault = false): array
+    public function present(Family $family, array $filters, bool $compactDefault = false, ?User $user = null): array
     {
         $memberOptions = $this->members->paginateForFamily($family, [
             'search' => $filters['member_search'] ?? null,
@@ -38,12 +39,13 @@ class WebTreeViewerService
         $tree = $this->layouts->layout($this->trees->generate($root, $mode, $depth), $layout);
         $showRelationships = ($filters['show_relationships'] ?? '1') === '1';
 
-        $tree['nodes'] = array_map(function (array $node) use ($root, $showRelationships): array {
+        $tree['nodes'] = array_map(function (array $node) use ($root, $showRelationships, $user): array {
             $member = $this->members->findByUuid($node['uuid']);
             $node['relationship_label'] = $showRelationships && $member instanceof FamilyMember
                 ? $this->relationships->resolve($root, $member)['relationship']
                 : null;
             $node['profile_photo_url'] = $node['profile_photo'] ? Storage::url($node['profile_photo']) : null;
+            $node['can_add_relative'] = $user instanceof User && $member instanceof FamilyMember && $user->can('addRelative', $member);
             unset($node['id'], $node['profile_photo']);
 
             return $node;

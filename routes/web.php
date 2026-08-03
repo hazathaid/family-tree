@@ -17,6 +17,7 @@ use App\Http\Controllers\Web\ProfileController;
 use App\Http\Controllers\Web\ReportController;
 use App\Http\Controllers\Web\SearchController;
 use App\Http\Controllers\Web\TimelineController;
+use App\Http\Controllers\Web\TreeRelativeMemberController;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome')->name('home');
@@ -66,6 +67,7 @@ Route::middleware('auth')->group(function (): void {
         Route::middleware('active.family')->group(function (): void {
             Route::get('/dashboard', DashboardController::class)->name('dashboard');
             Route::get('/tree', FamilyTreeController::class)->name('tree.index');
+            Route::post('/tree/members/{member}/relatives', [TreeRelativeMemberController::class, 'store'])->name('tree.relatives.store');
             Route::get('/search', SearchController::class)->middleware('throttle:60,1')->name('search.index');
             Route::get('/reports', ReportController::class)->name('reports.index');
 

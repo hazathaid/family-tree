@@ -1,6 +1,6 @@
 import './bootstrap';
 import 'bootstrap';
-import { Offcanvas } from 'bootstrap';
+import { Modal, Offcanvas } from 'bootstrap';
 
 document.addEventListener('shown.bs.offcanvas', (event) => {
     event.target.querySelector('a, button')?.focus();
@@ -16,6 +16,8 @@ if (viewer && dataElement) {
     const edgesLayer = viewer.querySelector('[data-tree-edges]');
     const drawerElement = document.querySelector('#tree-member-drawer');
     const detail = drawerElement.querySelector('[data-tree-detail]');
+    const relativeModalElement = document.querySelector('#tree-relative-modal');
+    const relativeForm = relativeModalElement?.querySelector('[data-tree-relative-form]');
     const nodes = new Map(tree.nodes.map((node) => [node.uuid, node]));
     let scale = 1;
     let offsetX = 0;
@@ -37,6 +39,16 @@ if (viewer && dataElement) {
     const memorialPrefix = (node) => {
         return node.memorial_prefix ?? (node.is_alive ? '' : 'Mendiang ');
     };
+    const openRelativeForm = (node, relation) => {
+        if (!relativeModalElement || !relativeForm) return;
+        const labels = { parent: 'orang tua', spouse: 'pasangan', child: 'anak' };
+        relativeForm.action = relativeModalElement.dataset.relativeUrlTemplate.replace('__member__', encodeURIComponent(node.uuid));
+        relativeForm.querySelector('[data-tree-relative-relation]').value = relation;
+        relativeModalElement.querySelector('#tree-relative-modal-title').textContent = `Tambah ${labels[relation]} untuk ${node.name}`;
+        relativeModalElement.querySelector('[data-tree-relative-description]').textContent = `Anggota baru akan langsung dihubungkan sebagai ${labels[relation]} dari ${node.name}.`;
+        Offcanvas.getInstance(drawerElement)?.hide();
+        Modal.getOrCreateInstance(relativeModalElement).show();
+    };
 
     edgesLayer.setAttribute('width', tree.viewport.width);
     edgesLayer.setAttribute('height', tree.viewport.height);
@@ -56,7 +68,9 @@ if (viewer && dataElement) {
         button.setAttribute('aria-label', `${node.name}, ${node.relationship_label ?? 'anggota keluarga'}`);
         button.innerHTML = `<span class="d-flex gap-2 align-items-center">${photo(node)}<span class="min-width-0"><strong class="d-block text-truncate">${memorialPrefix(node)}${escape(node.name)}</strong>${node.nickname ? `<span class="tree-nickname d-block text-body-secondary text-truncate">(${escape(node.nickname)})</span>` : ''}<small>${escape(node.birth_year ?? '?')}${node.is_alive ? '–sekarang' : `–${escape(node.death_year ?? '?')}`}</small>${node.relationship_label ? `<span class="tree-relationship d-block text-primary">${escape(node.relationship_label)}</span>` : ''}</span></span>`;
         button.addEventListener('click', () => {
-            detail.innerHTML = `<div class="text-center mb-3">${photo(node)}<h3 class="h5 mt-2">${memorialPrefix(node)}${escape(node.name)}</h3><p class="text-primary">${escape(node.relationship_label ?? 'Hubungan belum dikenali')}</p></div><dl><dt>Pekerjaan</dt><dd>${escape(node.occupation || 'Belum diisi')}</dd><dt>Pendidikan</dt><dd>${escape(node.education || 'Belum diisi')}</dd><dt>Biografi</dt><dd>${escape(node.biography || 'Belum ada biografi.')}</dd></dl><a class="btn btn-primary" href="/members/${encodeURIComponent(node.uuid)}">Lihat profil lengkap</a>`;
+            const relativeActions = node.can_add_relative ? `<div class="mt-3"><p class="small text-body-secondary mb-2">Tambah dari anggota ini</p><div class="d-flex flex-wrap gap-2"><button class="btn btn-outline-primary btn-sm" type="button" data-relative-action="parent">Tambah orang tua</button><button class="btn btn-outline-primary btn-sm" type="button" data-relative-action="spouse">Tambah pasangan</button><button class="btn btn-outline-primary btn-sm" type="button" data-relative-action="child">Tambah anak</button></div></div>` : '';
+            detail.innerHTML = `<div class="text-center mb-3">${photo(node)}<h3 class="h5 mt-2">${memorialPrefix(node)}${escape(node.name)}</h3><p class="text-primary">${escape(node.relationship_label ?? 'Hubungan belum dikenali')}</p></div><dl><dt>Pekerjaan</dt><dd>${escape(node.occupation || 'Belum diisi')}</dd><dt>Pendidikan</dt><dd>${escape(node.education || 'Belum diisi')}</dd><dt>Biografi</dt><dd>${escape(node.biography || 'Belum ada biografi.')}</dd></dl><a class="btn btn-primary" href="/members/${encodeURIComponent(node.uuid)}">Lihat profil lengkap</a>${relativeActions}`;
+            detail.querySelectorAll('[data-relative-action]').forEach((action) => action.addEventListener('click', () => openRelativeForm(node, action.dataset.relativeAction)));
             Offcanvas.getOrCreateInstance(drawerElement).show();
         });
         nodesLayer.append(button);
