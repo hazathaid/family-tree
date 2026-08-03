@@ -106,6 +106,14 @@ class _Trees implements TreeRepository {
           required String layout}) async =>
       value;
   @override
+  Future<FamilyMember> createRelative(
+          String memberUuid, Map<String, dynamic> values) async =>
+      const FamilyMember(
+          uuid: 'new-relative',
+          familyUuid: 'family',
+          fullName: 'Kerabat Baru',
+          isAlive: true);
+  @override
   Future<Uint8List> export(String format, String rootUuid,
           {required String mode,
           required int depth,

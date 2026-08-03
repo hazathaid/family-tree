@@ -445,6 +445,7 @@ class TreeNode {
       required this.isAlive,
       required this.isRoot,
       required this.isBoundary,
+      this.canAddRelative = false,
       this.relationshipToRoot,
       this.memorialPrefix = '',
       this.photoUrl});
@@ -458,6 +459,7 @@ class TreeNode {
   final bool isAlive;
   final bool isRoot;
   final bool isBoundary;
+  final bool canAddRelative;
   final String? relationshipToRoot;
   final String memorialPrefix;
   final String? photoUrl;
@@ -476,6 +478,7 @@ class TreeNode {
       isAlive: json['is_alive'] as bool? ?? true,
       isRoot: json['is_root'] as bool? ?? false,
       isBoundary: json['is_boundary'] as bool? ?? false,
+      canAddRelative: json['can_add_relative'] as bool? ?? false,
       relationshipToRoot: json['relationship_to_root'] as String?,
       memorialPrefix: json['memorial_prefix'] as String? ?? '',
       photoUrl: json['profile_photo_url'] as String?,

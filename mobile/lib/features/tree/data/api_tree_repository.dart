@@ -30,6 +30,13 @@ class ApiTreeRepository implements TreeRepository {
           query: query(rootUuid, mode, depth, layout)) as Map<String, dynamic>);
 
   @override
+  Future<FamilyMember> createRelative(
+          String memberUuid, Map<String, dynamic> values) async =>
+      FamilyMember.fromJson(
+          await api.post('/family-members/$memberUuid/relatives', data: values)
+              as Map<String, dynamic>);
+
+  @override
   Future<Uint8List> export(String format, String rootUuid,
           {required String mode,
           required int depth,

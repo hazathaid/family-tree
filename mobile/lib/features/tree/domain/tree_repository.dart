@@ -7,6 +7,8 @@ import '../../../core/models.dart';
 abstract interface class TreeRepository {
   Future<FamilyTree> generate(String rootUuid,
       {required String mode, required int depth, required String layout});
+  Future<FamilyMember> createRelative(
+      String memberUuid, Map<String, dynamic> values);
   Future<Uint8List> export(String format, String rootUuid,
       {required String mode,
       required int depth,

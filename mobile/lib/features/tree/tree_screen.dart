@@ -232,8 +232,131 @@ class _TreeScreenState extends ConsumerState<TreeScreen> {
                         Navigator.pop(sheetContext);
                         context.push('/members/${node.uuid}');
                       },
-                      child: const Text('Buka detail anggota')))
+                      child: const Text('Buka detail anggota'))),
+              if (node.canAddRelative) ...[
+                const SizedBox(height: 12),
+                Wrap(spacing: 8, runSpacing: 8, children: [
+                  OutlinedButton.icon(
+                      onPressed: () =>
+                          _openRelativeForm(sheetContext, node, 'parent'),
+                      icon: const Icon(Icons.supervisor_account_outlined),
+                      label: const Text('Tambah orang tua')),
+                  OutlinedButton.icon(
+                      onPressed: () =>
+                          _openRelativeForm(sheetContext, node, 'spouse'),
+                      icon: const Icon(Icons.favorite_border),
+                      label: const Text('Tambah pasangan')),
+                  OutlinedButton.icon(
+                      onPressed: () =>
+                          _openRelativeForm(sheetContext, node, 'child'),
+                      icon: const Icon(Icons.child_care_outlined),
+                      label: const Text('Tambah anak')),
+                ]),
+              ]
             ])));
+  }
+
+  void _openRelativeForm(
+      BuildContext sheetContext, TreeNode node, String relation) {
+    Navigator.pop(sheetContext);
+    final name = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+    var gender = 'male';
+    var saving = false;
+    final label = {
+      'parent': 'orang tua',
+      'spouse': 'pasangan',
+      'child': 'anak'
+    }[relation]!;
+
+    showDialog<void>(
+        context: context,
+        builder: (dialogContext) => StatefulBuilder(
+            builder: (dialogStateContext, setDialogState) => AlertDialog(
+                    title: Text('Tambah $label'),
+                    content: Form(
+                        key: formKey,
+                        child:
+                            Column(mainAxisSize: MainAxisSize.min, children: [
+                          Text('Untuk ${node.displayName}'),
+                          const SizedBox(height: 12),
+                          TextFormField(
+                              controller: name,
+                              autofocus: true,
+                              decoration: const InputDecoration(
+                                  labelText: 'Nama lengkap'),
+                              validator: (value) =>
+                                  value?.trim().isEmpty ?? true
+                                      ? 'Nama wajib diisi.'
+                                      : null),
+                          const SizedBox(height: 8),
+                          DropdownButtonFormField<String>(
+                            initialValue: gender,
+                            decoration: const InputDecoration(
+                                labelText: 'Jenis kelamin'),
+                            items: const [
+                              DropdownMenuItem(
+                                  value: 'male', child: Text('Laki-laki')),
+                              DropdownMenuItem(
+                                  value: 'female', child: Text('Perempuan')),
+                            ],
+                            onChanged: saving
+                                ? null
+                                : (value) =>
+                                    setDialogState(() => gender = value!),
+                          ),
+                        ])),
+                    actions: [
+                      TextButton(
+                          onPressed: saving
+                              ? null
+                              : () => Navigator.pop(dialogStateContext),
+                          child: const Text('Batal')),
+                      FilledButton(
+                          onPressed: saving
+                              ? null
+                              : () async {
+                                  if (!formKey.currentState!.validate()) return;
+                                  setDialogState(() => saving = true);
+                                  final navigator =
+                                      Navigator.of(dialogStateContext);
+                                  final messenger =
+                                      ScaffoldMessenger.of(context);
+                                  try {
+                                    await ref
+                                        .read(treeRepositoryProvider)
+                                        .createRelative(node.uuid, {
+                                      'relation': relation,
+                                      'full_name': name.text.trim(),
+                                      'gender': gender,
+                                      'is_alive': true,
+                                    });
+                                    if (!mounted) return;
+                                    navigator.pop();
+                                    await generate();
+                                    if (mounted) {
+                                      messenger.showSnackBar(SnackBar(
+                                          content: Text(
+                                              '${name.text.trim()} berhasil ditambahkan.')));
+                                    }
+                                  } on AppError catch (error) {
+                                    setDialogState(() => saving = false);
+                                    messenger.showSnackBar(
+                                        SnackBar(content: Text(error.message)));
+                                  } catch (_) {
+                                    setDialogState(() => saving = false);
+                                    messenger.showSnackBar(const SnackBar(
+                                        content: Text(
+                                            'Anggota belum dapat ditambahkan.')));
+                                  }
+                                },
+                          child: saving
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator())
+                              : const Text('Tambahkan')),
+                    ])));
   }
 
   @override
