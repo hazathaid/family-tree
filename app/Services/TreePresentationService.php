@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\FamilyMember;
+use App\Models\User;
 
 class TreePresentationService
 {
@@ -12,7 +13,7 @@ class TreePresentationService
         private readonly RelationshipResolverService $relationships,
     ) {}
 
-    public function present(FamilyMember $root, string $mode, int $depth, string $layout): array
+    public function present(FamilyMember $root, string $mode, int $depth, string $layout, ?User $user = null): array
     {
         $tree = $this->layouts->layout($this->trees->generate($root, $mode, $depth), $layout);
         $members = FamilyMember::query()
@@ -39,7 +40,7 @@ class TreePresentationService
             ]];
         }
 
-        $tree['nodes'] = array_map(function (array $node) use ($root, $members, $paths, $depth): array {
+        $tree['nodes'] = array_map(function (array $node) use ($root, $members, $paths, $depth, $user): array {
             /** @var FamilyMember|null $member */
             $member = $members->get($node['id']);
             $node['relationship_to_root'] = $member instanceof FamilyMember
@@ -47,6 +48,7 @@ class TreePresentationService
                 : null;
             $node['distance'] ??= abs((int) $node['generation']);
             $node['is_boundary'] = $node['distance'] === $depth;
+            $node['can_add_relative'] = $user instanceof User && $member instanceof FamilyMember && $user->can('addRelative', $member);
 
             return $node;
         }, $tree['nodes']);

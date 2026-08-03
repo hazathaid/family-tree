@@ -92,6 +92,7 @@ An accepted claim sets `family_members.user_id`, restores/creates a `member` fam
 | POST `/family-members` | `family_uuid`, `full_name`; optional branch UUID, nickname, gender, religion, birth, `is_alive`, death, biography | created member |
 | GET/PUT/DELETE `/family-members/{family_member}` | PUT member fields; death required when not alive | member / updated / soft-deleted null |
 | POST `/family-members/{family_member}/photo` | multipart `photo`, image <=10 MB in current request | updated member with photo |
+| POST `/family-members/{family_member}/relatives` | `relation` parent/spouse/child, `full_name`, `gender`; optional birth, death, biography fields | created relative; allowed only for the linked member or family owner |
 | GET `/relationships` | family/member filters + pagination | base relationship resources |
 | POST `/relationships` | family/source/target UUID, type; optional dates/notes | base relationship; type only father/mother/child/husband/wife |
 | GET/PUT/DELETE `/relationships/{relationship}` | update base-edge fields | relationship / updated / null |

@@ -18,7 +18,7 @@ class FamilyTreeController extends Controller
     {
         $root = FamilyMember::query()->where('uuid', $request->string('member_uuid'))->firstOrFail();
         Gate::authorize('view', $root);
-        $data = $this->trees->present($root, $request->string('mode', 'full')->toString(), $request->integer('depth', 5), $request->string('layout', 'vertical')->toString());
+        $data = $this->trees->present($root, $request->string('mode', 'full')->toString(), $request->integer('depth', 5), $request->string('layout', 'vertical')->toString(), $request->user());
 
         return response()->json(['success' => true, 'message' => 'Tree generated successfully', 'data' => (new TreeResource($data))->resolve($request)]);
     }

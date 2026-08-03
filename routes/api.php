@@ -33,6 +33,7 @@ use App\Http\Controllers\Api\V1\SearchController;
 use App\Http\Controllers\Api\V1\SystemHealthController;
 use App\Http\Controllers\Api\V1\TimelineController;
 use App\Http\Controllers\Api\V1\TreeExportController;
+use App\Http\Controllers\Api\V1\TreeRelativeMemberController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->name('api.')->middleware('throttle:api')->group(function (): void {
@@ -82,6 +83,7 @@ Route::prefix('v1')->name('api.')->middleware('throttle:api')->group(function ()
         Route::apiResource('family-members', FamilyMemberController::class);
         Route::post('family-members/{family_member}/photo', [FamilyMemberController::class, 'uploadPhoto']);
         Route::post('family-members/{family_member}/account-invitations', [MemberAccountInvitationController::class, 'store']);
+        Route::post('family-members/{family_member}/relatives', [TreeRelativeMemberController::class, 'store']);
 
         Route::get('relationship-engine', [RelationshipEngineController::class, 'show']);
         Route::apiResource('relationships', RelationshipController::class);

@@ -38,6 +38,12 @@ member can do so only from the family-member profile linked to their account.
 Server-side policy authorization is mandatory even when the action is hidden in
 the viewer.
 
+The mobile app consumes the same capability through
+`POST /api/v1/family-members/{family_member}/relatives` and only shows the
+action when the tree response includes `can_add_relative`. Flutter remains a
+thin client: it submits the relative payload, then refreshes the tree after the
+server commits the new node and base relationship.
+
 ## Layouts
 
 Current `TreeLayoutService` supports `vertical`, `horizontal`, `radial`, and `compact` positioning. Vertical is the baseline generation-axis layout; horizontal swaps axes; compact reduces spacing; radial places generations around root. Layout is deterministic presentation metadata over the same graph and does not alter kinship.
