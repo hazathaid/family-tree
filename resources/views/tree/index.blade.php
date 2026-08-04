@@ -20,6 +20,7 @@
             <form method="GET" action="{{ route('tree.index') }}" class="row g-3 align-items-end" aria-label="Pengaturan pohon keluarga">
                 <div class="col-12 col-lg-3">
                     <label for="tree-root" class="form-label">Anggota akar</label>
+                    <input id="tree-root-search" class="form-control mb-2" type="search" placeholder="Ketik nama anggota...">
                     <select id="tree-root" name="root" class="form-select">
                         @if(!$memberOptions->contains('uuid', $root->uuid))<option value="{{ $root->uuid }}">{{ $root->full_name }}</option>@endif
                         @foreach($memberOptions as $member)<option value="{{ $member->uuid }}" @selected($root->is($member))>{{ $member->full_name }}{{ $member->nickname ? ' ('.$member->nickname.')' : '' }}</option>@endforeach

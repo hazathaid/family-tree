@@ -90,6 +90,20 @@ if (viewer && dataElement) {
         const match = tree.nodes.find((node) => node.name.toLocaleLowerCase('id').includes(term) || (node.nickname ?? '').toLocaleLowerCase('id').includes(term));
         if (term && match) { center(match); document.querySelector(`[data-tree-node="${match.uuid}"]`).focus(); }
     });
+    const rootSearch = document.querySelector('#tree-root-search');
+    const rootSelect = document.querySelector('#tree-root');
+    if (rootSearch && rootSelect) {
+        rootSearch.addEventListener('input', (event) => {
+            const term = event.target.value.trim().toLocaleLowerCase('id');
+            Array.from(rootSelect.options).forEach((option) => {
+                const label = option.textContent.toLocaleLowerCase('id');
+                option.hidden = Boolean(term) && !label.includes(term);
+            });
+            if (rootSelect.selectedOptions[0]?.hidden) {
+                rootSelect.selectedIndex = Array.from(rootSelect.options).findIndex((option) => !option.hidden);
+            }
+        });
+    }
     viewer.addEventListener('pointerdown', (event) => { if (event.target.closest('.tree-node')) return; dragging = true; start = { x: event.clientX - offsetX, y: event.clientY - offsetY }; viewer.setPointerCapture(event.pointerId); });
     viewer.addEventListener('pointermove', (event) => { if (!dragging) return; offsetX = event.clientX - start.x; offsetY = event.clientY - start.y; applyTransform(); });
     viewer.addEventListener('pointerup', () => { dragging = false; });
