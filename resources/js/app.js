@@ -90,18 +90,43 @@ if (viewer && dataElement) {
         const match = tree.nodes.find((node) => node.name.toLocaleLowerCase('id').includes(term) || (node.nickname ?? '').toLocaleLowerCase('id').includes(term));
         if (term && match) { center(match); document.querySelector(`[data-tree-node="${match.uuid}"]`).focus(); }
     });
-    const rootSearch = document.querySelector('#tree-root-search');
     const rootSelect = document.querySelector('#tree-root');
-    if (rootSearch && rootSelect) {
-        rootSearch.addEventListener('input', (event) => {
-            const term = event.target.value.trim().toLocaleLowerCase('id');
+    if (rootSelect) {
+        let rootSearchTerm = '';
+        let rootSearchTimer = null;
+        const applyRootFilter = () => {
+            const term = rootSearchTerm.trim().toLocaleLowerCase('id');
             Array.from(rootSelect.options).forEach((option) => {
                 const label = option.textContent.toLocaleLowerCase('id');
                 option.hidden = Boolean(term) && !label.includes(term);
             });
-            if (rootSelect.selectedOptions[0]?.hidden) {
-                rootSelect.selectedIndex = Array.from(rootSelect.options).findIndex((option) => !option.hidden);
+            const visibleOptions = Array.from(rootSelect.options).filter((option) => !option.hidden);
+            if (visibleOptions.length && rootSelect.selectedOptions[0]?.hidden) {
+                rootSelect.value = visibleOptions[0].value;
             }
+        };
+        rootSelect.addEventListener('keydown', (event) => {
+            if (event.key === 'Backspace') {
+                event.preventDefault();
+                rootSearchTerm = rootSearchTerm.slice(0, -1);
+            } else if (event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey) {
+                event.preventDefault();
+                rootSearchTerm += event.key;
+            } else if (event.key === 'Escape') {
+                rootSearchTerm = '';
+            } else {
+                return;
+            }
+            applyRootFilter();
+            clearTimeout(rootSearchTimer);
+            rootSearchTimer = setTimeout(() => {
+                rootSearchTerm = '';
+                Array.from(rootSelect.options).forEach((option) => (option.hidden = false));
+            }, 1200);
+        });
+        rootSelect.addEventListener('focus', () => {
+            rootSearchTerm = '';
+            Array.from(rootSelect.options).forEach((option) => (option.hidden = false));
         });
     }
     viewer.addEventListener('pointerdown', (event) => { if (event.target.closest('.tree-node')) return; dragging = true; start = { x: event.clientX - offsetX, y: event.clientY - offsetY }; viewer.setPointerCapture(event.pointerId); });
