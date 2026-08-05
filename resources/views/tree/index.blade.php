@@ -20,11 +20,24 @@
             <form method="GET" action="{{ route('tree.index') }}" class="row g-3 align-items-end" aria-label="Pengaturan pohon keluarga">
                 <div class="col-12 col-lg-3">
                     <label for="tree-root" class="form-label">Anggota akar</label>
-                    <select id="tree-root" name="root" class="form-select">
-                        @if(!$memberOptions->contains('uuid', $root->uuid))<option value="{{ $root->uuid }}">{{ $root->full_name }}</option>@endif
-                        @foreach($memberOptions as $member)<option value="{{ $member->uuid }}" @selected($root->is($member))>{{ $member->full_name }}{{ $member->nickname ? ' ('.$member->nickname.')' : '' }}</option>@endforeach
-                    </select>
-                    <div class="form-text">Klik dropdown lalu ketik nama untuk mencari anggota.</div>
+                    <input type="hidden" id="tree-root" name="root" value="{{ $root->uuid }}">
+                    <div class="dropdown tree-root-picker">
+                        <button class="form-select text-start" type="button" id="tree-root-toggle" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                            <span data-tree-root-label>{{ $root->full_name }}{{ $root->nickname ? ' ('.$root->nickname.')' : '' }}</span>
+                        </button>
+                        <div class="dropdown-menu p-2 w-100">
+                            <input id="tree-root-search" class="form-control mb-2" type="search" placeholder="Ketik nama anggota..." autocomplete="off">
+                            <div class="tree-root-options" data-tree-root-options>
+                                @if(!$memberOptions->contains('uuid', $root->uuid))
+                                    <button type="button" class="dropdown-item" data-tree-root-option data-value="{{ $root->uuid }}" data-label="{{ $root->full_name }}{{ $root->nickname ? ' ('.$root->nickname.')' : '' }}">{{ $root->full_name }}{{ $root->nickname ? ' ('.$root->nickname.')' : '' }}</button>
+                                @endif
+                                @foreach($memberOptions as $member)
+                                    @php($label = $member->full_name.($member->nickname ? ' ('.$member->nickname.')' : ''))
+                                    <button type="button" class="dropdown-item" data-tree-root-option data-value="{{ $member->uuid }}" data-label="{{ $label }}">{{ $label }}</button>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="col-12 col-lg-2">
                     <label for="member-search" class="form-label">Cari pilihan</label>

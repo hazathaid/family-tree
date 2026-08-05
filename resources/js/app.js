@@ -1,6 +1,6 @@
 import './bootstrap';
 import 'bootstrap';
-import { Modal, Offcanvas } from 'bootstrap';
+import { Dropdown, Modal, Offcanvas } from 'bootstrap';
 
 document.addEventListener('shown.bs.offcanvas', (event) => {
     event.target.querySelector('a, button')?.focus();
@@ -90,43 +90,46 @@ if (viewer && dataElement) {
         const match = tree.nodes.find((node) => node.name.toLocaleLowerCase('id').includes(term) || (node.nickname ?? '').toLocaleLowerCase('id').includes(term));
         if (term && match) { center(match); document.querySelector(`[data-tree-node="${match.uuid}"]`).focus(); }
     });
-    const rootSelect = document.querySelector('#tree-root');
-    if (rootSelect) {
-        let rootSearchTerm = '';
-        let rootSearchTimer = null;
-        const applyRootFilter = () => {
-            const term = rootSearchTerm.trim().toLocaleLowerCase('id');
-            Array.from(rootSelect.options).forEach((option) => {
-                const label = option.textContent.toLocaleLowerCase('id');
+    const rootPicker = document.querySelector('.tree-root-picker');
+    const rootValue = document.querySelector('#tree-root');
+    const rootToggle = document.querySelector('#tree-root-toggle');
+    const rootLabel = document.querySelector('[data-tree-root-label]');
+    const rootSearch = document.querySelector('#tree-root-search');
+    const rootOptions = document.querySelectorAll('[data-tree-root-option]');
+    if (rootPicker && rootValue && rootToggle && rootLabel && rootSearch) {
+        const setSelectedRoot = (value, label) => {
+            rootValue.value = value;
+            rootLabel.textContent = label;
+            Dropdown.getOrCreateInstance(rootToggle).hide();
+            rootSearch.value = '';
+            rootOptions.forEach((option) => (option.hidden = false));
+        };
+        const filterRootOptions = () => {
+            const term = rootSearch.value.trim().toLocaleLowerCase('id');
+            rootOptions.forEach((option) => {
+                const label = option.dataset.label.toLocaleLowerCase('id');
                 option.hidden = Boolean(term) && !label.includes(term);
             });
-            const visibleOptions = Array.from(rootSelect.options).filter((option) => !option.hidden);
-            if (visibleOptions.length && rootSelect.selectedOptions[0]?.hidden) {
-                rootSelect.value = visibleOptions[0].value;
-            }
         };
-        rootSelect.addEventListener('keydown', (event) => {
-            if (event.key === 'Backspace') {
-                event.preventDefault();
-                rootSearchTerm = rootSearchTerm.slice(0, -1);
-            } else if (event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey) {
-                event.preventDefault();
-                rootSearchTerm += event.key;
-            } else if (event.key === 'Escape') {
-                rootSearchTerm = '';
-            } else {
-                return;
+        rootSearch.addEventListener('input', filterRootOptions);
+        rootSearch.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                rootSearch.value = '';
+                filterRootOptions();
             }
-            applyRootFilter();
-            clearTimeout(rootSearchTimer);
-            rootSearchTimer = setTimeout(() => {
-                rootSearchTerm = '';
-                Array.from(rootSelect.options).forEach((option) => (option.hidden = false));
-            }, 1200);
         });
-        rootSelect.addEventListener('focus', () => {
-            rootSearchTerm = '';
-            Array.from(rootSelect.options).forEach((option) => (option.hidden = false));
+        rootOptions.forEach((option) => {
+            option.addEventListener('click', () => setSelectedRoot(option.dataset.value, option.dataset.label));
+        });
+        rootToggle.addEventListener('shown.bs.dropdown', () => rootSearch.focus());
+        rootToggle.addEventListener('keydown', (event) => {
+            if (event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey) {
+                event.preventDefault();
+                Dropdown.getOrCreateInstance(rootToggle).show();
+                rootSearch.value = event.key;
+                filterRootOptions();
+                rootSearch.focus();
+            }
         });
     }
     viewer.addEventListener('pointerdown', (event) => { if (event.target.closest('.tree-node')) return; dragging = true; start = { x: event.clientX - offsetX, y: event.clientY - offsetY }; viewer.setPointerCapture(event.pointerId); });
