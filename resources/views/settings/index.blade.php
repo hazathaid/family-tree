@@ -1,6 +1,7 @@
 <x-layouts.app title="Pengaturan Keluarga">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
         <div><h1 class="h2 mb-1">Pengaturan {{ $family->name }}</h1><p class="text-secondary mb-0">Kelola profil, cabang, akses, dan preferensi keluarga.</p></div>
+        <a href="{{ route('settings.export.gedcom') }}" class="btn btn-outline-primary" title="Unduh seluruh data keluarga dalam format GEDCOM (backup & migrasi)">Ekspor GEDCOM</a>
     </div>
     @if(session('status'))<x-alert variant="success">{{ session('status') }}</x-alert>@endif
 

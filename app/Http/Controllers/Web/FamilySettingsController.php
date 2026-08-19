@@ -18,11 +18,13 @@ use App\Models\FamilyUserRole;
 use App\Services\FamilyBranchService;
 use App\Services\FamilyRoleService;
 use App\Services\FamilyService;
+use App\Services\GedcomExportService;
 use App\Services\WebFamilyManagementService;
 use App\Services\WebOnboardingService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
 
 class FamilySettingsController extends Controller
@@ -33,6 +35,7 @@ class FamilySettingsController extends Controller
         private readonly FamilyService $families,
         private readonly FamilyBranchService $branches,
         private readonly FamilyRoleService $roles,
+        private readonly GedcomExportService $gedcom,
     ) {}
 
     public function index(Request $request): View
@@ -108,6 +111,17 @@ class FamilySettingsController extends Controller
         $this->roles->removeMember($family, $membership);
 
         return back()->with('status', 'Akses anggota berhasil dicabut.');
+    }
+
+    public function exportGedcom(Request $request): Response
+    {
+        $family = $this->activeFamily($request);
+        Gate::authorize('view', $family);
+
+        return response($this->gedcom->export($family), 200, [
+            'Content-Type' => 'text/x-gedcom; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="'.$this->gedcom->filename($family).'"',
+        ]);
     }
 
     private function activeFamily(Request $request): Family

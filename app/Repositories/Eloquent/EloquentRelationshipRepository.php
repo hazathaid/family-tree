@@ -155,4 +155,11 @@ class EloquentRelationshipRepository implements RelationshipRepositoryInterface
             ->latest()
             ->get();
     }
+
+    public function allForFamily(Family $family): Collection
+    {
+        return MemberRelationship::query()
+            ->where('family_id', $family->id)
+            ->get();
+    }
 }

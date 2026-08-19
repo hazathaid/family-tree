@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Repositories\Contracts\FamilyMemberRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 
 class EloquentFamilyMemberRepository implements FamilyMemberRepositoryInterface
 {
@@ -73,5 +74,12 @@ class EloquentFamilyMemberRepository implements FamilyMemberRepositoryInterface
             ->when(! in_array($sort, ['name', 'name_desc', 'oldest'], true), fn (Builder $query) => $query->latest())
             ->paginate($perPage)
             ->withQueryString();
+    }
+
+    public function allForFamily(Family $family): Collection
+    {
+        return FamilyMember::query()
+            ->where('family_id', $family->id)
+            ->get();
     }
 }

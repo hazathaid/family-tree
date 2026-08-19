@@ -73,6 +73,7 @@ Route::middleware('auth')->group(function (): void {
 
             Route::get('/settings', [FamilySettingsController::class, 'index'])->name('settings.index');
             Route::put('/settings', [FamilySettingsController::class, 'update'])->name('settings.update');
+            Route::get('/settings/export/gedcom', [FamilySettingsController::class, 'exportGedcom'])->name('settings.export.gedcom');
             Route::post('/settings/branches', [FamilySettingsController::class, 'storeBranch'])->name('settings.branches.store');
             Route::put('/settings/branches/{branch}', [FamilySettingsController::class, 'updateBranch'])->name('settings.branches.update');
             Route::delete('/settings/branches/{branch}', [FamilySettingsController::class, 'destroyBranch'])->name('settings.branches.destroy');

@@ -71,6 +71,7 @@ Session responses never expose database IDs, token values, IP addresses, or full
 | GET/PUT/DELETE `/families/{family}/branches/{branch}` | update name/description | branch / updated / null; nested family invariant |
 | GET `/families/{family}/dashboard` | none | six totals plus bounded recent activity (8), birthdays in 30 days (8), events (5), user-scoped notification summary (5), family facts and recent members (6); cached 5 minutes per family/user |
 | POST `/families/{family}/assets` | multipart optional `logo` jpg/jpeg/png/webp <=5 MB and/or `cover_image` <=10 MB | updated Family; owner/admin; 10/min |
+| GET `/families/{family}/export/gedcom` | none | binary `text/x-gedcom; charset=UTF-8` attachment; GEDCOM 5.5.1 LINEAGE-LINKED of all members and base relationships; any family role; 10/min; see `docs/gedcom-export.md` |
 
 Family logo/cover web multipart behavior is not represented by the current REST update contract; see API-G02.
 

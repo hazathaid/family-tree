@@ -499,6 +499,21 @@ Fase ini hanya dikerjakan jika FT-DOC-001 menetapkan console super-admin sebagai
 
 # Current Baseline
 
+## FT-MOB-804A — ARB Localization Foundation ✅ Complete (2026-08-19)
+
+- Added `flutter_localizations` + `intl`, `l10n.yaml`, and `lib/l10n/app_id.arb` (Indonesian template) / `app_en.arb` with `generate: true`.
+- Wired `AppLocalizations` into `FamilyTreeApp` with `locale: Locale('id')`.
+- Migrated the auth flow (login, register, forgot/reset password, verification) and shared widgets (`AppSkeleton`, `AppErrorState`, `StaleDataBanner`, `AppStatusBadge`, `showAppConfirmation`) to ARB.
+- Added `test/l10n_test.dart` verifying both locales resolve every key; Flutter analyze + tests green.
+- Screens outside auth/shared widgets still contain inline strings; migrating them is follow-up work tracked under FT-MOB-804.
+
+## FT-GEDCOM-001 — GEDCOM Family Export ✅ Complete (2026-08-19)
+
+- Family owners and members can download the active family as a GEDCOM 5.5.1 LINEAGE-LINKED file from web settings (`/settings/export/gedcom`) and via REST (`GET /api/v1/families/{family}/export/gedcom`).
+- Only the five stored base relationships are mapped into INDI/FAM records through `GedcomExportService`; derived kinship is never stored or computed.
+- Export is family-scoped, policy-guarded (`view`), rate-limited (10/min), and documented in `docs/gedcom-export.md`; no schema change required.
+- GEDCOM import is a separate backlog item and is not included.
+
 ## FT-WEB-1801 — Member Account Claim & Invitation ✅ Complete (2026-08-01)
 
 - Owner/admin invites an existing unclaimed family profile by email.
