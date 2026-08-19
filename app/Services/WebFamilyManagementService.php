@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Family;
 use App\Models\FamilyMember;
+use App\Models\User;
 use App\Repositories\Contracts\FamilyBranchRepositoryInterface;
 use App\Repositories\Contracts\FamilyMemberRepositoryInterface;
 use App\Repositories\Contracts\FamilyUserRoleRepositoryInterface;
@@ -17,6 +18,7 @@ class WebFamilyManagementService
         private readonly FamilyMemberRepositoryInterface $members,
         private readonly FamilyUserRoleRepositoryInterface $roles,
         private readonly RelationshipRepositoryInterface $relationships,
+        private readonly RelationshipResolverService $relationshipResolver,
     ) {}
 
     public function settings(Family $family): array
@@ -36,9 +38,19 @@ class WebFamilyManagementService
         ];
     }
 
-    public function memberDetail(FamilyMember $member): array
+    public function memberDetail(FamilyMember $member, User $user): array
     {
-        return ['relationships' => $this->relationships->forMember($member)];
+        $viewer = $this->members->findForUserInFamily($user, $member->family);
+        $relationship = null;
+
+        if ($viewer instanceof FamilyMember) {
+            $relationship = $this->relationshipResolver->resolve($viewer, $member)['relationship'];
+        }
+
+        return [
+            'relationships' => $this->relationships->forMember($member),
+            'relationship_to_viewer' => $relationship,
+        ];
     }
 
     public function branchesForForm(Family $family): Collection

@@ -34,6 +34,14 @@ class EloquentFamilyMemberRepository implements FamilyMemberRepositoryInterface
         return FamilyMember::query()->where('uuid', $uuid)->first();
     }
 
+    public function findForUserInFamily(User $user, Family $family): ?FamilyMember
+    {
+        return FamilyMember::query()
+            ->where('family_id', $family->id)
+            ->where('user_id', $user->id)
+            ->first();
+    }
+
     public function paginateForUser(User $user, int $perPage = 15): LengthAwarePaginator
     {
         return FamilyMember::query()

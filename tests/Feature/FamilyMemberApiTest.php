@@ -6,6 +6,7 @@ use App\Models\Family;
 use App\Models\FamilyBranch;
 use App\Models\FamilyMember;
 use App\Models\FamilyUserRole;
+use App\Models\MemberRelationship;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -196,6 +197,69 @@ class FamilyMemberApiTest extends TestCase
 
         $this->getJson('/api/v1/family-members?family_uuid='.$foreignFamily->uuid)
             ->assertForbidden();
+    }
+
+    public function test_member_detail_exposes_relationship_to_viewer_from_linked_member(): void
+    {
+        $user = User::factory()->create();
+        $family = Family::factory()->create(['created_by' => $user->id]);
+        FamilyUserRole::factory()->owner()->create(['family_id' => $family->id, 'user_id' => $user->id]);
+
+        $father = $this->member($family, 'Ayah Dedi', 'male', '1970-01-01', $user);
+        $mother = $this->member($family, 'Ibu Rini', 'female', '1972-01-01', $user);
+        $self = $this->member($family, 'Saya Arif', 'male', '1995-01-01', $user);
+        $self->update(['user_id' => $user->id]);
+
+        $this->relationship($father, $self, 'father');
+        $this->relationship($mother, $self, 'mother');
+
+        Sanctum::actingAs($user);
+
+        $this->getJson('/api/v1/family-members/'.$father->uuid)
+            ->assertOk()
+            ->assertJsonPath('data.relationship_to_viewer', 'Ayah');
+
+        $this->getJson('/api/v1/family-members/'.$mother->uuid)
+            ->assertOk()
+            ->assertJsonPath('data.relationship_to_viewer', 'Ibu');
+
+        $this->getJson('/api/v1/family-members/'.$self->uuid)
+            ->assertOk()
+            ->assertJsonPath('data.relationship_to_viewer', 'Saya');
+    }
+
+    public function test_member_detail_relationship_to_viewer_is_null_without_linked_member(): void
+    {
+        $owner = User::factory()->create();
+        $family = Family::factory()->create(['created_by' => $owner->id]);
+        $member = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $owner->id]);
+        FamilyUserRole::factory()->owner()->create(['family_id' => $family->id, 'user_id' => $owner->id]);
+        Sanctum::actingAs($owner);
+
+        $this->getJson('/api/v1/family-members/'.$member->uuid)
+            ->assertOk()
+            ->assertJsonPath('data.relationship_to_viewer', null);
+    }
+
+    private function member(Family $family, string $name, string $gender, string $birthDate, User $user): FamilyMember
+    {
+        return FamilyMember::factory()->create([
+            'family_id' => $family->id,
+            'full_name' => $name,
+            'gender' => $gender,
+            'birth_date' => $birthDate,
+            'created_by' => $user->id,
+        ]);
+    }
+
+    private function relationship(FamilyMember $source, FamilyMember $target, string $type): MemberRelationship
+    {
+        return MemberRelationship::factory()->create([
+            'family_id' => $source->family_id,
+            'source_member_id' => $source->id,
+            'target_member_id' => $target->id,
+            'relationship_type' => $type,
+        ]);
     }
 
     private function tinyPng(): string

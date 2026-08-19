@@ -47,6 +47,10 @@ The PHP resolver is the executable naming authority. Mobile displays its label/p
 
 Pakde/Bude versus Om/Tante uses available birth dates to compare the parent's sibling with the parent. Missing/equal dates fall back to the resolver's generic/younger naming behavior; clients must not guess age order.
 
+### Viewer perspective on member detail
+
+Web and API member detail surfaces resolve the authenticated user's linked member (`family_members.user_id` within the same family) and call `RelationshipResolverService::resolve(viewer, target)` server-side. The derived label is exposed as `relationship_to_viewer` on GET `/family-members/{family_member}` and rendered on the web member detail page ("X untuk Anda") and the mobile detail screen. When the user has no linked member in the target family, or viewer and target are disconnected, the field is `null` and no badge is shown. `source == target` yields `Saya`. Clients display the label verbatim and never recompute kinship.
+
 ## Integrity and cycle handling
 
 Before write, `RelationshipService` rejects self-reference, duplicate base edge, second biological father/mother and a parent edge that would create a cycle. Parent-cycle detection is iterative over existing parent edges. Spouse inverses are created/updated/deleted in the same database transaction. Runtime BFS remains cycle-safe even if legacy malformed data exists.

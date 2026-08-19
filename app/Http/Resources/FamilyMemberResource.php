@@ -11,6 +11,11 @@ use Illuminate\Support\Facades\Storage;
 
 class FamilyMemberResource extends JsonResource
 {
+    public function __construct(mixed $resource, private readonly ?string $relationshipToViewer = null)
+    {
+        parent::__construct($resource);
+    }
+
     public function toArray(Request $request): array
     {
         /** @var FamilyMember $member */
@@ -45,6 +50,7 @@ class FamilyMemberResource extends JsonResource
             'profile_photo_url' => $member->profile_photo ? $disk->url($member->profile_photo) : null,
             'profile_photo_thumbnail' => $member->profile_photo_thumbnail,
             'profile_photo_thumbnail_url' => $member->profile_photo_thumbnail ? $disk->url($member->profile_photo_thumbnail) : null,
+            'relationship_to_viewer' => $this->relationshipToViewer,
             'created_by' => $member->created_by,
             'created_at' => $member->created_at?->toISOString(),
             'updated_at' => $member->updated_at?->toISOString(),

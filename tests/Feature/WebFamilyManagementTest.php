@@ -6,6 +6,7 @@ use App\Models\Family;
 use App\Models\FamilyBranch;
 use App\Models\FamilyMember;
 use App\Models\FamilyUserRole;
+use App\Models\MemberRelationship;
 use App\Models\User;
 use App\Services\WebOnboardingService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -113,6 +114,65 @@ class WebFamilyManagementTest extends TestCase
         $foreignMember = FamilyMember::factory()->create();
 
         $this->active($user, $family)->get(route('members.show', $foreignMember))->assertNotFound();
+    }
+
+    public function test_linked_member_sees_derived_relationship_labels_from_own_perspective(): void
+    {
+        [$user, $family] = $this->userWithFamily(FamilyUserRole::ROLE_MEMBER);
+
+        $grandFather = $this->member($family, 'Kakek Budi', 'male', '1945-01-01', $user);
+        $grandMother = $this->member($family, 'Nenek Siti', 'female', '1947-01-01', $user);
+        $father = $this->member($family, 'Ayah Dedi', 'male', '1970-01-01', $user);
+        $mother = $this->member($family, 'Ibu Rini', 'female', '1972-01-01', $user);
+        $uncle = $this->member($family, 'Om Fajar', 'male', '1975-01-01', $user);
+        $cousin = $this->member($family, 'Sepupu Indra', 'male', '1997-01-01', $user);
+        $self = $this->member($family, 'Saya Arif', 'male', '1995-01-01', $user);
+        $self->update(['user_id' => $user->id]);
+
+        $this->relationship($grandFather, $father, 'father');
+        $this->relationship($grandMother, $father, 'mother');
+        $this->relationship($grandFather, $uncle, 'father');
+        $this->relationship($grandMother, $uncle, 'mother');
+        $this->relationship($uncle, $cousin, 'father');
+        $this->relationship($father, $self, 'father');
+        $this->relationship($mother, $self, 'mother');
+
+        $this->active($user, $family)->get(route('members.show', $father))
+            ->assertOk()
+            ->assertSeeText('Ayah untuk Anda');
+        $this->active($user, $family)->get(route('members.show', $grandFather))
+            ->assertOk()
+            ->assertSeeText('Kakek untuk Anda');
+        $this->active($user, $family)->get(route('members.show', $uncle))
+            ->assertOk()
+            ->assertSeeText('Om untuk Anda');
+        $this->active($user, $family)->get(route('members.show', $cousin))
+            ->assertOk()
+            ->assertSeeText('Sepupu untuk Anda');
+        $this->active($user, $family)->get(route('members.show', $self))
+            ->assertOk()
+            ->assertSeeText('Saya untuk Anda');
+    }
+
+    private function member(Family $family, string $name, string $gender, string $birthDate, User $user): FamilyMember
+    {
+        return FamilyMember::factory()->create([
+            'family_id' => $family->id,
+            'full_name' => $name,
+            'gender' => $gender,
+            'birth_date' => $birthDate,
+            'created_by' => $user->id,
+        ]);
+    }
+
+    private function relationship(FamilyMember $source, FamilyMember $target, string $type): MemberRelationship
+    {
+        return MemberRelationship::factory()->create([
+            'family_id' => $source->family_id,
+            'source_member_id' => $source->id,
+            'target_member_id' => $target->id,
+            'relationship_type' => $type,
+        ]);
     }
 
     private function userWithFamily(string $role): array

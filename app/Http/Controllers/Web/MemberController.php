@@ -63,7 +63,7 @@ class MemberController extends Controller
         return view('members.show', [
             'member' => $member->load(['branch', 'taggedPhotos', 'user']),
             'accountInvitation' => $this->accountInvitations->latestFor($member),
-            ...$this->presentation->memberDetail($member),
+            ...$this->presentation->memberDetail($member, $request->user()),
         ]);
     }
 

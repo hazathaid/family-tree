@@ -13,7 +13,9 @@ use App\Models\FamilyMember;
 use App\Repositories\Contracts\FamilyMemberRepositoryInterface;
 use App\Repositories\Contracts\FamilyRepositoryInterface;
 use App\Services\FamilyMemberService;
+use App\Services\RelationshipResolverService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
 class FamilyMemberController extends Controller
@@ -22,6 +24,7 @@ class FamilyMemberController extends Controller
         private readonly FamilyMemberRepositoryInterface $members,
         private readonly FamilyRepositoryInterface $families,
         private readonly FamilyMemberService $memberService,
+        private readonly RelationshipResolverService $relationshipResolver,
     ) {}
 
     public function index(ListFamilyMemberRequest $request): JsonResponse
@@ -67,14 +70,21 @@ class FamilyMemberController extends Controller
         ], 201);
     }
 
-    public function show(FamilyMember $familyMember): JsonResponse
+    public function show(Request $request, FamilyMember $familyMember): JsonResponse
     {
         Gate::authorize('view', $familyMember);
+
+        $viewer = $this->members->findForUserInFamily($request->user(), $familyMember->family);
+        $relationship = null;
+
+        if ($viewer instanceof FamilyMember) {
+            $relationship = $this->relationshipResolver->resolve($viewer, $familyMember)['relationship'];
+        }
 
         return response()->json([
             'success' => true,
             'message' => 'Success',
-            'data' => new FamilyMemberResource($familyMember->load(['family', 'branch'])),
+            'data' => new FamilyMemberResource($familyMember->load(['family', 'branch']), $relationship),
         ]);
     }
 

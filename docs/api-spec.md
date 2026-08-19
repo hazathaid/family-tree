@@ -100,6 +100,15 @@ An accepted claim sets `family_members.user_id`, restores/creates a `member` fam
 
 Member directory filters and sorting execute server-side. Relationship resolver inputs are public member UUIDs; numeric IDs are not accepted.
 
+GET `/family-members/{family_member}` additionally resolves the derived
+relationship from the authenticated user's perspective: when the user has a
+linked member (`family_members.user_id`) in the same family as the target, the
+resource exposes `relationship_to_viewer` with the computed label (`Ayah`,
+`Ibu`, `Kakek`, `Pakde`, `Bude`, `Om`, `Tante`, `Sepupu`, `Keponakan`,
+`Menantu`, `Mertua`, `Saya`, etc.). The label is `null` when the user has no
+linked member in that family or the members are disconnected. Clients display
+the label verbatim and must not recompute kinship locally.
+
 Member `religion` accepts `islam`, `christian`, `catholic`, `hindu`,
 `buddhist`, `confucian`, `belief`, or `other`, and may be null. Member
 resources also expose a server-derived `memorial_prefix`: `Alm.`/`Almh.` for

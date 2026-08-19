@@ -301,6 +301,16 @@ class MemberDetailScreen extends ConsumerWidget {
           ]),
           body: ListView(padding: const EdgeInsets.all(16), children: [
             Center(child: _MemberAvatar(member: member, large: true)),
+            if (member.relationshipToViewer != null)
+              Center(
+                  child: Chip(
+                      avatar: const Icon(Icons.family_restroom, size: 18),
+                      label: Text('${member.relationshipToViewer} untuk Anda'),
+                      backgroundColor:
+                          Theme.of(context).colorScheme.primaryContainer,
+                      labelStyle: TextStyle(
+                          color: Theme.of(context).colorScheme.onPrimaryContainer,
+                          fontWeight: FontWeight.w600))),
             if (!member.isAlive)
               const Center(
                   child: Chip(

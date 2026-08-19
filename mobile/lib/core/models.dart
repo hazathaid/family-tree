@@ -250,7 +250,8 @@ class FamilyMember {
       this.deathPlace,
       this.biography,
       this.photoUrl,
-      this.generation});
+      this.generation,
+      this.relationshipToViewer});
   final String uuid;
   final String familyUuid;
   final String fullName;
@@ -268,6 +269,7 @@ class FamilyMember {
   final String? biography;
   final String? photoUrl;
   final int? generation;
+  final String? relationshipToViewer;
 
   String get displayName => '$memorialPrefix$fullName';
 
@@ -290,6 +292,7 @@ class FamilyMember {
         photoUrl: (json['profile_photo_thumbnail_url'] ??
             json['profile_photo_url']) as String?,
         generation: json['generation'] as int?,
+        relationshipToViewer: json['relationship_to_viewer'] as String?,
       );
 }
 

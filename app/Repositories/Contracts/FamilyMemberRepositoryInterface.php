@@ -17,6 +17,8 @@ interface FamilyMemberRepositoryInterface
 
     public function findByUuid(string $uuid): ?FamilyMember;
 
+    public function findForUserInFamily(User $user, Family $family): ?FamilyMember;
+
     public function paginateForUser(User $user, int $perPage = 15): LengthAwarePaginator;
 
     public function paginateForFamily(Family $family, array $filters = [], int $perPage = 15): LengthAwarePaginator;
