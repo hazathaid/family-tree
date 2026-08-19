@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/errors/app_error.dart';
 import '../../core/providers.dart';
+import '../../l10n/app_localizations.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -50,60 +51,67 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-      body: SafeArea(
-          child: Center(
-              child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(24),
-                  child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 420),
-                      child: AutofillGroup(
-                          child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                            const Icon(Icons.account_tree,
-                                size: 72, color: Color(0xff1e88e5)),
-                            const SizedBox(height: 16),
-                            Text('Family Tree Indonesia',
-                                textAlign: TextAlign.center,
-                                style:
-                                    Theme.of(context).textTheme.headlineSmall),
-                            const SizedBox(height: 32),
-                            TextField(
-                                controller: email,
-                                keyboardType: TextInputType.emailAddress,
-                                autofillHints: const [AutofillHints.email],
-                                textInputAction: TextInputAction.next,
-                                decoration: InputDecoration(
-                                    labelText: 'Email', errorText: emailError)),
-                            const SizedBox(height: 12),
-                            TextField(
-                                controller: password,
-                                obscureText: obscure,
-                                autofillHints: const [AutofillHints.password],
-                                onSubmitted: (_) => loading ? null : submit(),
-                                decoration: InputDecoration(
-                                    labelText: 'Kata sandi',
-                                    suffixIcon: IconButton(
-                                        tooltip: obscure
-                                            ? 'Tampilkan kata sandi'
-                                            : 'Sembunyikan kata sandi',
-                                        onPressed: () =>
-                                            setState(() => obscure = !obscure),
-                                        icon: Icon(obscure
-                                            ? Icons.visibility
-                                            : Icons.visibility_off)))),
-                            Align(
-                                alignment: Alignment.centerRight,
-                                child: TextButton(
-                                    onPressed: () =>
-                                        context.go('/forgot-password'),
-                                    child: const Text('Lupa kata sandi?'))),
-                            FilledButton(
-                                onPressed: loading ? null : submit,
-                                child: Text(loading ? 'Memuat…' : 'Masuk')),
-                            TextButton(
-                                onPressed: () => context.go('/register'),
-                                child: const Text('Buat akun baru')),
-                          ])))))));
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Scaffold(
+        body: SafeArea(
+            child: Center(
+                child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(24),
+                    child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 420),
+                        child: AutofillGroup(
+                            child: Column(
+                                crossAxisAlignment:
+                                    CrossAxisAlignment.stretch,
+                                children: [
+                              const Icon(Icons.account_tree,
+                                  size: 72, color: Color(0xff1e88e5)),
+                              const SizedBox(height: 16),
+                              Text(l10n.appTitle,
+                                  textAlign: TextAlign.center,
+                                  style:
+                                      Theme.of(context).textTheme.headlineSmall),
+                              const SizedBox(height: 32),
+                              TextField(
+                                  controller: email,
+                                  keyboardType: TextInputType.emailAddress,
+                                  autofillHints: const [AutofillHints.email],
+                                  textInputAction: TextInputAction.next,
+                                  decoration: InputDecoration(
+                                      labelText: l10n.email,
+                                      errorText: emailError)),
+                              const SizedBox(height: 12),
+                              TextField(
+                                  controller: password,
+                                  obscureText: obscure,
+                                  autofillHints: const [AutofillHints.password],
+                                  onSubmitted: (_) =>
+                                      loading ? null : submit(),
+                                  decoration: InputDecoration(
+                                      labelText: l10n.password,
+                                      suffixIcon: IconButton(
+                                          tooltip: obscure
+                                              ? l10n.showPassword
+                                              : l10n.hidePassword,
+                                          onPressed: () => setState(
+                                              () => obscure = !obscure),
+                                          icon: Icon(obscure
+                                              ? Icons.visibility
+                                              : Icons.visibility_off)))),
+                              Align(
+                                  alignment: Alignment.centerRight,
+                                  child: TextButton(
+                                      onPressed: () =>
+                                          context.go('/forgot-password'),
+                                      child: Text(l10n.forgotPassword))),
+                              FilledButton(
+                                  onPressed: loading ? null : submit,
+                                  child: Text(
+                                      loading ? l10n.loading : l10n.loginButton)),
+                              TextButton(
+                                  onPressed: () => context.go('/register'),
+                                  child: Text(l10n.createAccount)),
+                            ])))))));
+  }
 }

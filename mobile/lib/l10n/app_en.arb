@@ -1,0 +1,63 @@
+{
+  "@@locale": "en",
+  "appTitle": "Family Tree Indonesia",
+  "loading": "Loading…",
+  "retry": "Try again",
+  "cancel": "Cancel",
+  "continueAction": "Continue",
+  "loadingData": "Loading",
+  "loadFailed": "Unable to load data",
+  "genericError": "Something went wrong. Please try again.",
+  "showingStoredData": "Showing saved data from {time}.",
+  "@showingStoredData": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "statusLabel": "Status: {label}",
+  "@statusLabel": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "email": "Email",
+  "password": "Password",
+  "showPassword": "Show password",
+  "hidePassword": "Hide password",
+  "loginTitle": "Sign in",
+  "loginButton": "Sign in",
+  "forgotPassword": "Forgot password?",
+  "createAccount": "Create new account",
+  "registerTitle": "Register",
+  "registerButton": "Register",
+  "nameLabel": "Name",
+  "phoneOptional": "Phone number (optional)",
+  "haveAccount": "Already have an account? Sign in",
+  "accountCreated": "Account created. Please sign in and verify your email.",
+  "forgotPasswordTitle": "Forgot password",
+  "sendResetLink": "Send reset link",
+  "sending": "Sending…",
+  "backToLogin": "Back to sign in",
+  "resetEmailSent": "If the email is registered, a reset link has been sent.",
+  "resetPasswordTitle": "Reset password",
+  "newPassword": "New password",
+  "savePassword": "Save password",
+  "passwordChanged": "Password changed successfully.",
+  "verifyEmailTitle": "Verify email",
+  "verifyEmailPrompt": "Check your email and open the verification link.",
+  "resendEmail": "Resend email",
+  "resendIn": "Resend in {seconds}s",
+  "@resendIn": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "verificationSent": "Verification link sent.",
+  "logout": "Sign out"
+}

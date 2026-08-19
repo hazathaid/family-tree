@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/errors/app_error.dart';
 import '../../core/providers.dart';
+import '../../l10n/app_localizations.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -30,8 +31,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           name.text.trim(), email.text.trim(), password.text,
           phone: phone.text.trim().isEmpty ? null : phone.text.trim());
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('Akun dibuat. Silakan masuk dan verifikasi email.')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content:
+                Text(AppLocalizations.of(context).accountCreated)));
         context.go('/login');
       }
     } on AppError catch (e) {
@@ -48,27 +50,30 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   }
 
   @override
-  Widget build(BuildContext context) => _AuthPage(title: 'Daftar', children: [
-        _field(name, 'Nama', errors['name']),
-        _field(email, 'Email', errors['email'], email: true),
-        _field(phone, 'Nomor telepon (opsional)', errors['phone']),
-        TextField(
-            controller: password,
-            obscureText: obscure,
-            decoration: InputDecoration(
-                labelText: 'Kata sandi',
-                errorText: errors['password']?.first,
-                suffixIcon: IconButton(
-                    tooltip: 'Tampilkan kata sandi',
-                    onPressed: () => setState(() => obscure = !obscure),
-                    icon: const Icon(Icons.visibility)))),
-        FilledButton(
-            onPressed: loading ? null : submit,
-            child: Text(loading ? 'Memuat…' : 'Daftar')),
-        TextButton(
-            onPressed: () => context.go('/login'),
-            child: const Text('Sudah punya akun? Masuk'))
-      ]);
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return _AuthPage(title: l10n.registerTitle, children: [
+          _field(name, l10n.nameLabel, errors['name']),
+          _field(email, l10n.email, errors['email'], email: true),
+          _field(phone, l10n.phoneOptional, errors['phone']),
+          TextField(
+              controller: password,
+              obscureText: obscure,
+              decoration: InputDecoration(
+                  labelText: l10n.password,
+                  errorText: errors['password']?.first,
+                  suffixIcon: IconButton(
+                      tooltip: l10n.showPassword,
+                      onPressed: () => setState(() => obscure = !obscure),
+                      icon: const Icon(Icons.visibility)))),
+          FilledButton(
+              onPressed: loading ? null : submit,
+              child: Text(loading ? l10n.loading : l10n.registerButton)),
+          TextButton(
+              onPressed: () => context.go('/login'),
+              child: Text(l10n.haveAccount))
+        ]);
+  }
 }
 
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
@@ -86,9 +91,9 @@ class _ForgotPasswordState extends ConsumerState<ForgotPasswordScreen> {
     try {
       await ref.read(authRepositoryProvider).forgotPassword(email.text.trim());
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content:
-                Text('Jika email terdaftar, tautan reset telah dikirim.')));
+                Text(AppLocalizations.of(context).resetEmailSent)));
       }
     } on AppError catch (e) {
       if (mounted) {
@@ -100,16 +105,20 @@ class _ForgotPasswordState extends ConsumerState<ForgotPasswordScreen> {
   }
 
   @override
-  Widget build(BuildContext context) =>
-      _AuthPage(title: 'Lupa kata sandi', children: [
-        _field(email, 'Email', error == null ? null : [error!], email: true),
-        FilledButton(
-            onPressed: loading ? null : submit,
-            child: Text(loading ? 'Mengirim…' : 'Kirim tautan reset')),
-        TextButton(
-            onPressed: () => context.go('/login'),
-            child: const Text('Kembali ke masuk'))
-      ]);
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return _AuthPage(title: l10n.forgotPasswordTitle, children: [
+          _field(email, l10n.email, error == null ? null : [error!],
+              email: true),
+          FilledButton(
+              onPressed: loading ? null : submit,
+              child:
+                  Text(loading ? l10n.sending : l10n.sendResetLink)),
+          TextButton(
+              onPressed: () => context.go('/login'),
+              child: Text(l10n.backToLogin))
+        ]);
+  }
 }
 
 class ResetPasswordScreen extends ConsumerStatefulWidget {
@@ -131,8 +140,8 @@ class _ResetPasswordState extends ConsumerState<ResetPasswordScreen> {
           .read(authRepositoryProvider)
           .resetPassword(widget.token, widget.email, password.text);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Kata sandi berhasil diubah.')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(AppLocalizations.of(context).passwordChanged)));
         context.go('/login');
       }
     } on AppError catch (e) {
@@ -145,20 +154,22 @@ class _ResetPasswordState extends ConsumerState<ResetPasswordScreen> {
   }
 
   @override
-  Widget build(BuildContext context) =>
-      _AuthPage(title: 'Reset kata sandi', children: [
-        Text(widget.email),
-        TextField(
-            controller: password,
-            obscureText: true,
-            decoration: InputDecoration(
-                labelText: 'Kata sandi baru', errorText: error)),
-        FilledButton(
-            onPressed: widget.token.isEmpty || widget.email.isEmpty || loading
-                ? null
-                : submit,
-            child: Text(loading ? 'Memuat…' : 'Simpan kata sandi'))
-      ]);
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return _AuthPage(title: l10n.resetPasswordTitle, children: [
+          Text(widget.email),
+          TextField(
+              controller: password,
+              obscureText: true,
+              decoration: InputDecoration(
+                  labelText: l10n.newPassword, errorText: error)),
+          FilledButton(
+              onPressed: widget.token.isEmpty || widget.email.isEmpty || loading
+                  ? null
+                  : submit,
+              child: Text(loading ? l10n.loading : l10n.savePassword))
+        ]);
+  }
 }
 
 class VerificationScreen extends ConsumerStatefulWidget {
@@ -212,7 +223,7 @@ class _VerificationState extends ConsumerState<VerificationScreen> {
       await ref.read(authRepositoryProvider).resendVerification();
       setState(() {
         cooldown = 60;
-        message = 'Tautan verifikasi dikirim.';
+        message = AppLocalizations.of(context).verificationSent;
       });
       timer?.cancel();
       timer = Timer.periodic(const Duration(seconds: 1), (value) {
@@ -235,24 +246,26 @@ class _VerificationState extends ConsumerState<VerificationScreen> {
   }
 
   @override
-  Widget build(BuildContext context) =>
-      _AuthPage(title: 'Verifikasi email', children: [
-        const Icon(Icons.mark_email_unread_outlined, size: 64),
-        Text(message ?? 'Periksa email Anda lalu buka tautan verifikasi.',
-            textAlign: TextAlign.center),
-        if (loading) const Center(child: CircularProgressIndicator()),
-        FilledButton(
-            onPressed: loading || cooldown > 0 ? null : resend,
-            child: Text(cooldown > 0
-                ? 'Kirim ulang dalam ${cooldown}d'
-                : 'Kirim ulang email')),
-        TextButton(
-            onPressed: () async {
-              await ref.read(authRepositoryProvider).logout();
-              await ref.read(sessionControllerProvider).endSession();
-            },
-            child: const Text('Keluar'))
-      ]);
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return _AuthPage(title: l10n.verifyEmailTitle, children: [
+          const Icon(Icons.mark_email_unread_outlined, size: 64),
+          Text(message ?? l10n.verifyEmailPrompt,
+              textAlign: TextAlign.center),
+          if (loading) const Center(child: CircularProgressIndicator()),
+          FilledButton(
+              onPressed: loading || cooldown > 0 ? null : resend,
+              child: Text(cooldown > 0
+                  ? l10n.resendIn(cooldown)
+                  : l10n.resendEmail)),
+          TextButton(
+              onPressed: () async {
+                await ref.read(authRepositoryProvider).logout();
+                await ref.read(sessionControllerProvider).endSession();
+              },
+              child: Text(l10n.logout))
+        ]);
+  }
 }
 
 Widget _field(

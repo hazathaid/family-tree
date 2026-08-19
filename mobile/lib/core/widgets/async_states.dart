@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
+
 class AppSkeleton extends StatelessWidget {
   const AppSkeleton({this.lines = 4, super.key});
   final int lines;
   @override
   Widget build(BuildContext context) => Semantics(
-        label: 'Memuat',
+        label: AppLocalizations.of(context).loadingData,
         liveRegion: true,
         child: Column(
             children: List.generate(
@@ -40,20 +42,20 @@ class AppEmptyState extends StatelessWidget {
 }
 
 class AppErrorState extends StatelessWidget {
-  const AppErrorState(
-      {required this.onRetry,
-      this.message = 'Terjadi kendala. Silakan coba lagi.',
-      super.key});
+  const AppErrorState({required this.onRetry, this.message, super.key});
   final VoidCallback onRetry;
-  final String message;
+  final String? message;
   @override
-  Widget build(BuildContext context) => AppEmptyState(
-      title: 'Tidak dapat memuat data',
-      message: message,
-      action: FilledButton.icon(
-          onPressed: onRetry,
-          icon: const Icon(Icons.refresh),
-          label: const Text('Coba lagi')));
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return AppEmptyState(
+        title: l10n.loadFailed,
+        message: message ?? l10n.genericError,
+        action: FilledButton.icon(
+            onPressed: onRetry,
+            icon: const Icon(Icons.refresh),
+            label: Text(l10n.retry)));
+  }
 }
 
 class StaleDataBanner extends StatelessWidget {
@@ -62,12 +64,13 @@ class StaleDataBanner extends StatelessWidget {
   final DateTime updatedAt;
   final VoidCallback onRetry;
   @override
-  Widget build(BuildContext context) =>
-      MaterialBanner(
-          content:
-              Text('Menampilkan data tersimpan dari ${updatedAt.toLocal()}.'),
-          leading: const Icon(Icons.cloud_off),
-          actions: [
-            TextButton(onPressed: onRetry, child: const Text('Coba lagi'))
-          ]);
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return MaterialBanner(
+        content: Text(l10n.showingStoredData(updatedAt.toLocal().toString())),
+        leading: const Icon(Icons.cloud_off),
+        actions: [
+          TextButton(onPressed: onRetry, child: Text(l10n.retry))
+        ]);
+  }
 }

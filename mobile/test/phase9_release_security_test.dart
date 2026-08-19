@@ -32,8 +32,7 @@ void main() {
     final files = Directory('.')
         .listSync(recursive: true)
         .whereType<File>()
-        .where((file) => !file.path.contains('/build/') &&
-            !file.path.contains('/.dart_tool/') &&
+        .where((file) => !_isThirdPartyOrArtifact(file.path) &&
             !file.path.endsWith('phase9_release_security_test.dart') &&
             RegExp(r'\.(dart|xml|plist|xcconfig|kts|gradle|properties|yaml|md)$')
                 .hasMatch(file.path));
@@ -45,4 +44,13 @@ void main() {
           reason: 'Credential-like value found in ${file.path}');
     }
   });
+}
+
+bool _isThirdPartyOrArtifact(String path) {
+  final segments = path.replaceAll('\\', '/').split('/');
+  return segments.any((segment) =>
+      segment == 'build' ||
+      segment == '.dart_tool' ||
+      segment == '.symlinks' ||
+      segment == 'Pods');
 }

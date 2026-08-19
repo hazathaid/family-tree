@@ -1,0 +1,63 @@
+{
+  "@@locale": "id",
+  "appTitle": "Family Tree Indonesia",
+  "loading": "Memuat…",
+  "retry": "Coba lagi",
+  "cancel": "Batal",
+  "continueAction": "Lanjutkan",
+  "loadingData": "Memuat",
+  "loadFailed": "Tidak dapat memuat data",
+  "genericError": "Terjadi kendala. Silakan coba lagi.",
+  "showingStoredData": "Menampilkan data tersimpan dari {time}.",
+  "@showingStoredData": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "statusLabel": "Status: {label}",
+  "@statusLabel": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "email": "Email",
+  "password": "Kata sandi",
+  "showPassword": "Tampilkan kata sandi",
+  "hidePassword": "Sembunyikan kata sandi",
+  "loginTitle": "Masuk",
+  "loginButton": "Masuk",
+  "forgotPassword": "Lupa kata sandi?",
+  "createAccount": "Buat akun baru",
+  "registerTitle": "Daftar",
+  "registerButton": "Daftar",
+  "nameLabel": "Nama",
+  "phoneOptional": "Nomor telepon (opsional)",
+  "haveAccount": "Sudah punya akun? Masuk",
+  "accountCreated": "Akun dibuat. Silakan masuk dan verifikasi email.",
+  "forgotPasswordTitle": "Lupa kata sandi",
+  "sendResetLink": "Kirim tautan reset",
+  "sending": "Mengirim…",
+  "backToLogin": "Kembali ke masuk",
+  "resetEmailSent": "Jika email terdaftar, tautan reset telah dikirim.",
+  "resetPasswordTitle": "Reset kata sandi",
+  "newPassword": "Kata sandi baru",
+  "savePassword": "Simpan kata sandi",
+  "passwordChanged": "Kata sandi berhasil diubah.",
+  "verifyEmailTitle": "Verifikasi email",
+  "verifyEmailPrompt": "Periksa email Anda lalu buka tautan verifikasi.",
+  "resendEmail": "Kirim ulang email",
+  "resendIn": "Kirim ulang dalam {seconds}d",
+  "@resendIn": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "verificationSent": "Tautan verifikasi dikirim.",
+  "logout": "Keluar"
+}

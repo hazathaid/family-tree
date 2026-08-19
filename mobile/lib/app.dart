@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'app/router/app_router.dart';
 import 'app/theme/app_theme.dart';
 import 'core/providers.dart';
+import 'l10n/app_localizations.dart';
 
 class FamilyTreeApp extends ConsumerWidget {
   const FamilyTreeApp({super.key});
@@ -17,6 +18,9 @@ class FamilyTreeApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
       themeMode: ThemeMode.light,
+      locale: const Locale('id'),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       routerConfig: router,
       builder: (context, child) => MediaQuery(
         data: MediaQuery.of(context).copyWith(

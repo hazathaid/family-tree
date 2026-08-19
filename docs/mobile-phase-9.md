@@ -47,7 +47,9 @@ Startup, dashboard paint, scrolling jank, image memory, upload reliability, and 
 
 The implementation supports adaptive phone/tablet layouts, 200% text scaling, 48dp primary controls, semantic async states, labelled icon actions, semantic report rows, and a non-canvas tree list. Bahasa Indonesia is the current primary UI language.
 
-Open items: user-facing strings are still inline rather than generated from ARB localization resources; a complete screen-reader, external-keyboard, contrast, reduced-motion, and focus-order device audit has not been executed. FT-MOB-804 remains open.
+Localization progress (2026-08-19): the ARB pipeline is now active (`l10n.yaml`, `lib/l10n/app_id.arb` as Indonesian template, `app_en.arb`, `generate: true`) and wired through `AppLocalizations.localizationsDelegates`/`supportedLocales` with `locale: Locale('id')` in `FamilyTreeApp`. The authentication flow (login, register, forgot/reset password, verification) and shared widgets (`AppSkeleton`, `AppErrorState`, `StaleDataBanner`, `AppStatusBadge`, `showAppConfirmation`) read all user-facing strings from ARB. `test/l10n_test.dart` verifies both locales resolve every key.
+
+Remaining: screens outside auth/shared widgets still carry inline Indonesian strings and must be migrated to ARB in a follow-up; a complete screen-reader, external-keyboard, contrast, reduced-motion, and focus-order device audit has not been executed. FT-MOB-804 remains open.
 
 ## FT-MOB-805 — Android release readiness
 

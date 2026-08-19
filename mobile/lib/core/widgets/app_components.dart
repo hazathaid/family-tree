@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
+
 class AppStatusBadge extends StatelessWidget {
   const AppStatusBadge({required this.label, this.color, super.key});
   final String label;
   final Color? color;
   @override
   Widget build(BuildContext context) => Semantics(
-      label: 'Status: $label',
+      label: AppLocalizations.of(context).statusLabel(label),
       child: Chip(
           label: Text(label),
           backgroundColor: (color ?? Theme.of(context).colorScheme.primary)
@@ -20,19 +22,21 @@ Future<bool> showAppConfirmation(BuildContext context,
         bool destructive = false}) async =>
     await showDialog<bool>(
         context: context,
-        builder: (context) =>
-            AlertDialog(title: Text(title), content: Text(message), actions: [
+        builder: (context) {
+          final l10n = AppLocalizations.of(context);
+          return AlertDialog(title: Text(title), content: Text(message), actions: [
               TextButton(
                   onPressed: () => Navigator.pop(context, false),
-                  child: const Text('Batal')),
+                  child: Text(l10n.cancel)),
               FilledButton(
                   onPressed: () => Navigator.pop(context, true),
                   style: destructive
                       ? FilledButton.styleFrom(
                           backgroundColor: Theme.of(context).colorScheme.error)
                       : null,
-                  child: const Text('Lanjutkan'))
-            ])) ??
+                  child: Text(l10n.continueAction))
+            ]);
+        }) ??
     false;
 
 void showAppSnackBar(BuildContext context, String message) =>
