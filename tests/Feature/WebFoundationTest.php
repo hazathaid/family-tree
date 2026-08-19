@@ -16,7 +16,7 @@ class WebFoundationTest extends TestCase
             ->assertSee('Lewati ke konten utama')
             ->assertSee('aria-label="Navigasi utama"', false)
             ->assertSee('.css', false)
-            ->assertSee('Sejarah keluarga dalam satu tempat');
+            ->assertSee('Setiap nama punya cerita');
     }
 
     public function test_shared_components_render_accessible_states(): void
