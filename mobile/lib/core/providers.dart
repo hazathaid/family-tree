@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart' hide Family;
 import 'api_client.dart';
 import 'auth/session_controller.dart';
 import 'config/app_environment.dart';
+import 'crash/crash_reporting.dart';
 import 'errors/app_error.dart';
 import 'models.dart';
 import 'repositories.dart';
@@ -25,6 +26,16 @@ final sessionControllerProvider =
     Provider<SessionController>((ref) => throw UnimplementedError());
 final scopedCacheProvider =
     Provider<ScopedCache>((ref) => throw UnimplementedError());
+final crashReporterProvider = Provider<CrashReporter>(
+    (ref) => const NoopCrashReporter());
+final crashReportingServiceProvider = Provider<CrashReportingService>((ref) {
+  final enabled = ref.watch(crashReportingConsentProvider);
+  return CrashReportingService(
+    enabled: enabled,
+    reporter: ref.watch(crashReporterProvider),
+  );
+});
+final crashReportingConsentProvider = StateProvider<bool>((ref) => false);
 final authRepositoryProvider =
     Provider((ref) => ApiAuthRepository(ref.watch(apiClientProvider)));
 final familyRepositoryProvider =

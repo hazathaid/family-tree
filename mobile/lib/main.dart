@@ -71,9 +71,17 @@ Future<void> main() async {
       sessionControllerProvider.overrideWithValue(session),
       scopedCacheProvider.overrideWithValue(cache),
       apiClientProvider.overrideWithValue(api),
+      crashReportingConsentProvider.overrideWith((ref) => crashReportingConsent),
       currentUserProvider.overrideWith((ref) => initialUser),
       currentFamilyProvider.overrideWith((ref) => initialFamily),
     ],
     child: const FamilyTreeApp(),
   ));
 }
+
+/// Opt-in crash reporting: enabled only in production builds when the user has
+/// granted consent. Consent is stored with the user's explicit agreement and
+/// must never be inferred from anything else. The default reporter is a no-op;
+/// wiring a real provider (Sentry) requires product approval and a DSN injected
+/// from the environment, never hardcoded.
+final bool crashReportingConsent = false;
