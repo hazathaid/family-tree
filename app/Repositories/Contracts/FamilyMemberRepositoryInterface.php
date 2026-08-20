@@ -28,4 +28,9 @@ interface FamilyMemberRepositoryInterface
      * @return Collection<int, FamilyMember>
      */
     public function allForFamily(Family $family): Collection;
+
+    /**
+     * @return iterable<int, FamilyMember>
+     */
+    public function cursorForFamily(Family $family): iterable;
 }

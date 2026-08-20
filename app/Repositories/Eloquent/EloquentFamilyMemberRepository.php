@@ -82,4 +82,17 @@ class EloquentFamilyMemberRepository implements FamilyMemberRepositoryInterface
             ->where('family_id', $family->id)
             ->get();
     }
+
+    public function cursorForFamily(Family $family): iterable
+    {
+        foreach (FamilyMember::query()
+            ->with(['branch'])
+            ->where('family_id', $family->id)
+            ->orderBy('full_name')
+            ->cursor() as $member) {
+            if ($member instanceof FamilyMember) {
+                yield $member;
+            }
+        }
+    }
 }

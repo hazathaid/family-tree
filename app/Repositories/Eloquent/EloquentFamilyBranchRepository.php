@@ -6,6 +6,7 @@ use App\Models\Family;
 use App\Models\FamilyBranch;
 use App\Repositories\Contracts\FamilyBranchRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 class EloquentFamilyBranchRepository implements FamilyBranchRepositoryInterface
 {
@@ -38,5 +39,12 @@ class EloquentFamilyBranchRepository implements FamilyBranchRepositoryInterface
             ->where('family_id', $family->id)
             ->latest()
             ->paginate($perPage);
+    }
+
+    public function allForFamily(Family $family): Collection
+    {
+        return FamilyBranch::query()
+            ->where('family_id', $family->id)
+            ->get();
     }
 }
