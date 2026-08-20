@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../../core/errors/app_error.dart';
 import '../../../core/models.dart';
 import '../../../core/providers.dart';
+import '../../../l10n/app_localizations.dart';
 
 class FamilyManagementScreen extends ConsumerStatefulWidget {
   const FamilyManagementScreen({super.key});
@@ -31,16 +32,17 @@ class _FamilyManagementScreenState extends ConsumerState<FamilyManagementScreen>
   @override
   Widget build(BuildContext context) {
     final family = ref.watch(currentFamilyProvider);
+    final l10n = AppLocalizations.of(context);
     if (family == null) {
-      return const Center(child: Text('Pilih keluarga terlebih dahulu.'));
+      return Center(child: Text(l10n.selectFamilyFirst));
     }
     return Scaffold(
         appBar: AppBar(
-            title: const Text('Kelola keluarga'),
-            bottom: TabBar(controller: tabs, tabs: const [
-              Tab(text: 'Profil'),
-              Tab(text: 'Cabang'),
-              Tab(text: 'Akses')
+            title: Text(l10n.manageFamilyTitle),
+            bottom: TabBar(controller: tabs, tabs: [
+              Tab(text: l10n.tabProfile),
+              Tab(text: l10n.tabBranches),
+              Tab(text: l10n.tabAccess)
             ])),
         body: TabBarView(controller: tabs, children: [
           _Settings(family: family),
@@ -63,6 +65,7 @@ class _SettingsState extends ConsumerState<_Settings> {
       city = TextEditingController(text: widget.family.originCity);
   bool busy = false;
   Future<void> save() async {
+    final l10n = AppLocalizations.of(context);
     setState(() => busy = true);
     try {
       final updated = await ref.read(familyRepositoryProvider).update(
@@ -72,7 +75,7 @@ class _SettingsState extends ConsumerState<_Settings> {
           originCity: city.text.trim());
       ref.read(currentFamilyProvider.notifier).state = updated;
       ref.invalidate(familiesProvider);
-      _notice('Pengaturan keluarga disimpan.');
+      _notice(l10n.familySettingsSaved);
     } on AppError catch (e) {
       _notice(e.message);
     } finally {
@@ -81,6 +84,7 @@ class _SettingsState extends ConsumerState<_Settings> {
   }
 
   Future<void> pick(bool logo) async {
+    final l10n = AppLocalizations.of(context);
     final file = await ImagePicker().pickImage(
         source: ImageSource.gallery,
         maxWidth: logo ? 800 : 2000,
@@ -93,7 +97,7 @@ class _SettingsState extends ConsumerState<_Settings> {
           logoPath: logo ? file.path : null,
           coverPath: logo ? null : file.path);
       ref.read(currentFamilyProvider.notifier).state = updated;
-      _notice(logo ? 'Logo diperbarui.' : 'Sampul diperbarui.');
+      _notice(logo ? l10n.logoUpdated : l10n.coverUpdated);
     } on AppError catch (e) {
       _notice(e.message);
     } finally {
@@ -109,45 +113,46 @@ class _SettingsState extends ConsumerState<_Settings> {
   }
 
   @override
-  Widget build(BuildContext context) =>
-      ListView(padding: const EdgeInsets.all(16), children: [
-        const ListTile(
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return ListView(padding: const EdgeInsets.all(16), children: [
+        ListTile(
             contentPadding: EdgeInsets.zero,
-            leading: Icon(Icons.lock),
-            title: Text('Privasi: hanya anggota keluarga'),
-            subtitle: Text(
-                'Privasi keluarga mengikuti keanggotaan dan tidak dapat diubah. Preferensi notifikasi dikelola per akun.')),
+            leading: const Icon(Icons.lock),
+            title: Text(l10n.familyPrivacyTitle),
+            subtitle: Text(l10n.familyPrivacyBody)),
         TextField(
             controller: name,
             enabled: widget.family.canManage,
-            decoration: const InputDecoration(labelText: 'Nama keluarga')),
+            decoration: InputDecoration(labelText: l10n.familyName)),
         const SizedBox(height: 12),
         TextField(
             controller: city,
             enabled: widget.family.canManage,
-            decoration: const InputDecoration(labelText: 'Kota asal')),
+            decoration: InputDecoration(labelText: l10n.originCity)),
         const SizedBox(height: 12),
         TextField(
             controller: description,
             enabled: widget.family.canManage,
             maxLines: 3,
-            decoration: const InputDecoration(labelText: 'Deskripsi')),
+            decoration: InputDecoration(labelText: l10n.description)),
         const SizedBox(height: 16),
         if (widget.family.canManage)
           Wrap(spacing: 8, runSpacing: 8, children: [
             OutlinedButton.icon(
                 onPressed: busy ? null : () => pick(true),
                 icon: const Icon(Icons.image),
-                label: const Text('Ganti logo')),
+                label: Text(l10n.replaceLogo)),
             OutlinedButton.icon(
                 onPressed: busy ? null : () => pick(false),
                 icon: const Icon(Icons.panorama),
-                label: const Text('Ganti sampul')),
+                label: Text(l10n.replaceCover)),
             FilledButton(
                 onPressed: busy ? null : save,
-                child: Text(busy ? 'Menyimpan…' : 'Simpan'))
+                child: Text(busy ? l10n.saving : l10n.save))
           ]),
       ]);
+  }
 }
 
 class _Branches extends ConsumerStatefulWidget {
@@ -163,27 +168,29 @@ class _BranchesState extends ConsumerState<_Branches> {
       ref.read(familyRepositoryProvider).branches(widget.family.uuid);
   void refresh() => setState(() => future = load());
   Future<void> edit([FamilyBranch? branch]) async {
+    final l10n = AppLocalizations.of(context);
     final name = TextEditingController(text: branch?.name),
         description = TextEditingController(text: branch?.description);
     final ok = await showDialog<bool>(
         context: context,
         builder: (_) => AlertDialog(
-                title: Text(branch == null ? 'Tambah cabang' : 'Ubah cabang'),
+                title: Text(branch == null ? l10n.addBranch : l10n.editBranch),
                 content: Column(mainAxisSize: MainAxisSize.min, children: [
                   TextField(
                       controller: name,
-                      decoration: const InputDecoration(labelText: 'Nama')),
+                      decoration: InputDecoration(labelText: l10n.nameLabel)),
                   TextField(
                       controller: description,
-                      decoration: const InputDecoration(labelText: 'Deskripsi'))
+                      decoration:
+                          InputDecoration(labelText: l10n.description))
                 ]),
                 actions: [
                   TextButton(
                       onPressed: () => Navigator.pop(context, false),
-                      child: const Text('Batal')),
+                      child: Text(l10n.cancel)),
                   FilledButton(
                       onPressed: () => Navigator.pop(context, true),
-                      child: const Text('Simpan'))
+                      child: Text(l10n.save))
                 ]));
     if (ok != true) return;
     try {
@@ -204,19 +211,19 @@ class _BranchesState extends ConsumerState<_Branches> {
   }
 
   Future<void> remove(FamilyBranch branch) async {
+    final l10n = AppLocalizations.of(context);
     final ok = await showDialog<bool>(
         context: context,
         builder: (_) => AlertDialog(
-                title: Text('Hapus ${branch.name}?'),
-                content: const Text(
-                    'Cabang akan dihapus. Anggota yang terkait tetap dipertahankan sesuai aturan server.'),
+                title: Text(l10n.deleteBranchTitle(branch.name)),
+                content: Text(l10n.deleteBranchConfirmation),
                 actions: [
                   TextButton(
                       onPressed: () => Navigator.pop(context, false),
-                      child: const Text('Batal')),
+                      child: Text(l10n.cancel)),
                   FilledButton(
                       onPressed: () => Navigator.pop(context, true),
-                      child: const Text('Hapus'))
+                      child: Text(l10n.delete))
                 ]));
     if (ok != true) return;
     try {
@@ -232,7 +239,9 @@ class _BranchesState extends ConsumerState<_Branches> {
   void _error(String message) => ScaffoldMessenger.of(context)
       .showSnackBar(SnackBar(content: Text(message)));
   @override
-  Widget build(BuildContext context) => FutureBuilder(
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return FutureBuilder(
       future: future,
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
@@ -241,7 +250,7 @@ class _BranchesState extends ConsumerState<_Branches> {
         if (snapshot.hasError) {
           return Center(
               child: FilledButton(
-                  onPressed: refresh, child: const Text('Coba lagi')));
+                  onPressed: refresh, child: Text(l10n.retry)));
         }
         final items = snapshot.data ?? const <FamilyBranch>[];
         return ListView(padding: const EdgeInsets.all(16), children: [
@@ -251,9 +260,9 @@ class _BranchesState extends ConsumerState<_Branches> {
                 child: FilledButton.icon(
                     onPressed: () => edit(),
                     icon: const Icon(Icons.add),
-                    label: const Text('Cabang'))),
+                    label: Text(l10n.addBranch))),
           if (items.isEmpty)
-            const ListTile(title: Text('Belum ada cabang.'))
+            ListTile(title: Text(l10n.noBranches))
           else
             ...items.map((branch) => Card(
                 child: ListTile(
@@ -261,17 +270,20 @@ class _BranchesState extends ConsumerState<_Branches> {
                     subtitle: Text(branch.description ?? ''),
                     trailing: widget.family.canManage
                         ? PopupMenuButton(
-                            itemBuilder: (_) => const [
+                            itemBuilder: (_) => [
                                   PopupMenuItem(
-                                      value: 'edit', child: Text('Ubah')),
+                                      value: 'edit',
+                                      child: Text(l10n.editLabel)),
                                   PopupMenuItem(
-                                      value: 'delete', child: Text('Hapus'))
+                                      value: 'delete',
+                                      child: Text(l10n.delete))
                                 ],
                             onSelected: (value) =>
                                 value == 'edit' ? edit(branch) : remove(branch))
                         : null)))
         ]);
       });
+  }
 }
 
 class _Access extends ConsumerStatefulWidget {
@@ -287,38 +299,39 @@ class _AccessState extends ConsumerState<_Access> {
       ref.read(familyRepositoryProvider).memberships(widget.family.uuid);
   void refresh() => setState(() => future = load());
   Future<void> invite() async {
+    final l10n = AppLocalizations.of(context);
     final email = TextEditingController();
     var role = 'member';
     final ok = await showDialog<bool>(
         context: context,
         builder: (_) => StatefulBuilder(
             builder: (context, setDialog) => AlertDialog(
-                    title: const Text('Undang anggota'),
+                    title: Text(l10n.inviteMember),
                     content: Column(mainAxisSize: MainAxisSize.min, children: [
                       TextField(
                           controller: email,
                           keyboardType: TextInputType.emailAddress,
-                          decoration:
-                              const InputDecoration(labelText: 'Email')),
+                          decoration: InputDecoration(labelText: l10n.email)),
                       DropdownButtonFormField(
                           initialValue: role,
-                          items: const [
+                          items: [
                             DropdownMenuItem(
-                                value: 'member', child: Text('Member')),
+                                value: 'member',
+                                child: Text(l10n.roleMember)),
                             DropdownMenuItem(
-                                value: 'admin', child: Text('Admin')),
+                                value: 'admin', child: Text(l10n.roleAdmin)),
                             DropdownMenuItem(
-                                value: 'owner', child: Text('Owner'))
+                                value: 'owner', child: Text(l10n.roleOwner))
                           ],
                           onChanged: (value) => setDialog(() => role = value!))
                     ]),
                     actions: [
                       TextButton(
                           onPressed: () => Navigator.pop(context, false),
-                          child: const Text('Batal')),
+                          child: Text(l10n.cancel)),
                       FilledButton(
                           onPressed: () => Navigator.pop(context, true),
-                          child: const Text('Undang'))
+                          child: Text(l10n.invite))
                     ])));
     if (ok != true) return;
     try {
@@ -343,18 +356,19 @@ class _AccessState extends ConsumerState<_Access> {
   }
 
   Future<void> remove(FamilyMembership member) async {
+    final l10n = AppLocalizations.of(context);
     final ok = await showDialog<bool>(
         context: context,
         builder: (_) => AlertDialog(
-                title: Text('Hapus akses ${member.user.name}?'),
-                content: const Text('Pemilik terakhir tidak dapat dihapus.'),
+                title: Text(l10n.deleteAccessTitle(member.user.name)),
+                content: Text(l10n.deleteOwnerConfirmation),
                 actions: [
                   TextButton(
                       onPressed: () => Navigator.pop(context, false),
-                      child: const Text('Batal')),
+                      child: Text(l10n.cancel)),
                   FilledButton(
                       onPressed: () => Navigator.pop(context, true),
-                      child: const Text('Hapus'))
+                      child: Text(l10n.delete))
                 ]));
     if (ok != true) return;
     try {
@@ -371,12 +385,12 @@ class _AccessState extends ConsumerState<_Access> {
       .showSnackBar(SnackBar(content: Text(message)));
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     if (!widget.family.canManageRoles) {
-      return const Center(
+      return Center(
           child: Padding(
-              padding: EdgeInsets.all(24),
-              child:
-                  Text('Hanya pemilik yang dapat mengelola akses keluarga.')));
+              padding: const EdgeInsets.all(24),
+              child: Text(l10n.ownerOnlyAccess)));
     }
     return FutureBuilder<List<FamilyMembership>>(
         future: future,
@@ -387,7 +401,7 @@ class _AccessState extends ConsumerState<_Access> {
           if (snapshot.hasError) {
             return Center(
                 child: FilledButton(
-                    onPressed: refresh, child: const Text('Coba lagi')));
+                    onPressed: refresh, child: Text(l10n.retry)));
           }
           final items = snapshot.data ?? const <FamilyMembership>[];
           return ListView(padding: const EdgeInsets.all(16), children: [
@@ -396,7 +410,7 @@ class _AccessState extends ConsumerState<_Access> {
                 child: FilledButton.icon(
                     onPressed: invite,
                     icon: const Icon(Icons.person_add),
-                    label: const Text('Undang'))),
+                    label: Text(l10n.invite))),
             ...items.map((member) => Card(
                 child: ListTile(
                     title: Text(member.user.name),
@@ -404,19 +418,20 @@ class _AccessState extends ConsumerState<_Access> {
                     trailing: Row(mainAxisSize: MainAxisSize.min, children: [
                       DropdownButton<String>(
                           value: member.role,
-                          items: const [
+                          items: [
                             DropdownMenuItem(
-                                value: 'member', child: Text('Member')),
+                                value: 'member',
+                                child: Text(l10n.roleMember)),
                             DropdownMenuItem(
-                                value: 'admin', child: Text('Admin')),
+                                value: 'admin', child: Text(l10n.roleAdmin)),
                             DropdownMenuItem(
-                                value: 'owner', child: Text('Owner'))
+                                value: 'owner', child: Text(l10n.roleOwner))
                           ],
                           onChanged: (value) {
                             if (value != null) role(member, value);
                           }),
                       IconButton(
-                          tooltip: 'Hapus akses',
+                          tooltip: l10n.deleteAccess,
                           onPressed: () => remove(member),
                           icon: const Icon(Icons.delete_outline))
                     ])))),

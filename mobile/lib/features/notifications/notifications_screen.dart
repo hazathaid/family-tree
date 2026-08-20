@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/providers.dart';
+import '../../l10n/app_localizations.dart';
 
 class NotificationsScreen extends ConsumerStatefulWidget {
   const NotificationsScreen({super.key});
@@ -12,20 +13,22 @@ class NotificationsScreen extends ConsumerStatefulWidget {
 
 class _NotificationsState extends ConsumerState<NotificationsScreen> {
   @override
-  Widget build(BuildContext context) => Column(children: [
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Column(children: [
         Padding(
           padding: const EdgeInsets.all(12),
           child: Row(children: [
-            const Expanded(
-                child: Text('Notifikasi',
+            Expanded(
+                child: Text(l10n.notificationsTitle,
                     style:
-                        TextStyle(fontSize: 20, fontWeight: FontWeight.bold))),
+                        const TextStyle(fontSize: 20, fontWeight: FontWeight.bold))),
             TextButton(
                 onPressed: () async {
                   await ref.read(notificationRepositoryProvider).markAllRead();
                   ref.invalidate(notificationsProvider);
                 },
-                child: const Text('Baca semua')),
+                child: Text(l10n.markAllRead)),
           ]),
         ),
         Expanded(
@@ -34,14 +37,14 @@ class _NotificationsState extends ConsumerState<NotificationsScreen> {
                 error: (_, __) => Center(
                     child: FilledButton(
                         onPressed: () => ref.invalidate(notificationsProvider),
-                        child: const Text('Coba lagi'))),
+                        child: Text(l10n.retry))),
                 data: (items) => RefreshIndicator(
                   onRefresh: () => ref.refresh(notificationsProvider.future),
                   child: items.isEmpty
-                      ? ListView(children: const [
-                          SizedBox(height: 160),
-                          Icon(Icons.notifications_none, size: 64),
-                          Center(child: Text('Belum ada notifikasi.'))
+                      ? ListView(children: [
+                          const SizedBox(height: 160),
+                          const Icon(Icons.notifications_none, size: 64),
+                          Center(child: Text(l10n.noNotifications))
                         ])
                       : ListView.builder(
                           itemCount: items.length,
@@ -81,4 +84,5 @@ class _NotificationsState extends ConsumerState<NotificationsScreen> {
               ),
         ),
       ]);
+  }
 }

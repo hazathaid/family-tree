@@ -8,9 +8,17 @@ import 'package:family_tree_mobile/features/members/domain/member_repository.dar
 import 'package:family_tree_mobile/features/tree/domain/tree_repository.dart';
 import 'package:family_tree_mobile/features/tree/domain/tree_render_policy.dart';
 import 'package:family_tree_mobile/features/tree/tree_screen.dart';
+import 'package:family_tree_mobile/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' hide Family;
 import 'package:flutter_test/flutter_test.dart';
+
+Widget _app(Widget home) => MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('id'),
+      home: home,
+    );
 
 void main() {
   const member = FamilyMember(
@@ -45,7 +53,7 @@ void main() {
       currentMemberUuidProvider.overrideWith((ref) => 'root'),
       memberRepositoryProvider.overrideWithValue(_Members(member)),
       treeRepositoryProvider.overrideWithValue(_Trees(tree)),
-    ], child: const MaterialApp(home: Scaffold(body: TreeScreen()))));
+    ], child: _app(const Scaffold(body: TreeScreen()))));
     await tester.pumpAndSettle();
     expect(find.text('Budi Root'), findsWidgets);
     expect(find.textContaining('Perluas'), findsOneWidget);

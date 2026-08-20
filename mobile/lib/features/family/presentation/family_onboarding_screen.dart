@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/errors/app_error.dart';
 import '../../../core/providers.dart';
+import '../../../l10n/app_localizations.dart';
 
 class FamilyOnboardingScreen extends ConsumerStatefulWidget {
   const FamilyOnboardingScreen({this.createOnly = false, super.key});
@@ -41,48 +42,52 @@ class _FamilyOnboardingState extends ConsumerState<FamilyOnboardingScreen> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-      appBar: AppBar(title: const Text('Buat keluarga')),
-      body: SafeArea(
-          child: Center(
-              child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(24),
-                  child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 520),
-                      child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Text('Mulai dokumentasikan keluarga',
-                                style:
-                                    Theme.of(context).textTheme.headlineSmall),
-                            const SizedBox(height: 8),
-                            const Text(
-                                'Anda akan menjadi pemilik keluarga dan dapat mengundang anggota nanti.'),
-                            const SizedBox(height: 24),
-                            TextField(
-                                controller: name,
-                                decoration: InputDecoration(
-                                    labelText: 'Nama keluarga',
-                                    errorText: error)),
-                            const SizedBox(height: 12),
-                            TextField(
-                                controller: city,
-                                decoration: const InputDecoration(
-                                    labelText: 'Kota asal (opsional)')),
-                            const SizedBox(height: 12),
-                            TextField(
-                                controller: description,
-                                maxLines: 3,
-                                decoration: const InputDecoration(
-                                    labelText: 'Deskripsi (opsional)')),
-                            const SizedBox(height: 24),
-                            FilledButton(
-                                onPressed: loading || name.text.trim().isEmpty
-                                    ? (loading ? null : create)
-                                    : create,
-                                child: Text(
-                                    loading ? 'Membuat…' : 'Buat keluarga'))
-                          ]))))));
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Scaffold(
+        appBar: AppBar(title: Text(l10n.familyOnboardingTitle)),
+        body: SafeArea(
+            child: Center(
+                child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(24),
+                    child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 520),
+                        child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Text(l10n.familyOnboardingHeadline,
+                                  style:
+                                      Theme.of(context).textTheme.headlineSmall),
+                              const SizedBox(height: 8),
+                              Text(l10n.familyOnboardingBody),
+                              const SizedBox(height: 24),
+                              TextField(
+                                  controller: name,
+                                  decoration: InputDecoration(
+                                      labelText: l10n.familyName,
+                                      errorText: error)),
+                              const SizedBox(height: 12),
+                              TextField(
+                                  controller: city,
+                                  decoration: InputDecoration(
+                                      labelText: l10n.originCityOptional)),
+                              const SizedBox(height: 12),
+                              TextField(
+                                  controller: description,
+                                  maxLines: 3,
+                                  decoration: InputDecoration(
+                                      labelText: l10n.descriptionOptional)),
+                              const SizedBox(height: 24),
+                              FilledButton(
+                                  onPressed:
+                                      loading || name.text.trim().isEmpty
+                                          ? (loading ? null : create)
+                                          : create,
+                                  child: Text(loading
+                                      ? l10n.creating
+                                      : l10n.familyOnboardingTitle))
+                            ]))))));
+  }
 }
 
 class FamilySelectorScreen extends ConsumerWidget {
@@ -90,24 +95,25 @@ class FamilySelectorScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final families = ref.watch(familiesProvider);
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
-        appBar: AppBar(title: const Text('Pilih keluarga')),
+        appBar: AppBar(title: Text(l10n.selectFamilyTitle)),
         floatingActionButton: FloatingActionButton.extended(
             onPressed: () => Navigator.of(context).push(MaterialPageRoute(
                 builder: (_) =>
                     const FamilyOnboardingScreen(createOnly: true))),
             icon: const Icon(Icons.add),
-            label: const Text('Keluarga')),
+            label: Text(l10n.family)),
         body: SafeArea(
             child: families.when(
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (error, _) => Center(
                         child:
                             Column(mainAxisSize: MainAxisSize.min, children: [
-                      const Text('Keluarga tidak dapat dimuat.'),
+                      Text(l10n.familiesLoadFailed),
                       FilledButton(
                           onPressed: () => ref.invalidate(familiesProvider),
-                          child: const Text('Coba lagi'))
+                          child: Text(l10n.retry))
                     ])),
                 data: (items) {
                   if (items.isEmpty) {
@@ -117,7 +123,7 @@ class FamilySelectorScreen extends ConsumerWidget {
                                 MaterialPageRoute(
                                     builder: (_) =>
                                         const FamilyOnboardingScreen())),
-                            child: const Text('Buat keluarga pertama')));
+                            child: Text(l10n.createFirstFamily)));
                   }
                   if (items.length == 1) {
                     Future.microtask(() => _select(ref, items.single));

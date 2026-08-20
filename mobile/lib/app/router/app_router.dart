@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/auth/session_controller.dart';
 import '../../core/config/app_environment.dart';
 import '../../core/models.dart';
+import '../../l10n/app_localizations.dart';
 import '../../features/auth/login_screen.dart';
 import '../../features/auth/auth_screens.dart';
 import '../../features/account/presentation/account_screen.dart';
@@ -194,29 +195,32 @@ GoRouter createAppRouter(
 class _AdaptiveShell extends StatelessWidget {
   const _AdaptiveShell({required this.shell});
   final StatefulNavigationShell shell;
-  static const destinations = [
-    NavigationDestination(
-        icon: Icon(Icons.home_outlined),
-        selectedIcon: Icon(Icons.home),
-        label: 'Dashboard'),
-    NavigationDestination(
-        icon: Icon(Icons.account_tree_outlined),
-        selectedIcon: Icon(Icons.account_tree),
-        label: 'Keluarga'),
-    NavigationDestination(
-        icon: Icon(Icons.history_outlined),
-        selectedIcon: Icon(Icons.history),
-        label: 'Aktivitas'),
-    NavigationDestination(icon: Icon(Icons.more_horiz), label: 'Lainnya'),
-  ];
+  List<NavigationDestination> _destinations(AppLocalizations l10n) => [
+        NavigationDestination(
+            icon: const Icon(Icons.home_outlined),
+            selectedIcon: const Icon(Icons.home),
+            label: l10n.navDashboard),
+        NavigationDestination(
+            icon: const Icon(Icons.account_tree_outlined),
+            selectedIcon: const Icon(Icons.account_tree),
+            label: l10n.family),
+        NavigationDestination(
+            icon: const Icon(Icons.history_outlined),
+            selectedIcon: const Icon(Icons.history),
+            label: l10n.navActivity),
+        NavigationDestination(
+            icon: const Icon(Icons.more_horiz), label: l10n.navMore),
+      ];
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final destinations = _destinations(l10n);
     final tablet = MediaQuery.sizeOf(context).width >= 600;
     final body = SafeArea(child: shell);
     return Scaffold(
-      appBar: AppBar(title: const Text('Family Tree Indonesia'), actions: [
+      appBar: AppBar(title: Text(l10n.appTitle), actions: [
         IconButton(
-            tooltip: 'Notifikasi',
+            tooltip: l10n.notificationsTitle,
             onPressed: () => context.go('/account/notifications'),
             icon: const Icon(Icons.notifications_outlined))
       ]),
@@ -252,7 +256,7 @@ class _SplashScreen extends StatelessWidget {
   Widget build(BuildContext context) => Scaffold(
       body: Center(
           child: Semantics(
-              label: 'Memulai aplikasi',
+              label: AppLocalizations.of(context).startingApp,
               liveRegion: true,
               child: CircularProgressIndicator())));
 }
@@ -260,77 +264,79 @@ class _SplashScreen extends StatelessWidget {
 class _MoreScreen extends StatelessWidget {
   const _MoreScreen();
   @override
-  Widget build(BuildContext context) =>
-      ListView(padding: const EdgeInsets.all(16), children: [
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return ListView(padding: const EdgeInsets.all(16), children: [
         Card(
             child: ListTile(
                 minTileHeight: 56,
                 leading: const Icon(Icons.people_outline),
-                title: const Text('Anggota keluarga'),
+                title: Text(l10n.membersTitle),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => context.go('/members'))),
         Card(
             child: ListTile(
                 minTileHeight: 56,
                 leading: const Icon(Icons.settings),
-                title: const Text('Pengaturan keluarga'),
+                title: Text(l10n.familySettings),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => context.go('/family/manage'))),
         Card(
             child: ListTile(
                 minTileHeight: 56,
                 leading: const Icon(Icons.person),
-                title: const Text('Akun'),
+                title: Text(l10n.accountTitle),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => context.go('/account/profile'))),
         Card(
             child: ListTile(
                 minTileHeight: 56,
                 leading: const Icon(Icons.notifications),
-                title: const Text('Notifikasi'),
+                title: Text(l10n.notificationsTitle),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => context.go('/account/notifications'))),
         Card(
             child: ListTile(
                 minTileHeight: 56,
                 leading: const Icon(Icons.article_outlined),
-                title: const Text('Artikel'),
+                title: Text(l10n.articlesGroup),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => context.go('/articles'))),
         Card(
             child: ListTile(
                 minTileHeight: 56,
                 leading: const Icon(Icons.photo_library_outlined),
-                title: const Text('Foto & album'),
+                title: Text(l10n.photosAlbums),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => context.go('/photos'))),
         Card(
             child: ListTile(
                 minTileHeight: 56,
                 leading: const Icon(Icons.event_outlined),
-                title: const Text('Acara'),
+                title: Text(l10n.eventsGroup),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => context.go('/events'))),
         Card(
             child: ListTile(
                 minTileHeight: 56,
                 leading: const Icon(Icons.search),
-                title: const Text('Pencarian'),
+                title: Text(l10n.searchMenu),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => context.go('/search'))),
         Card(
             child: ListTile(
                 minTileHeight: 56,
                 leading: const Icon(Icons.insights_outlined),
-                title: const Text('Laporan'),
+                title: Text(l10n.reportsMenu),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => context.go('/reports'))),
         Card(
             child: ListTile(
                 minTileHeight: 56,
                 leading: const Icon(Icons.emoji_events_outlined),
-                title: const Text('Kontribusi & peringkat'),
+                title: Text(l10n.contributionRanking),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => context.go('/gamification'))),
       ]);
+  }
 }

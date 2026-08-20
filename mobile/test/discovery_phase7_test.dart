@@ -3,9 +3,17 @@ import 'package:family_tree_mobile/core/providers.dart';
 import 'package:family_tree_mobile/features/discovery/domain/discovery_models.dart';
 import 'package:family_tree_mobile/features/discovery/domain/discovery_repository.dart';
 import 'package:family_tree_mobile/features/discovery/presentation/discovery_screens.dart';
+import 'package:family_tree_mobile/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' hide Family;
 import 'package:flutter_test/flutter_test.dart';
+
+Widget _app(Widget home) => MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('id'),
+      home: home,
+    );
 
 void main() {
   const family = Family(uuid: 'family', name: 'Keluarga');
@@ -45,7 +53,7 @@ void main() {
     await tester.pumpWidget(ProviderScope(overrides: [
       currentFamilyProvider.overrideWith((ref) => family),
       discoveryRepositoryProvider.overrideWithValue(const _Discovery()),
-    ], child: const MaterialApp(home: GamificationScreen())));
+    ], child: _app(const GamificationScreen())));
     await tester.pumpAndSettle();
     expect(find.text('25 poin'), findsNWidgets(2));
     expect(find.text('Penjaga Sejarah'), findsOneWidget);

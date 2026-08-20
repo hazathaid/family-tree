@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/models.dart';
 import '../../core/providers.dart';
 import '../../core/widgets/async_states.dart';
+import '../../l10n/app_localizations.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -13,6 +14,7 @@ class DashboardScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final family = ref.watch(currentFamilyProvider);
     final summary = ref.watch(dashboardProvider);
+    final l10n = AppLocalizations.of(context);
     return RefreshIndicator(
       onRefresh: () async => ref.invalidate(dashboardProvider),
       child: CustomScrollView(slivers: [
@@ -22,13 +24,13 @@ class DashboardScreen extends ConsumerWidget {
               Semantics(
                   header: true,
                   child: Text(
-                      'Selamat datang di ${family?.name ?? 'keluarga Anda'}',
+                      l10n.dashboardWelcome(family?.name ?? l10n.dashboardYourFamily),
                       style: Theme.of(context).textTheme.headlineSmall)),
               const SizedBox(height: 16),
               summary.when(
                 loading: () => const AppSkeleton(lines: 8),
                 error: (error, _) => AppErrorState(
-                    message: 'Dashboard tidak dapat dimuat.',
+                    message: l10n.dashboardLoadFailed,
                     onRetry: () => ref.invalidate(dashboardProvider)),
                 data: (data) => _Dashboard(data: data),
               ),
@@ -43,64 +45,68 @@ class _Dashboard extends StatelessWidget {
   final DashboardSummary data;
 
   @override
-  Widget build(BuildContext context) =>
-      Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         LayoutBuilder(builder: (context, constraints) {
           final width = constraints.maxWidth >= 600
               ? (constraints.maxWidth - 24) / 3
               : (constraints.maxWidth - 12) / 2;
           return Wrap(spacing: 12, runSpacing: 12, children: [
-            _Stat('Total anggota', data.totalMembers, Icons.groups, width,
+            _Stat(l10n.dashboardTotalMembers, data.totalMembers, Icons.groups,
+                width, '/members'),
+            _Stat(l10n.dashboardLivingMembers, data.livingMembers,
+                Icons.favorite, width, '/members'),
+            _Stat(l10n.deceased, data.deceasedMembers, Icons.history, width,
                 '/members'),
-            _Stat('Anggota hidup', data.livingMembers, Icons.favorite, width,
-                '/members'),
-            _Stat('Meninggal', data.deceasedMembers, Icons.history, width,
-                '/members'),
-            _Stat('Artikel', data.totalArticles, Icons.article, width,
-                '/articles'),
-            _Stat('Foto', data.totalPhotos, Icons.photo_library, width,
-                '/photos'),
-            _Stat('Acara', data.totalEvents, Icons.event, width, '/events'),
+            _Stat(l10n.dashboardArticles, data.totalArticles, Icons.article,
+                width, '/articles'),
+            _Stat(l10n.dashboardPhotos, data.totalPhotos, Icons.photo_library,
+                width, '/photos'),
+            _Stat(l10n.dashboardEvents, data.totalEvents, Icons.event, width,
+                '/events'),
           ]);
         }),
         _Section(
-            title: 'Aktivitas terbaru',
+            title: l10n.dashboardRecentActivity,
             items: data.activity,
             icon: Icons.history),
         _Section(
-            title: 'Ulang tahun mendatang',
+            title: l10n.dashboardUpcomingBirthdays,
             items: data.birthdays,
             icon: Icons.cake),
         _Section(
-            title: 'Acara mendatang',
+            title: l10n.dashboardUpcomingEvents,
             items: data.events,
             icon: Icons.event,
             routePrefix: '/events'),
         _Section(
-            title: 'Notifikasi (${data.unreadNotifications} belum dibaca)',
+            title: l10n.dashboardNotifications(data.unreadNotifications),
             items: data.notifications,
             icon: Icons.notifications,
             onAll: () => context.go('/account/notifications')),
         const SizedBox(height: 20),
-        Text('Fakta keluarga', style: Theme.of(context).textTheme.titleLarge),
+        Text(l10n.dashboardFamilyFacts,
+            style: Theme.of(context).textTheme.titleLarge),
         Card(
             child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Kota asal: ${data.originCity ?? '-'}'),
-                      Text(
-                          'Anggota tertua: ${data.oldestMember?.title ?? '-'}'),
-                      Text(
-                          'Anggota termuda: ${data.youngestMember?.title ?? '-'}'),
+                      Text(l10n.dashboardOriginCity(data.originCity ?? '-')),
+                      Text(l10n.dashboardOldestMember(
+                          data.oldestMember?.title ?? '-')),
+                      Text(l10n.dashboardYoungestMember(
+                          data.youngestMember?.title ?? '-')),
                     ]))),
         _Section(
-            title: 'Anggota terbaru',
+            title: l10n.dashboardRecentMembers,
             items: data.recentMembers,
             icon: Icons.person,
             routePrefix: '/members'),
       ]);
+  }
 }
 
 class _Stat extends StatelessWidget {
@@ -141,32 +147,36 @@ class _Section extends StatelessWidget {
   final String? routePrefix;
   final VoidCallback? onAll;
   @override
-  Widget build(BuildContext context) => Padding(
-      padding: const EdgeInsets.only(top: 20),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(children: [
-          Expanded(
-              child:
-                  Text(title, style: Theme.of(context).textTheme.titleLarge)),
-          if (onAll != null)
-            TextButton(onPressed: onAll, child: const Text('Lihat semua'))
-        ]),
-        if (items.isEmpty)
-          const Card(child: ListTile(title: Text('Belum ada data.')))
-        else
-          Card(
-              child: Column(
-                  children: items
-                      .map((item) => ListTile(
-                          minTileHeight: 56,
-                          leading: Icon(icon),
-                          title: Text(item.title),
-                          subtitle: item.subtitle == null
-                              ? null
-                              : Text(item.subtitle!),
-                          onTap: routePrefix == null
-                              ? null
-                              : () => context.go('$routePrefix/${item.uuid}')))
-                      .toList())),
-      ]));
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Padding(
+        padding: const EdgeInsets.only(top: 20),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(children: [
+            Expanded(
+                child:
+                    Text(title, style: Theme.of(context).textTheme.titleLarge)),
+            if (onAll != null)
+              TextButton(onPressed: onAll, child: Text(l10n.dashboardSeeAll))
+          ]),
+          if (items.isEmpty)
+            Card(child: ListTile(title: Text(l10n.noData)))
+          else
+            Card(
+                child: Column(
+                    children: items
+                        .map((item) => ListTile(
+                            minTileHeight: 56,
+                            leading: Icon(icon),
+                            title: Text(item.title),
+                            subtitle: item.subtitle == null
+                                ? null
+                                : Text(item.subtitle!),
+                            onTap: routePrefix == null
+                                ? null
+                                : () =>
+                                    context.go('$routePrefix/${item.uuid}')))
+                        .toList())),
+        ]));
+  }
 }

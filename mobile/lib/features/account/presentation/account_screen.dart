@@ -5,12 +5,14 @@ import 'package:image_picker/image_picker.dart';
 import '../../../core/errors/app_error.dart';
 import '../../../core/models.dart';
 import '../../../core/providers.dart';
+import '../../../l10n/app_localizations.dart';
 
 class AccountScreen extends ConsumerWidget {
   const AccountScreen({super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(currentUserProvider);
+    final l10n = AppLocalizations.of(context);
     return ListView(padding: const EdgeInsets.all(16), children: [
       ListTile(
           leading: CircleAvatar(
@@ -18,24 +20,24 @@ class AccountScreen extends ConsumerWidget {
                   ? null
                   : NetworkImage(user!.avatarUrl!),
               child: user?.avatarUrl == null ? const Icon(Icons.person) : null),
-          title: Text(user?.name ?? 'Akun'),
+          title: Text(user?.name ?? l10n.accountTitle),
           subtitle: Text(user?.email ?? ''),
           contentPadding: const EdgeInsets.all(8)),
-      _tile(context, Icons.person_outline, 'Profil', const ProfileScreen()),
-      _tile(context, Icons.notifications_outlined, 'Preferensi notifikasi',
+      _tile(context, Icons.person_outline, l10n.profile, const ProfileScreen()),
+      _tile(context, Icons.notifications_outlined, l10n.notificationPreferences,
           const PreferencesScreen()),
-      _tile(context, Icons.security_outlined, 'Keamanan dan sesi',
+      _tile(context, Icons.security_outlined, l10n.securitySessions,
           const SecurityScreen()),
       ListTile(
           minTileHeight: 56,
           leading: const Icon(Icons.family_restroom),
-          title: const Text('Ganti keluarga'),
+          title: Text(l10n.switchFamily),
           onTap: () =>
               ref.read(sessionControllerProvider).requireFamilySelection()),
       ListTile(
           minTileHeight: 56,
           leading: const Icon(Icons.logout),
-          title: const Text('Keluar'),
+          title: Text(l10n.logout),
           onTap: () async {
             try {
               await ref.read(authRepositoryProvider).logout();
@@ -77,10 +79,11 @@ class _ProfileState extends ConsumerState<ProfileScreen> {
   String? error;
 
   Future<void> pickAvatar() async {
+    final l10n = AppLocalizations.of(context);
     final image = await ImagePicker().pickImage(source: ImageSource.gallery);
     if (image == null) return;
     if (await image.length() > 5 * 1024 * 1024) {
-      setState(() => error = 'Ukuran avatar maksimal 5 MB.');
+      setState(() => error = l10n.avatarSizeLimit);
       return;
     }
     setState(() => loading = true);
@@ -96,6 +99,7 @@ class _ProfileState extends ConsumerState<ProfileScreen> {
   }
 
   Future<void> save() async {
+    final l10n = AppLocalizations.of(context);
     setState(() => loading = true);
     try {
       final user = await ref.read(accountRepositoryProvider).updateProfile(
@@ -107,7 +111,7 @@ class _ProfileState extends ConsumerState<ProfileScreen> {
       ref.read(currentUserProvider.notifier).state = user;
       if (mounted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('Profil diperbarui.')));
+            .showSnackBar(SnackBar(content: Text(l10n.profileUpdated)));
       }
     } on AppError catch (e) {
       setState(() => error = e.message);
@@ -117,47 +121,52 @@ class _ProfileState extends ConsumerState<ProfileScreen> {
   }
 
   @override
-  Widget build(BuildContext context) => _Page(title: 'Profil', children: [
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return _Page(title: l10n.profile, children: [
         OutlinedButton.icon(
             onPressed: loading ? null : pickAvatar,
             icon: const Icon(Icons.photo_camera_outlined),
-            label: const Text('Pilih avatar')),
+            label: Text(l10n.chooseAvatar)),
         TextField(
             controller: name,
-            decoration: const InputDecoration(labelText: 'Nama')),
+            decoration: InputDecoration(labelText: l10n.nameLabel)),
         TextField(
             controller: email,
-            decoration: const InputDecoration(labelText: 'Email')),
+            decoration: InputDecoration(labelText: l10n.email)),
         TextField(
             controller: phone,
-            decoration: const InputDecoration(labelText: 'Telepon')),
+            decoration: InputDecoration(labelText: l10n.phone)),
         TextField(
             controller: currentPassword,
             obscureText: true,
-            decoration: const InputDecoration(
-                labelText: 'Kata sandi saat ini (jika email berubah)')),
+            decoration: InputDecoration(labelText: l10n.currentPasswordLabel)),
         if (error != null)
           Text(error!,
               style: TextStyle(color: Theme.of(context).colorScheme.error)),
         FilledButton(
             onPressed: loading ? null : save,
-            child: Text(loading ? 'Menyimpan…' : 'Simpan'))
+            child: Text(loading ? l10n.saving : l10n.save))
       ]);
+  }
 }
 
 class PreferencesScreen extends ConsumerWidget {
   const PreferencesScreen({super.key});
   @override
-  Widget build(BuildContext context, WidgetRef ref) => Scaffold(
-      appBar: AppBar(title: const Text('Preferensi notifikasi')),
-      body: ref.watch(notificationPreferencesProvider).when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (_, __) => Center(
-              child: FilledButton(
-                  onPressed: () =>
-                      ref.invalidate(notificationPreferencesProvider),
-                  child: const Text('Coba lagi'))),
-          data: (value) => _PreferencesForm(value: value)));
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    return Scaffold(
+        appBar: AppBar(title: Text(l10n.notificationPreferences)),
+        body: ref.watch(notificationPreferencesProvider).when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (_, __) => Center(
+                child: FilledButton(
+                    onPressed: () =>
+                        ref.invalidate(notificationPreferencesProvider),
+                    child: Text(l10n.retry))),
+            data: (value) => _PreferencesForm(value: value)));
+  }
 }
 
 class _PreferencesForm extends ConsumerStatefulWidget {
@@ -186,27 +195,29 @@ class _PreferencesState extends ConsumerState<_PreferencesForm> {
   }
 
   @override
-  Widget build(BuildContext context) =>
-      ListView(padding: const EdgeInsets.all(16), children: [
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return ListView(padding: const EdgeInsets.all(16), children: [
         SwitchListTile(
-            title: const Text('Email'),
+            title: Text(l10n.email),
             value: email,
             onChanged: (v) => setState(() => email = v)),
         SwitchListTile(
-            title: const Text('Push'),
+            title: Text(l10n.push),
             value: push,
             onChanged: (v) => setState(() => push = v)),
         SwitchListTile(
-            title: const Text('Pengingat acara'),
+            title: Text(l10n.eventReminders),
             value: events,
             onChanged: (v) => setState(() => events = v)),
         SwitchListTile(
-            title: const Text('Pembaruan keluarga'),
+            title: Text(l10n.familyUpdates),
             value: family,
             onChanged: (v) => setState(() => family = v)),
         FilledButton(
-            onPressed: loading ? null : save, child: const Text('Simpan'))
+            onPressed: loading ? null : save, child: Text(l10n.save))
       ]);
+  }
 }
 
 class SecurityScreen extends ConsumerStatefulWidget {
@@ -238,31 +249,33 @@ class _SecurityState extends ConsumerState<SecurityScreen> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: const Text('Keamanan')),
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Scaffold(
+        appBar: AppBar(title: Text(l10n.security)),
         body: ListView(padding: const EdgeInsets.all(16), children: [
           TextField(
               controller: current,
               obscureText: true,
               decoration:
-                  const InputDecoration(labelText: 'Kata sandi saat ini')),
+                  InputDecoration(labelText: l10n.currentPassword)),
           const SizedBox(height: 12),
           TextField(
               controller: password,
               obscureText: true,
-              decoration: const InputDecoration(labelText: 'Kata sandi baru')),
+              decoration: InputDecoration(labelText: l10n.newPassword)),
           const SizedBox(height: 12),
           FilledButton(
               onPressed: loading ? null : change,
-              child: const Text('Ubah kata sandi')),
+              child: Text(l10n.changePassword)),
           const Divider(height: 32),
-          Text('Sesi perangkat',
+          Text(l10n.deviceSessions,
               style: Theme.of(context).textTheme.titleMedium),
           ref.watch(accountSessionsProvider).when(
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (_, __) => FilledButton(
                     onPressed: () => ref.invalidate(accountSessionsProvider),
-                    child: const Text('Muat ulang sesi')),
+                    child: Text(l10n.reloadSessions)),
                 data: (items) => Column(
                     children: items
                         .map((session) => ListTile(
@@ -270,10 +283,11 @@ class _SecurityState extends ConsumerState<SecurityScreen> {
                               leading: const Icon(Icons.devices),
                               title: Text(session.deviceName),
                               subtitle: Text(session.isCurrent
-                                  ? 'Perangkat ini'
-                                  : 'Terakhir aktif: ${session.lastActiveAt?.toLocal()}'),
+                                  ? l10n.thisDevice
+                                  : l10n.lastActive(
+                                      '${session.lastActiveAt?.toLocal()}')),
                               trailing: IconButton(
-                                  tooltip: 'Cabut sesi',
+                                  tooltip: l10n.revokeSession,
                                   icon: const Icon(Icons.logout),
                                   onPressed: () => revoke(session)),
                             ))
@@ -281,6 +295,7 @@ class _SecurityState extends ConsumerState<SecurityScreen> {
               ),
         ]),
       );
+  }
 
   Future<void> revoke(AccountSession session) async {
     final currentRevoked =

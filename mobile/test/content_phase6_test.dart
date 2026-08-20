@@ -5,9 +5,17 @@ import 'package:family_tree_mobile/core/providers.dart';
 import 'package:family_tree_mobile/features/content/domain/content_models.dart';
 import 'package:family_tree_mobile/features/content/domain/content_repository.dart';
 import 'package:family_tree_mobile/features/content/presentation/content_screens.dart';
+import 'package:family_tree_mobile/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' hide Family;
 import 'package:flutter_test/flutter_test.dart';
+
+Widget _app(Widget home) => MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('id'),
+      home: home,
+    );
 
 void main() {
   const family =
@@ -28,7 +36,7 @@ void main() {
     await tester.pumpWidget(ProviderScope(overrides: [
       currentFamilyProvider.overrideWith((ref) => family),
       contentRepositoryProvider.overrideWithValue(const _Content(article)),
-    ], child: const MaterialApp(home: ArticleListScreen())));
+    ], child: _app(const ArticleListScreen())));
     await tester.pumpAndSettle();
     expect(find.text('Kisah Keluarga'), findsWidgets);
     expect(find.byTooltip('Tulis artikel'), findsOneWidget);

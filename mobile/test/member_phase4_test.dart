@@ -7,6 +7,14 @@ import 'package:family_tree_mobile/core/models.dart';
 import 'package:family_tree_mobile/core/providers.dart';
 import 'package:family_tree_mobile/features/members/domain/member_repository.dart';
 import 'package:family_tree_mobile/features/members/presentation/member_screens.dart';
+import 'package:family_tree_mobile/l10n/app_localizations.dart';
+
+Widget _app(Widget home) => MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('id'),
+      home: home,
+    );
 
 void main() {
   const family =
@@ -26,7 +34,7 @@ void main() {
     await tester.pumpWidget(ProviderScope(overrides: [
       memberRepositoryProvider.overrideWithValue(_FakeMemberRepository(member)),
       currentFamilyProvider.overrideWith((ref) => family)
-    ], child: const MaterialApp(home: MemberDirectoryScreen())));
+    ], child: _app(const MemberDirectoryScreen())));
     await tester.pumpAndSettle();
     expect(find.text('Alm. Budi Santoso'), findsOneWidget);
     expect(find.textContaining('Meninggal'), findsOneWidget);
@@ -37,7 +45,7 @@ void main() {
     await tester.pumpWidget(ProviderScope(overrides: [
       memberRepositoryProvider.overrideWithValue(_FakeMemberRepository(member)),
       currentFamilyProvider.overrideWith((ref) => family)
-    ], child: const MaterialApp(home: RelationshipResolverScreen())));
+    ], child: _app(const RelationshipResolverScreen())));
     await tester.pumpAndSettle();
     expect(find.text('Pilih anggota'), findsNWidgets(2));
     expect(find.text('Temukan relationship'), findsOneWidget);

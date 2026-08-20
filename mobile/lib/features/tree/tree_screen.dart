@@ -10,6 +10,7 @@ import '../../core/errors/app_error.dart';
 import '../../core/http/page_data.dart';
 import '../../core/models.dart';
 import '../../core/providers.dart';
+import '../../l10n/app_localizations.dart';
 import 'domain/tree_render_policy.dart';
 
 class TreeScreen extends ConsumerStatefulWidget {
@@ -176,34 +177,35 @@ class _TreeScreenState extends ConsumerState<TreeScreen> {
         exportCancellation = null;
         exportProgress = null;
       });
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Ekspor tidak dapat dibuka atau dibagikan.')));
+      final l10n = AppLocalizations.of(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.exportShareFailed)));
     }
   }
 
   Future<void> _previewAndShare(String format, Uint8List bytes) async {
+    final l10n = AppLocalizations.of(context);
     final mime = format == 'png' ? 'image/png' : 'application/pdf';
     final share = await showDialog<bool>(
         context: context,
         builder: (_) => AlertDialog(
-                title: Text('Ekspor ${format.toUpperCase()} siap'),
+                title: Text(l10n.exportReady(format.toUpperCase())),
                 content: format == 'png'
                     ? ConstrainedBox(
                         constraints: const BoxConstraints(maxHeight: 420),
                         child: Image.memory(bytes,
                             fit: BoxFit.contain,
                             errorBuilder: (_, __, ___) =>
-                                const Text('Pratinjau tidak tersedia.')))
-                    : Text(
-                        'PDF berhasil dibuat (${(bytes.length / 1024).ceil()} KB). Bagikan untuk membuka atau menyimpannya.'),
+                                Text(l10n.previewUnavailable)))
+                    : Text(l10n.pdfExportReady((bytes.length / 1024).ceil())),
                 actions: [
                   TextButton(
                       onPressed: () => Navigator.pop(context, false),
-                      child: const Text('Tutup')),
+                      child: Text(l10n.close)),
                   FilledButton.icon(
                       onPressed: () => Navigator.pop(context, true),
                       icon: const Icon(Icons.share),
-                      label: const Text('Bagikan'))
+                      label: Text(l10n.share))
                 ]));
     if (share == true) {
       await SharePlus.instance.share(ShareParams(files: [
@@ -213,6 +215,7 @@ class _TreeScreenState extends ConsumerState<TreeScreen> {
   }
 
   void showDetails(TreeNode node) {
+    final l10n = AppLocalizations.of(context);
     showModalBottomSheet<void>(
         context: context,
         showDragHandle: true,
@@ -224,7 +227,7 @@ class _TreeScreenState extends ConsumerState<TreeScreen> {
                       Icon(node.isAlive ? Icons.person : Icons.local_florist),
                   title: Text(node.displayName),
                   subtitle: Text(
-                      '${node.relationshipToRoot ?? 'Relationship tidak tersedia'} · ${node.isAlive ? 'Hidup' : 'Meninggal'}')),
+                      '${node.relationshipToRoot ?? l10n.relationshipUnavailable} · ${node.isAlive ? l10n.alive : l10n.deceased}')),
               SizedBox(
                   width: double.infinity,
                   child: FilledButton(
@@ -232,7 +235,7 @@ class _TreeScreenState extends ConsumerState<TreeScreen> {
                         Navigator.pop(sheetContext);
                         context.push('/members/${node.uuid}');
                       },
-                      child: const Text('Buka detail anggota'))),
+                      child: Text(l10n.openMemberDetail))),
               if (node.canAddRelative) ...[
                 const SizedBox(height: 12),
                 Wrap(spacing: 8, runSpacing: 8, children: [
@@ -240,17 +243,17 @@ class _TreeScreenState extends ConsumerState<TreeScreen> {
                       onPressed: () =>
                           _openRelativeForm(sheetContext, node, 'parent'),
                       icon: const Icon(Icons.supervisor_account_outlined),
-                      label: const Text('Tambah orang tua')),
+                      label: Text(l10n.addParent)),
                   OutlinedButton.icon(
                       onPressed: () =>
                           _openRelativeForm(sheetContext, node, 'spouse'),
                       icon: const Icon(Icons.favorite_border),
-                      label: const Text('Tambah pasangan')),
+                      label: Text(l10n.addSpouse)),
                   OutlinedButton.icon(
                       onPressed: () =>
                           _openRelativeForm(sheetContext, node, 'child'),
                       icon: const Icon(Icons.child_care_outlined),
-                      label: const Text('Tambah anak')),
+                      label: Text(l10n.addChild)),
                 ]),
               ]
             ])));
@@ -259,46 +262,47 @@ class _TreeScreenState extends ConsumerState<TreeScreen> {
   void _openRelativeForm(
       BuildContext sheetContext, TreeNode node, String relation) {
     Navigator.pop(sheetContext);
+    final l10n = AppLocalizations.of(context);
     final name = TextEditingController();
     final formKey = GlobalKey<FormState>();
     var gender = 'male';
     var saving = false;
-    final label = {
-      'parent': 'orang tua',
-      'spouse': 'pasangan',
-      'child': 'anak'
-    }[relation]!;
+    final label = switch (relation) {
+      'parent' => l10n.relativeLabelParent,
+      'spouse' => l10n.relativeLabelSpouse,
+      _ => l10n.relativeLabelChild,
+    };
 
     showDialog<void>(
         context: context,
         builder: (dialogContext) => StatefulBuilder(
             builder: (dialogStateContext, setDialogState) => AlertDialog(
-                    title: Text('Tambah $label'),
+                    title: Text(l10n.addRelative(label)),
                     content: Form(
                         key: formKey,
                         child:
                             Column(mainAxisSize: MainAxisSize.min, children: [
-                          Text('Untuk ${node.displayName}'),
+                          Text(l10n.forMember(node.displayName)),
                           const SizedBox(height: 12),
                           TextFormField(
                               controller: name,
                               autofocus: true,
-                              decoration: const InputDecoration(
-                                  labelText: 'Nama lengkap'),
+                              decoration: InputDecoration(
+                                  labelText: l10n.fullName),
                               validator: (value) =>
                                   value?.trim().isEmpty ?? true
-                                      ? 'Nama wajib diisi.'
+                                      ? l10n.nameRequired
                                       : null),
                           const SizedBox(height: 8),
                           DropdownButtonFormField<String>(
                             initialValue: gender,
-                            decoration: const InputDecoration(
-                                labelText: 'Jenis kelamin'),
-                            items: const [
+                            decoration: InputDecoration(
+                                labelText: l10n.gender),
+                            items: [
                               DropdownMenuItem(
-                                  value: 'male', child: Text('Laki-laki')),
+                                  value: 'male', child: Text(l10n.male)),
                               DropdownMenuItem(
-                                  value: 'female', child: Text('Perempuan')),
+                                  value: 'female', child: Text(l10n.female)),
                             ],
                             onChanged: saving
                                 ? null
@@ -311,7 +315,7 @@ class _TreeScreenState extends ConsumerState<TreeScreen> {
                           onPressed: saving
                               ? null
                               : () => Navigator.pop(dialogStateContext),
-                          child: const Text('Batal')),
+                          child: Text(l10n.cancel)),
                       FilledButton(
                           onPressed: saving
                               ? null
@@ -336,8 +340,8 @@ class _TreeScreenState extends ConsumerState<TreeScreen> {
                                     await generate();
                                     if (mounted) {
                                       messenger.showSnackBar(SnackBar(
-                                          content: Text(
-                                              '${name.text.trim()} berhasil ditambahkan.')));
+                                          content: Text(l10n.relativeAdded(
+                                              name.text.trim()))));
                                     }
                                   } on AppError catch (error) {
                                     setDialogState(() => saving = false);
@@ -345,9 +349,8 @@ class _TreeScreenState extends ConsumerState<TreeScreen> {
                                         SnackBar(content: Text(error.message)));
                                   } catch (_) {
                                     setDialogState(() => saving = false);
-                                    messenger.showSnackBar(const SnackBar(
-                                        content: Text(
-                                            'Anggota belum dapat ditambahkan.')));
+                                    messenger.showSnackBar(SnackBar(
+                                        content: Text(l10n.relativeAddFailed)));
                                   }
                                 },
                           child: saving
@@ -355,145 +358,160 @@ class _TreeScreenState extends ConsumerState<TreeScreen> {
                                   width: 18,
                                   height: 18,
                                   child: CircularProgressIndicator())
-                              : const Text('Tambahkan')),
+                              : Text(l10n.addAction)),
                     ])));
   }
 
   @override
-  Widget build(BuildContext context) => Column(children: [
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Column(children: [
         _controls(),
         if (exportCancellation != null)
           ListTile(
               leading: const CircularProgressIndicator(),
-              title: const Text('Menyiapkan ekspor…'),
+              title: Text(l10n.preparingExport),
               subtitle: LinearProgressIndicator(value: exportProgress),
               trailing: IconButton(
-                  tooltip: 'Batalkan ekspor',
+                  tooltip: l10n.cancelExport,
                   onPressed: exportCancellation!.cancel,
                   icon: const Icon(Icons.close))),
         Expanded(child: _content()),
       ]);
+  }
 
-  Widget _controls() => Material(
-      elevation: 1,
-      child: ExpansionTile(
-          initiallyExpanded: true,
-          title: Text(root?.displayName ?? 'Pilih pusat pohon'),
-          leading: const Icon(Icons.account_tree),
-          childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-          children: [
-            Row(children: [
-              Expanded(
-                  child: OutlinedButton.icon(
-                      onPressed: pickRoot,
-                      icon: const Icon(Icons.person_search),
-                      label: const Text('Pilih pusat'))),
-              const SizedBox(width: 8),
-              PopupMenuButton<String>(
-                  tooltip: 'Ekspor pohon',
-                  onSelected: export,
-                  itemBuilder: (_) => const [
-                        PopupMenuItem(value: 'png', child: Text('Ekspor PNG')),
-                        PopupMenuItem(value: 'pdf', child: Text('Ekspor PDF'))
-                      ],
-                  child: const Padding(
-                      padding: EdgeInsets.all(12), child: Icon(Icons.download)))
-            ]),
-            Wrap(spacing: 8, runSpacing: 8, children: [
-              DropdownButton<String>(
-                  value: mode,
-                  items: const [
-                    DropdownMenuItem(value: 'ancestor', child: Text('Leluhur')),
-                    DropdownMenuItem(
-                        value: 'descendant', child: Text('Keturunan')),
-                    DropdownMenuItem(value: 'full', child: Text('Lengkap'))
-                  ],
-                  onChanged: (value) {
-                    if (value != null) {
-                      setState(() => mode = value);
-                      generate();
-                    }
-                  }),
-              DropdownButton<String>(
-                  value: layout,
-                  items: const [
-                    DropdownMenuItem(
-                        value: 'vertical', child: Text('Vertikal')),
-                    DropdownMenuItem(
-                        value: 'horizontal', child: Text('Horizontal')),
-                    DropdownMenuItem(value: 'radial', child: Text('Radial')),
-                    DropdownMenuItem(value: 'compact', child: Text('Ringkas'))
-                  ],
-                  onChanged: (value) {
-                    if (value != null) {
-                      setState(() => layout = value);
-                      generate();
-                    }
-                  }),
-              OutlinedButton.icon(
-                  onPressed: tree?.canCollapse == true
-                      ? () {
-                          setState(() => depth--);
-                          generate();
-                        }
-                      : null,
-                  icon: const Icon(Icons.unfold_less),
-                  label: Text('Ciutkan ($depth)')),
-              OutlinedButton.icon(
-                  onPressed: tree?.canExpand == true
-                      ? () {
-                          setState(() => depth++);
-                          generate();
-                        }
-                      : null,
-                  icon: const Icon(Icons.unfold_more),
-                  label: Text('Perluas ($depth/20)')),
-              FilterChip(
-                  label: const Text('Hanya hidup'),
-                  selected: livingOnly,
-                  onSelected: (value) => setState(() => livingOnly = value)),
-              FilterChip(
-                  label: const Text('Daftar aksesibel'),
-                  selected: showSemanticList,
-                  onSelected: (value) =>
-                      setState(() => showSemanticList = value)),
-            ]),
-            Row(children: [
-              Expanded(
-                  child: TextField(
-                      controller: search,
-                      onSubmitted: (_) => searchNode(),
-                      decoration: const InputDecoration(
-                          labelText: 'Cari/fokus anggota',
-                          prefixIcon: Icon(Icons.search)))),
-              IconButton(
-                  tooltip: 'Perkecil',
-                  onPressed: () => zoom(.8),
-                  icon: const Icon(Icons.zoom_out)),
-              IconButton(
-                  tooltip: 'Perbesar',
-                  onPressed: () => zoom(1.25),
-                  icon: const Icon(Icons.zoom_in)),
-              IconButton(
-                  tooltip: 'Pusatkan',
-                  onPressed: centerRoot,
-                  icon: const Icon(Icons.center_focus_strong))
-            ])
-          ]));
+  Widget _controls() {
+    final l10n = AppLocalizations.of(context);
+    return Material(
+        elevation: 1,
+        child: ExpansionTile(
+            initiallyExpanded: true,
+            title: Text(root?.displayName ?? l10n.pickTreeRoot),
+            leading: const Icon(Icons.account_tree),
+            childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+            children: [
+              Row(children: [
+                Expanded(
+                    child: OutlinedButton.icon(
+                        onPressed: pickRoot,
+                        icon: const Icon(Icons.person_search),
+                        label: Text(l10n.chooseCenter))),
+                const SizedBox(width: 8),
+                PopupMenuButton<String>(
+                    tooltip: l10n.exportTree,
+                    onSelected: export,
+                    itemBuilder: (_) => [
+                          PopupMenuItem(
+                              value: 'png', child: Text(l10n.exportPng)),
+                          PopupMenuItem(
+                              value: 'pdf', child: Text(l10n.exportPdf))
+                        ],
+                    child: const Padding(
+                        padding: EdgeInsets.all(12), child: Icon(Icons.download)))
+              ]),
+              Wrap(spacing: 8, runSpacing: 8, children: [
+                DropdownButton<String>(
+                    value: mode,
+                    items: [
+                      DropdownMenuItem(
+                          value: 'ancestor', child: Text(l10n.ancestor)),
+                      DropdownMenuItem(
+                          value: 'descendant',
+                          child: Text(l10n.descendant)),
+                      DropdownMenuItem(
+                          value: 'full', child: Text(l10n.fullTree))
+                    ],
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() => mode = value);
+                        generate();
+                      }
+                    }),
+                DropdownButton<String>(
+                    value: layout,
+                    items: [
+                      DropdownMenuItem(
+                          value: 'vertical', child: Text(l10n.vertical)),
+                      DropdownMenuItem(
+                          value: 'horizontal',
+                          child: Text(l10n.horizontal)),
+                      DropdownMenuItem(
+                          value: 'radial', child: Text(l10n.radial)),
+                      DropdownMenuItem(
+                          value: 'compact', child: Text(l10n.compact))
+                    ],
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() => layout = value);
+                        generate();
+                      }
+                    }),
+                OutlinedButton.icon(
+                    onPressed: tree?.canCollapse == true
+                        ? () {
+                            setState(() => depth--);
+                            generate();
+                          }
+                        : null,
+                    icon: const Icon(Icons.unfold_less),
+                    label: Text(l10n.collapseDepth(depth))),
+                OutlinedButton.icon(
+                    onPressed: tree?.canExpand == true
+                        ? () {
+                            setState(() => depth++);
+                            generate();
+                          }
+                        : null,
+                    icon: const Icon(Icons.unfold_more),
+                    label: Text(l10n.expandDepth(depth))),
+                FilterChip(
+                    label: Text(l10n.livingOnly),
+                    selected: livingOnly,
+                    onSelected: (value) => setState(() => livingOnly = value)),
+                FilterChip(
+                    label: Text(l10n.semanticList),
+                    selected: showSemanticList,
+                    onSelected: (value) =>
+                        setState(() => showSemanticList = value)),
+              ]),
+              Row(children: [
+                Expanded(
+                    child: TextField(
+                        controller: search,
+                        onSubmitted: (_) => searchNode(),
+                        decoration: InputDecoration(
+                            labelText: l10n.searchFocusMember,
+                            prefixIcon: const Icon(Icons.search)))),
+                IconButton(
+                    tooltip: l10n.zoomOut,
+                    onPressed: () => zoom(.8),
+                    icon: const Icon(Icons.zoom_out)),
+                IconButton(
+                    tooltip: l10n.zoomIn,
+                    onPressed: () => zoom(1.25),
+                    icon: const Icon(Icons.zoom_in)),
+                IconButton(
+                    tooltip: l10n.centerTree,
+                    onPressed: centerRoot,
+                    icon: const Icon(Icons.center_focus_strong))
+              ])
+            ]));
+  }
 
   Widget _content() {
+    final l10n = AppLocalizations.of(context);
     if (root == null) {
       return Center(
           child: FilledButton.icon(
               onPressed: pickRoot,
               icon: const Icon(Icons.person_search),
-              label: const Text('Pilih anggota pusat')));
+              label: Text(l10n.pickCenterMember)));
     }
     if (loading && tree == null) {
       return Center(
           child: Semantics(
               liveRegion: true,
-              label: 'Memuat pohon keluarga',
+              label: l10n.loadingTree,
               child: const CircularProgressIndicator()));
     }
     if (error != null) {
@@ -501,11 +519,11 @@ class _TreeScreenState extends ConsumerState<TreeScreen> {
           child: FilledButton.icon(
               onPressed: generate,
               icon: const Icon(Icons.refresh),
-              label: const Text('Coba lagi')));
+              label: Text(l10n.retry)));
     }
     final current = tree;
     if (current == null || current.nodes.isEmpty) {
-      return const Center(child: Text('Pohon keluarga masih kosong.'));
+      return Center(child: Text(l10n.treeEmpty));
     }
     final rendered = filteredNodes;
     if (showSemanticList) {
@@ -518,7 +536,7 @@ class _TreeScreenState extends ConsumerState<TreeScreen> {
                     node.isAlive ? Icons.person_outline : Icons.local_florist),
                 title: Text(node.displayName),
                 subtitle: Text(
-                    '${node.relationshipToRoot ?? 'Tidak diketahui'} · Generasi ${node.generation}'),
+                    '${node.relationshipToRoot ?? l10n.treeUnknownRelationship} · ${l10n.generationLabel(node.generation)}'),
                 onTap: () => showDetails(node));
           });
     }
@@ -548,8 +566,13 @@ class _TreeScreenState extends ConsumerState<TreeScreen> {
                               top: node.y - 45,
                               child: Semantics(
                                   button: true,
-                                  label:
-                                      '${node.displayName}, ${node.relationshipToRoot ?? 'relationship tidak diketahui'}, ${node.isAlive ? 'hidup' : 'meninggal'}',
+                                  label: l10n.treeNodeSemantics(
+                                      node.displayName,
+                                      node.relationshipToRoot ??
+                                          l10n.treeRelationshipUnknown,
+                                      node.isAlive
+                                          ? l10n.treeAliveLower
+                                          : l10n.treeDeceasedLower),
                                   child: InkWell(
                                       onTap: () => showDetails(node),
                                       child: Container(
@@ -574,10 +597,11 @@ class _TreeScreenState extends ConsumerState<TreeScreen> {
                                                   MainAxisAlignment.center,
                                               children: [
                                                 Text(node.displayName,
-                                                    textAlign: TextAlign.center,
+                                                    textAlign:
+                                                        TextAlign.center,
                                                     maxLines: 2,
-                                                    overflow:
-                                                        TextOverflow.ellipsis),
+                                                    overflow: TextOverflow
+                                                        .ellipsis),
                                                 Text(
                                                     node.relationshipToRoot ??
                                                         '—',
@@ -585,11 +609,11 @@ class _TreeScreenState extends ConsumerState<TreeScreen> {
                                                         .textTheme
                                                         .labelSmall),
                                                 if (!node.isAlive)
-                                                  const Icon(
+                                                  Icon(
                                                       Icons.local_florist,
                                                       size: 14,
                                                       semanticLabel:
-                                                          'Meninggal')
+                                                          l10n.deceased)
                                               ]))))))
                           .toList())))),
       if (current.nodes.length > TreeRenderPolicy.maxActiveNodes)
@@ -597,8 +621,8 @@ class _TreeScreenState extends ConsumerState<TreeScreen> {
             left: 12,
             bottom: 12,
             child: Chip(
-                label: Text(
-                    'Menampilkan ${TreeRenderPolicy.maxActiveNodes} dari ${current.nodes.length} node'))),
+                label: Text(l10n.showingNodes(
+                    TreeRenderPolicy.maxActiveNodes, current.nodes.length)))),
       if (loading)
         const Positioned(top: 8, right: 8, child: CircularProgressIndicator()),
     ]);
@@ -657,15 +681,17 @@ class _TreeRootPickerState extends ConsumerState<_TreeRootPicker> {
   }
 
   @override
-  Widget build(BuildContext context) => AlertDialog(
-          title: const Text('Pilih pusat pohon'),
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return AlertDialog(
+          title: Text(l10n.pickTreeRoot),
           content: SizedBox(
               width: 480,
               height: 480,
               child: Column(children: [
                 SearchBar(
                     controller: search,
-                    hintText: 'Cari anggota',
+                    hintText: l10n.searchMembers,
                     onSubmitted: (_) => reload()),
                 Expanded(
                     child: FutureBuilder<PageData<FamilyMember>>(
@@ -683,26 +709,28 @@ class _TreeRootPickerState extends ConsumerState<_TreeRootPicker> {
                                         .map((member) => ListTile(
                                             title: Text(member.displayName),
                                             subtitle: Text(member.isAlive
-                                                ? 'Hidup'
-                                                : 'Meninggal'),
-                                            onTap: () =>
-                                                Navigator.pop(context, member)))
+                                                ? l10n.alive
+                                                : l10n.deceased),
+                                            onTap: () => Navigator.pop(
+                                                context, member)))
                                         .toList())),
                             Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   IconButton(
-                                      tooltip: 'Sebelumnya',
+                                      tooltip: l10n.previousPage,
                                       onPressed: result.currentPage > 1
-                                          ? () => reload(result.currentPage - 1)
+                                          ? () =>
+                                              reload(result.currentPage - 1)
                                           : null,
                                       icon: const Icon(Icons.chevron_left)),
-                                  Text(
-                                      '${result.currentPage} / ${result.lastPage}'),
+                                  Text(l10n.pageFraction(result.currentPage,
+                                      result.lastPage)),
                                   IconButton(
-                                      tooltip: 'Berikutnya',
+                                      tooltip: l10n.nextPage,
                                       onPressed: result.hasMore
-                                          ? () => reload(result.currentPage + 1)
+                                          ? () =>
+                                              reload(result.currentPage + 1)
                                           : null,
                                       icon: const Icon(Icons.chevron_right))
                                 ])
@@ -712,6 +740,7 @@ class _TreeRootPickerState extends ConsumerState<_TreeRootPicker> {
           actions: [
             TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('Batal'))
+                child: Text(l10n.cancel))
           ]);
+  }
 }

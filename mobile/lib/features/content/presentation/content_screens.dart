@@ -8,11 +8,9 @@ import 'package:image_picker/image_picker.dart';
 import '../../../core/errors/app_error.dart';
 import '../../../core/models.dart';
 import '../../../core/providers.dart';
+import '../../../l10n/app_localizations.dart';
 import '../domain/content_models.dart';
 
-String _message(Object error) => error is AppError
-    ? error.message
-    : 'Permintaan tidak berhasil. Silakan coba lagi.';
 String _date(DateTime value) =>
     '${value.toLocal().day.toString().padLeft(2, '0')}/${value.toLocal().month.toString().padLeft(2, '0')}/${value.toLocal().year} ${value.toLocal().hour.toString().padLeft(2, '0')}:${value.toLocal().minute.toString().padLeft(2, '0')}';
 bool _canManage(Family? family) => family?.canManage ?? false;
@@ -70,11 +68,12 @@ class _ArticleListState extends ConsumerState<ArticleListScreen> {
   @override
   Widget build(BuildContext context) {
     final family = ref.watch(currentFamilyProvider);
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
-        appBar: AppBar(title: const Text('Artikel keluarga')),
+        appBar: AppBar(title: Text(l10n.familyArticles)),
         floatingActionButton: _canManage(family)
             ? FloatingActionButton(
-                tooltip: 'Tulis artikel',
+                tooltip: l10n.writeArticle,
                 onPressed: () => context.push('/articles/new'),
                 child: const Icon(Icons.edit))
             : null,
@@ -83,17 +82,18 @@ class _ArticleListState extends ConsumerState<ArticleListScreen> {
             child: ListView(padding: const EdgeInsets.all(16), children: [
               SearchBar(
                   controller: search,
-                  hintText: 'Cari artikel',
+                  hintText: l10n.searchArticles,
                   onSubmitted: (_) {
                     page = 1;
                     load();
                   }),
               const SizedBox(height: 12),
               SegmentedButton<String>(
-                  segments: const [
-                    ButtonSegment(value: 'all', label: Text('Semua')),
-                    ButtonSegment(value: 'published', label: Text('Terbit')),
-                    ButtonSegment(value: 'draft', label: Text('Draf'))
+                  segments: [
+                    ButtonSegment(value: 'all', label: Text(l10n.all)),
+                    ButtonSegment(
+                        value: 'published', label: Text(l10n.published)),
+                    ButtonSegment(value: 'draft', label: Text(l10n.draft))
                   ],
                   selected: {
                     status ?? 'all'
@@ -105,7 +105,7 @@ class _ArticleListState extends ConsumerState<ArticleListScreen> {
                   }),
               if (featured.isNotEmpty) ...[
                 const SizedBox(height: 20),
-                Text('Pilihan keluarga',
+                Text(l10n.featuredArticles,
                     style: Theme.of(context).textTheme.titleMedium),
                 ...featured.map((a) => _ArticleTile(article: a, featured: true))
               ],
@@ -115,9 +115,8 @@ class _ArticleListState extends ConsumerState<ArticleListScreen> {
               else if (error != null)
                 _Retry(error: error!, retry: load)
               else if (articles.isEmpty)
-                const _Empty(
-                    icon: Icons.article_outlined,
-                    text: 'Belum ada artikel yang dapat ditampilkan.')
+                _Empty(
+                    icon: Icons.article_outlined, text: l10n.noArticles)
               else
                 ...articles.map((a) => _ArticleTile(article: a)),
             ])));
@@ -174,20 +173,21 @@ class _ArticleDetailState extends ConsumerState<ArticleDetailScreen> {
   }
 
   Future<void> comment([ArticleComment? existing]) async {
+    final l10n = AppLocalizations.of(context);
     final c = TextEditingController(text: existing?.comment);
     final value = await showDialog<String>(
         context: context,
         builder: (_) => AlertDialog(
-                title:
-                    Text(existing == null ? 'Tulis komentar' : 'Edit komentar'),
+                title: Text(
+                    existing == null ? l10n.writeComment : l10n.editComment),
                 content: TextField(controller: c, minLines: 2, maxLines: 5),
                 actions: [
                   TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: const Text('Batal')),
+                      child: Text(l10n.cancel)),
                   FilledButton(
                       onPressed: () => Navigator.pop(context, c.text.trim()),
-                      child: const Text('Simpan'))
+                      child: Text(l10n.save))
                 ]));
     if (value?.isNotEmpty == true) {
       await ref
@@ -202,6 +202,7 @@ class _ArticleDetailState extends ConsumerState<ArticleDetailScreen> {
     final a = article;
     final family = ref.watch(currentFamilyProvider);
     final user = ref.watch(currentUserProvider);
+    final l10n = AppLocalizations.of(context);
     if (error != null) {
       return Scaffold(
           appBar: AppBar(), body: _Retry(error: error!, retry: load));
@@ -210,7 +211,7 @@ class _ArticleDetailState extends ConsumerState<ArticleDetailScreen> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
     return Scaffold(
-        appBar: AppBar(title: const Text('Detail artikel'), actions: [
+        appBar: AppBar(title: Text(l10n.articleDetail), actions: [
           if (_canManage(family) || user?.uuid == a.authorUuid)
             PopupMenuButton<String>(
                 onSelected: (v) async {
@@ -231,16 +232,18 @@ class _ArticleDetailState extends ConsumerState<ArticleDetailScreen> {
                   await load();
                 },
                 itemBuilder: (_) => [
-                      const PopupMenuItem(value: 'edit', child: Text('Edit')),
+                      PopupMenuItem(
+                          value: 'edit', child: Text(l10n.editLabel)),
                       if (a.status == 'draft')
-                        const PopupMenuItem(
-                            value: 'publish', child: Text('Terbitkan')),
+                        PopupMenuItem(
+                            value: 'publish', child: Text(l10n.publish)),
                       PopupMenuItem(
                           value: 'feature',
                           child: Text(a.isFeatured
-                              ? 'Hapus pilihan'
-                              : 'Jadikan pilihan')),
-                      const PopupMenuItem(value: 'delete', child: Text('Hapus'))
+                              ? l10n.unfeatureArticle
+                              : l10n.featureArticle)),
+                      PopupMenuItem(
+                          value: 'delete', child: Text(l10n.delete))
                     ])
         ]),
         body: ListView(padding: const EdgeInsets.all(16), children: [
@@ -249,14 +252,14 @@ class _ArticleDetailState extends ConsumerState<ArticleDetailScreen> {
           const SizedBox(height: 16),
           if (a.featuredImageUrl != null)
             Image.network(a.featuredImageUrl!,
-                semanticLabel: 'Gambar utama ${a.title}',
+                semanticLabel: l10n.featuredImageLabel(a.title),
                 errorBuilder: (_, __, ___) => const SizedBox.shrink()),
           const SizedBox(height: 12),
           SelectableText(_safeRichText(a.content)),
           const Divider(height: 32),
           Row(children: [
             IconButton(
-                tooltip: a.isLikedByMe ? 'Batal suka' : 'Suka',
+                tooltip: a.isLikedByMe ? l10n.unlike : l10n.like,
                 icon: Icon(
                     a.isLikedByMe ? Icons.favorite : Icons.favorite_border),
                 onPressed: () async {
@@ -265,12 +268,12 @@ class _ArticleDetailState extends ConsumerState<ArticleDetailScreen> {
                       .likeArticle(a.uuid, !a.isLikedByMe);
                   await load();
                 }),
-            Text('${a.likesCount} suka'),
+            Text(l10n.likesCount(a.likesCount)),
             const Spacer(),
             TextButton.icon(
                 onPressed: () => comment(),
                 icon: const Icon(Icons.comment),
-                label: const Text('Komentar'))
+                label: Text(l10n.commentsLabel))
           ]),
           ...comments.map((c) => Card(
               child: ListTile(
@@ -290,10 +293,12 @@ class _ArticleDetailState extends ConsumerState<ArticleDetailScreen> {
                           },
                           itemBuilder: (_) => [
                                 if (c.userUuid == user?.uuid)
-                                  const PopupMenuItem(
-                                      value: 'edit', child: Text('Edit')),
-                                const PopupMenuItem(
-                                    value: 'delete', child: Text('Hapus'))
+                                  PopupMenuItem(
+                                      value: 'edit',
+                                      child: Text(l10n.editLabel)),
+                                PopupMenuItem(
+                                    value: 'delete',
+                                    child: Text(l10n.delete))
                               ])
                       : null)))
         ]));
@@ -383,8 +388,12 @@ class _ArticleEditorState extends ConsumerState<ArticleEditorScreen> {
       if (mounted) context.go('/articles/${value.uuid}');
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context);
+        final message = e is AppError
+            ? e.message
+            : l10n.requestFailed;
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(_message(e))));
+            .showSnackBar(SnackBar(content: Text(message)));
       }
     } finally {
       if (mounted) setState(() => saving = false);
@@ -392,59 +401,62 @@ class _ArticleEditorState extends ConsumerState<ArticleEditorScreen> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-      appBar: AppBar(
-          title:
-              Text(widget.article == null ? 'Tulis artikel' : 'Edit artikel')),
-      body: ListView(padding: const EdgeInsets.all(16), children: [
-        TextField(
-            controller: title,
-            decoration: const InputDecoration(labelText: 'Judul')),
-        const SizedBox(height: 12),
-        DropdownButtonFormField(
-            initialValue: category,
-            decoration: const InputDecoration(labelText: 'Kategori'),
-            items: categories
-                .map(
-                    (c) => DropdownMenuItem(value: c.uuid, child: Text(c.name)))
-                .toList(),
-            onChanged: (v) => setState(() => category = v)),
-        const SizedBox(height: 12),
-        TextField(
-            controller: excerpt,
-            decoration: const InputDecoration(labelText: 'Ringkasan'),
-            maxLines: 2),
-        const SizedBox(height: 12),
-        TextField(
-            controller: content,
-            decoration: const InputDecoration(
-                labelText: 'Isi (teks dan paragraf aman)'),
-            minLines: 10,
-            maxLines: 20),
-        const SizedBox(height: 16),
-        OutlinedButton.icon(
-            onPressed: () async {
-              final image = await ImagePicker().pickImage(
-                  source: ImageSource.gallery,
-                  imageQuality: 88,
-                  maxWidth: 2400);
-              if (image == null) return;
-              if (await image.length() > 10 * 1024 * 1024) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text('Gambar utama maksimal 10 MB.')));
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Scaffold(
+        appBar: AppBar(
+            title:
+                Text(widget.article == null ? l10n.writeArticle : l10n.editArticle)),
+        body: ListView(padding: const EdgeInsets.all(16), children: [
+          TextField(
+              controller: title,
+              decoration: InputDecoration(labelText: l10n.titleLabel)),
+          const SizedBox(height: 12),
+          DropdownButtonFormField(
+              initialValue: category,
+              decoration: InputDecoration(labelText: l10n.category),
+              items: categories
+                  .map(
+                      (c) => DropdownMenuItem(value: c.uuid, child: Text(c.name)))
+                  .toList(),
+              onChanged: (v) => setState(() => category = v)),
+          const SizedBox(height: 12),
+          TextField(
+              controller: excerpt,
+              decoration: InputDecoration(labelText: l10n.excerpt),
+              maxLines: 2),
+          const SizedBox(height: 12),
+          TextField(
+              controller: content,
+              decoration:
+                  InputDecoration(labelText: l10n.contentLabel),
+              minLines: 10,
+              maxLines: 20),
+          const SizedBox(height: 16),
+          OutlinedButton.icon(
+              onPressed: () async {
+                final image = await ImagePicker().pickImage(
+                    source: ImageSource.gallery,
+                    imageQuality: 88,
+                    maxWidth: 2400);
+                if (image == null) return;
+                if (await image.length() > 10 * 1024 * 1024) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text(l10n.featuredImageSizeLimit)));
+                  }
+                  return;
                 }
-                return;
-              }
-              setState(() => featuredImage = image);
-            },
-            icon: const Icon(Icons.image_outlined),
-            label: Text(featuredImage?.name ?? 'Pilih gambar utama')),
-        const SizedBox(height: 8),
-        FilledButton(
-            onPressed: saving ? null : save,
-            child: Text(saving ? 'Menyimpan…' : 'Simpan draf'))
-      ]));
+                setState(() => featuredImage = image);
+              },
+              icon: const Icon(Icons.image_outlined),
+              label: Text(featuredImage?.name ?? l10n.chooseFeaturedImage)),
+          const SizedBox(height: 8),
+          FilledButton(
+              onPressed: saving ? null : save,
+              child: Text(saving ? l10n.saving : l10n.saveDraft))
+        ]));
+  }
 }
 
 class GalleryScreen extends ConsumerStatefulWidget {
@@ -486,27 +498,28 @@ class _GalleryState extends ConsumerState<GalleryScreen> {
   }
 
   Future<void> editAlbum([PhotoAlbum? value]) async {
+    final l10n = AppLocalizations.of(context);
     final name = TextEditingController(text: value?.name),
         desc = TextEditingController(text: value?.description);
     final ok = await showDialog<bool>(
         context: context,
         builder: (_) => AlertDialog(
-                title: Text(value == null ? 'Album baru' : 'Edit album'),
+                title: Text(value == null ? l10n.createAlbum : l10n.editAlbum),
                 content: Column(mainAxisSize: MainAxisSize.min, children: [
                   TextField(
                       controller: name,
-                      decoration: const InputDecoration(labelText: 'Nama')),
+                      decoration: InputDecoration(labelText: l10n.nameLabel)),
                   TextField(
                       controller: desc,
-                      decoration: const InputDecoration(labelText: 'Deskripsi'))
+                      decoration: InputDecoration(labelText: l10n.description))
                 ]),
                 actions: [
                   TextButton(
                       onPressed: () => Navigator.pop(context, false),
-                      child: const Text('Batal')),
+                      child: Text(l10n.cancel)),
                   FilledButton(
                       onPressed: () => Navigator.pop(context, true),
-                      child: const Text('Simpan'))
+                      child: Text(l10n.save))
                 ]));
     if (ok == true && name.text.trim().isNotEmpty) {
       await ref.read(contentRepositoryProvider).saveAlbum(
@@ -521,16 +534,17 @@ class _GalleryState extends ConsumerState<GalleryScreen> {
   @override
   Widget build(BuildContext context) {
     final family = ref.watch(currentFamilyProvider);
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
-        appBar: AppBar(title: const Text('Album & galeri'), actions: [
+        appBar: AppBar(title: Text(l10n.albumGallery), actions: [
           if (_canManage(family))
             IconButton(
-                tooltip: 'Buat album',
+                tooltip: l10n.createAlbum,
                 onPressed: () => editAlbum(),
                 icon: const Icon(Icons.create_new_folder_outlined))
         ]),
         floatingActionButton: FloatingActionButton(
-            tooltip: 'Unggah foto',
+            tooltip: l10n.uploadPhoto,
             onPressed: () => context.push('/photos/upload'),
             child: const Icon(Icons.add_a_photo)),
         body: error != null
@@ -540,10 +554,10 @@ class _GalleryState extends ConsumerState<GalleryScreen> {
                 child: ListView(padding: const EdgeInsets.all(16), children: [
                   DropdownButtonFormField<String?>(
                       initialValue: album,
-                      decoration: const InputDecoration(labelText: 'Album'),
+                      decoration: InputDecoration(labelText: l10n.album),
                       items: [
-                        const DropdownMenuItem(
-                            value: null, child: Text('Semua foto')),
+                        DropdownMenuItem(
+                            value: null, child: Text(l10n.allPhotos)),
                         ...albums.map((a) => DropdownMenuItem(
                             value: a.uuid,
                             child: Text('${a.name} (${a.photosCount})')))
@@ -561,26 +575,28 @@ class _GalleryState extends ConsumerState<GalleryScreen> {
                                 label: Text(a.name),
                                 onPressed: () => editAlbum(a),
                                 avatar: const Icon(Icons.edit, size: 16),
-                                deleteButtonTooltipMessage: 'Hapus album',
+                                deleteButtonTooltipMessage: l10n.deleteAlbum,
                                 onDeleted: () async {
                                   final ok = await showDialog<bool>(
                                       context: context,
                                       builder: (_) => AlertDialog(
-                                              title: Text(
-                                                  'Hapus album ${a.name}?'),
-                                              content: const Text(
-                                                  'Album akan dihapus. Foto di dalamnya tetap disimpan tanpa album.'),
+                                              title: Text(l10n
+                                                  .deleteAlbumTitle(a.name)),
+                                              content: Text(l10n
+                                                  .deleteAlbumConfirmation),
                                               actions: [
                                                 TextButton(
                                                     onPressed: () =>
                                                         Navigator.pop(
                                                             context, false),
-                                                    child: const Text('Batal')),
+                                                    child:
+                                                        Text(l10n.cancel)),
                                                 FilledButton(
                                                     onPressed: () =>
                                                         Navigator.pop(
                                                             context, true),
-                                                    child: const Text('Hapus'))
+                                                    child:
+                                                        Text(l10n.delete))
                                               ]));
                                   if (ok == true) {
                                     await ref
@@ -591,9 +607,9 @@ class _GalleryState extends ConsumerState<GalleryScreen> {
                                 }))
                             .toList()),
                   if (photos.isEmpty)
-                    const _Empty(
+                    _Empty(
                         icon: Icons.photo_library_outlined,
-                        text: 'Belum ada foto.')
+                        text: l10n.noPhotos)
                   else
                     GridView.builder(
                         shrinkWrap: true,
@@ -608,7 +624,8 @@ class _GalleryState extends ConsumerState<GalleryScreen> {
                             onTap: () =>
                                 context.push('/photos/${photos[i].uuid}'),
                             child: Semantics(
-                                label: photos[i].caption ?? 'Foto keluarga',
+                                label:
+                                    photos[i].caption ?? l10n.familyPhoto,
                                 child: Image.network(photos[i].thumbnailUrl,
                                     fit: BoxFit.cover,
                                     errorBuilder: (_, __, ___) =>
@@ -647,6 +664,7 @@ class _PhotoUploadState extends ConsumerState<PhotoUploadScreen> {
   }
 
   Future<void> pick(ImageSource source) async {
+    final l10n = AppLocalizations.of(context);
     final value = await ImagePicker()
         .pickImage(source: source, imageQuality: 88, maxWidth: 2400);
     if (value == null) return;
@@ -655,9 +673,8 @@ class _PhotoUploadState extends ConsumerState<PhotoUploadScreen> {
     if (size > 10 * 1024 * 1024 ||
         !{'jpg', 'jpeg', 'png', 'webp'}.contains(ext)) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content:
-                Text('Foto harus JPG, PNG, atau WebP dan maksimal 10 MB.')));
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.photoValidation)));
       }
       return;
     }
@@ -678,8 +695,10 @@ class _PhotoUploadState extends ConsumerState<PhotoUploadScreen> {
       if (mounted) context.go('/photos/${photo.uuid}');
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context);
+        final message = e is AppError ? e.message : l10n.requestFailed;
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(_message(e))));
+            .showSnackBar(SnackBar(content: Text(message)));
       }
     } finally {
       if (mounted) setState(() => saving = false);
@@ -687,57 +706,63 @@ class _PhotoUploadState extends ConsumerState<PhotoUploadScreen> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-      appBar: AppBar(title: const Text('Unggah foto')),
-      body: ListView(padding: const EdgeInsets.all(16), children: [
-        Wrap(spacing: 8, children: [
-          OutlinedButton.icon(
-              onPressed: () => pick(ImageSource.gallery),
-              icon: const Icon(Icons.photo),
-              label: const Text('Galeri')),
-          OutlinedButton.icon(
-              onPressed: () => pick(ImageSource.camera),
-              icon: const Icon(Icons.camera_alt),
-              label: const Text('Kamera'))
-        ]),
-        if (file != null) ...[
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Scaffold(
+        appBar: AppBar(title: Text(l10n.uploadPhoto)),
+        body: ListView(padding: const EdgeInsets.all(16), children: [
+          Wrap(spacing: 8, children: [
+            OutlinedButton.icon(
+                onPressed: () => pick(ImageSource.gallery),
+                icon: const Icon(Icons.photo),
+                label: Text(l10n.gallery)),
+            OutlinedButton.icon(
+                onPressed: () => pick(ImageSource.camera),
+                icon: const Icon(Icons.camera_alt),
+                label: Text(l10n.camera))
+          ]),
+          if (file != null) ...[
+            const SizedBox(height: 12),
+            Image.file(File(file!.path),
+                height: 220,
+                fit: BoxFit.contain,
+                semanticLabel: l10n.photoPreview)
+          ],
           const SizedBox(height: 12),
-          Image.file(File(file!.path),
-              height: 220, fit: BoxFit.contain, semanticLabel: 'Pratinjau foto')
-        ],
-        const SizedBox(height: 12),
-        TextField(
-            controller: caption,
-            decoration: const InputDecoration(labelText: 'Keterangan'),
-            maxLines: 3),
-        DropdownButtonFormField<String?>(
-            initialValue: albumUuid,
-            decoration: const InputDecoration(labelText: 'Album'),
-            items: [
-              const DropdownMenuItem(value: null, child: Text('Tanpa album')),
-              ...albums.map(
-                  (a) => DropdownMenuItem(value: a.uuid, child: Text(a.name)))
-            ],
-            onChanged: (v) => setState(() => albumUuid = v)),
-        ListTile(
-            title: const Text('Tanggal pengambilan'),
-            subtitle:
-                Text(captured == null ? 'Tidak ditentukan' : _date(captured!)),
-            trailing: const Icon(Icons.calendar_today),
-            onTap: () async {
-              final d = await showDatePicker(
-                  context: context,
-                  firstDate: DateTime(1900),
-                  lastDate: DateTime.now(),
-                  initialDate: captured ?? DateTime.now());
-              if (d != null) setState(() => captured = d);
-            }),
-        if (saving)
-          LinearProgressIndicator(value: progress == 0 ? null : progress),
-        FilledButton(
-            onPressed: saving || file == null ? null : upload,
-            child: const Text('Unggah'))
-      ]));
+          TextField(
+              controller: caption,
+              decoration: InputDecoration(labelText: l10n.caption),
+              maxLines: 3),
+          DropdownButtonFormField<String?>(
+              initialValue: albumUuid,
+              decoration: InputDecoration(labelText: l10n.album),
+              items: [
+                DropdownMenuItem(value: null, child: Text(l10n.noAlbum)),
+                ...albums.map(
+                    (a) => DropdownMenuItem(value: a.uuid, child: Text(a.name)))
+              ],
+              onChanged: (v) => setState(() => albumUuid = v)),
+          ListTile(
+              title: Text(l10n.capturedDate),
+              subtitle: Text(captured == null
+                  ? l10n.notSpecified
+                  : _date(captured!)),
+              trailing: const Icon(Icons.calendar_today),
+              onTap: () async {
+                final d = await showDatePicker(
+                    context: context,
+                    firstDate: DateTime(1900),
+                    lastDate: DateTime.now(),
+                    initialDate: captured ?? DateTime.now());
+                if (d != null) setState(() => captured = d);
+              }),
+          if (saving)
+            LinearProgressIndicator(value: progress == 0 ? null : progress),
+          FilledButton(
+              onPressed: saving || file == null ? null : upload,
+              child: Text(l10n.upload))
+        ]));
+  }
 }
 
 class PhotoDetailScreen extends ConsumerStatefulWidget {
@@ -771,6 +796,7 @@ class _PhotoDetailState extends ConsumerState<PhotoDetailScreen> {
   }
 
   Future<void> tags() async {
+    final l10n = AppLocalizations.of(context);
     final family = ref.read(currentFamilyProvider)!;
     final page = await ref
         .read(memberRepositoryProvider)
@@ -781,7 +807,7 @@ class _PhotoDetailState extends ConsumerState<PhotoDetailScreen> {
         context: context,
         builder: (_) => StatefulBuilder(
             builder: (context, setLocal) => AlertDialog(
-                    title: const Text('Tag anggota'),
+                    title: Text(l10n.tagMembers),
                     content: SizedBox(
                         width: 400,
                         child: ListView(
@@ -797,10 +823,10 @@ class _PhotoDetailState extends ConsumerState<PhotoDetailScreen> {
                     actions: [
                       TextButton(
                           onPressed: () => Navigator.pop(context),
-                          child: const Text('Batal')),
+                          child: Text(l10n.cancel)),
                       FilledButton(
                           onPressed: () => Navigator.pop(context, selected),
-                          child: const Text('Simpan'))
+                          child: Text(l10n.save))
                     ])));
     if (result != null) {
       await ref
@@ -813,6 +839,7 @@ class _PhotoDetailState extends ConsumerState<PhotoDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final p = photo;
+    final l10n = AppLocalizations.of(context);
     if (error != null) {
       return Scaffold(
           appBar: AppBar(), body: _Retry(error: error!, retry: load));
@@ -821,13 +848,13 @@ class _PhotoDetailState extends ConsumerState<PhotoDetailScreen> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
     return Scaffold(
-        appBar: AppBar(title: const Text('Detail foto'), actions: [
+        appBar: AppBar(title: Text(l10n.photoDetail), actions: [
           IconButton(
-              tooltip: 'Tag anggota',
+              tooltip: l10n.tagMembers,
               onPressed: tags,
               icon: const Icon(Icons.sell_outlined)),
           IconButton(
-              tooltip: 'Hapus foto',
+              tooltip: l10n.deletePhoto,
               onPressed: () async {
                 await ref.read(contentRepositoryProvider).deletePhoto(p.uuid);
                 if (context.mounted) context.go('/photos');
@@ -835,13 +862,16 @@ class _PhotoDetailState extends ConsumerState<PhotoDetailScreen> {
               icon: const Icon(Icons.delete_outline))
         ]),
         body: ListView(padding: const EdgeInsets.all(16), children: [
-          Image.network(p.url, semanticLabel: p.caption ?? 'Foto keluarga'),
+          Image.network(p.url, semanticLabel: p.caption ?? l10n.familyPhoto),
           if (p.caption != null)
             Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 child: Text(p.caption!)),
-          Text(p.albumName == null ? 'Tanpa album' : 'Album: ${p.albumName}'),
-          if (p.capturedAt != null) Text('Diambil: ${_date(p.capturedAt!)}'),
+          Text(p.albumName == null
+              ? l10n.noAlbum
+              : l10n.photoAlbumLabel(p.albumName!)),
+          if (p.capturedAt != null)
+            Text(l10n.takenAt(_date(p.capturedAt!))),
           Wrap(
               spacing: 6,
               children: p.taggedMembers
@@ -888,11 +918,12 @@ class _EventListState extends ConsumerState<EventListScreen> {
   @override
   Widget build(BuildContext context) {
     final family = ref.watch(currentFamilyProvider);
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
-        appBar: AppBar(title: const Text('Acara keluarga')),
+        appBar: AppBar(title: Text(l10n.familyEvents)),
         floatingActionButton: _canManage(family)
             ? FloatingActionButton(
-                tooltip: 'Buat acara',
+                tooltip: l10n.createEvent,
                 onPressed: () => context.push('/events/new'),
                 child: const Icon(Icons.add))
             : null,
@@ -901,13 +932,14 @@ class _EventListState extends ConsumerState<EventListScreen> {
             child: ListView(padding: const EdgeInsets.all(16), children: [
               SearchBar(
                   controller: search,
-                  hintText: 'Cari acara',
+                  hintText: l10n.searchEvents,
                   onSubmitted: (_) => load()),
               const SizedBox(height: 12),
               SegmentedButton<String>(
-                  segments: const [
-                    ButtonSegment(value: 'upcoming', label: Text('Mendatang')),
-                    ButtonSegment(value: 'all', label: Text('Semua'))
+                  segments: [
+                    ButtonSegment(
+                        value: 'upcoming', label: Text(l10n.upcoming)),
+                    ButtonSegment(value: 'all', label: Text(l10n.all))
                   ],
                   selected: {
                     upcoming == true ? 'upcoming' : 'all'
@@ -920,14 +952,14 @@ class _EventListState extends ConsumerState<EventListScreen> {
               if (error != null)
                 _Retry(error: error!, retry: load)
               else if (items.isEmpty)
-                const _Empty(icon: Icons.event_busy, text: 'Belum ada acara.')
+                _Empty(icon: Icons.event_busy, text: l10n.noEvents)
               else
                 ...items.map((e) => Card(
                     child: ListTile(
                         minTileHeight: 64,
                         title: Text(e.title),
                         subtitle: Text(
-                            '${_date(e.eventDate)} ${e.location == null ? '' : '· ${e.location}'}\nWaktu perangkat: ${DateTime.now().timeZoneName}'),
+                            '${_date(e.eventDate)} ${e.location == null ? '' : '· ${e.location}'}\n${l10n.deviceTime(DateTime.now().timeZoneName)}'),
                         isThreeLine: true,
                         trailing: const Icon(Icons.chevron_right),
                         onTap: () => context.push('/events/${e.uuid}'))))
@@ -969,6 +1001,7 @@ class _EventDetailState extends ConsumerState<EventDetailScreen> {
   Widget build(BuildContext context) {
     final e = event;
     final family = ref.watch(currentFamilyProvider);
+    final l10n = AppLocalizations.of(context);
     if (error != null) {
       return Scaffold(
           appBar: AppBar(), body: _Retry(error: error!, retry: load));
@@ -977,16 +1010,16 @@ class _EventDetailState extends ConsumerState<EventDetailScreen> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
     return Scaffold(
-        appBar: AppBar(title: const Text('Detail acara'), actions: [
+        appBar: AppBar(title: Text(l10n.eventDetail), actions: [
           if (_canManage(family))
             IconButton(
-                tooltip: 'Edit acara',
+                tooltip: l10n.editEvent,
                 onPressed: () =>
                     context.push('/events/${e.uuid}/edit', extra: e),
                 icon: const Icon(Icons.edit)),
           if (_canManage(family))
             IconButton(
-                tooltip: 'Hapus acara',
+                tooltip: l10n.deleteEvent,
                 onPressed: () async {
                   await ref.read(contentRepositoryProvider).deleteEvent(e.uuid);
                   if (context.mounted) context.go('/events');
@@ -1001,12 +1034,12 @@ class _EventDetailState extends ConsumerState<EventDetailScreen> {
             Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 child: Text(e.description!)),
-          const Text('Konfirmasi kehadiran'),
+          Text(l10n.confirmAttendance),
           SegmentedButton<String>(
-              segments: const [
-                ButtonSegment(value: 'yes', label: Text('Ya')),
-                ButtonSegment(value: 'maybe', label: Text('Mungkin')),
-                ButtonSegment(value: 'no', label: Text('Tidak'))
+              segments: [
+                ButtonSegment(value: 'yes', label: Text(l10n.yes)),
+                ButtonSegment(value: 'maybe', label: Text(l10n.maybe)),
+                ButtonSegment(value: 'no', label: Text(l10n.no))
               ],
               emptySelectionAllowed: true,
               selected: {if (e.myRsvp != null) e.myRsvp!},
@@ -1015,7 +1048,7 @@ class _EventDetailState extends ConsumerState<EventDetailScreen> {
                 await load();
               }),
           const Divider(height: 32),
-          Text('Peserta (${e.attendees.length})',
+          Text(l10n.attendeesCount(e.attendees.length),
               style: Theme.of(context).textTheme.titleMedium),
           ...e.attendees.map((a) => ListTile(
               title: Text(a.userName), trailing: Chip(label: Text(a.status))))
@@ -1062,8 +1095,10 @@ class _EventFormState extends ConsumerState<EventFormScreen> {
       if (mounted) context.go('/events/${e.uuid}');
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context);
+        final message = e is AppError ? e.message : l10n.requestFailed;
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(_message(e))));
+            .showSnackBar(SnackBar(content: Text(message)));
       }
     } finally {
       if (mounted) setState(() => saving = false);
@@ -1071,42 +1106,48 @@ class _EventFormState extends ConsumerState<EventFormScreen> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-      appBar: AppBar(
-          title: Text(widget.event == null ? 'Buat acara' : 'Edit acara')),
-      body: ListView(padding: const EdgeInsets.all(16), children: [
-        TextField(
-            controller: title,
-            decoration: const InputDecoration(labelText: 'Judul')),
-        TextField(
-            controller: description,
-            decoration: const InputDecoration(labelText: 'Deskripsi'),
-            maxLines: 4),
-        TextField(
-            controller: location,
-            decoration: const InputDecoration(labelText: 'Lokasi')),
-        ListTile(
-            title: const Text('Tanggal & waktu'),
-            subtitle: Text(date == null ? 'Pilih waktu' : _date(date!)),
-            onTap: () async {
-              final d = await showDatePicker(
-                  context: context,
-                  firstDate: DateTime.now(),
-                  lastDate: DateTime.now().add(const Duration(days: 3650)),
-                  initialDate: date ?? DateTime.now());
-              if (d == null || !context.mounted) return;
-              final t = await showTimePicker(
-                  context: context,
-                  initialTime: TimeOfDay.fromDateTime(date ?? DateTime.now()));
-              if (t != null) {
-                setState(() =>
-                    date = DateTime(d.year, d.month, d.day, t.hour, t.minute));
-              }
-            }),
-        FilledButton(
-            onPressed: saving ? null : save,
-            child: Text(saving ? 'Menyimpan…' : 'Simpan'))
-      ]));
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Scaffold(
+        appBar: AppBar(
+            title: Text(
+                widget.event == null ? l10n.createEvent : l10n.editEvent)),
+        body: ListView(padding: const EdgeInsets.all(16), children: [
+          TextField(
+              controller: title,
+              decoration: InputDecoration(labelText: l10n.titleLabel)),
+          TextField(
+              controller: description,
+              decoration: InputDecoration(labelText: l10n.description),
+              maxLines: 4),
+          TextField(
+              controller: location,
+              decoration: InputDecoration(labelText: l10n.location)),
+          ListTile(
+              title: Text(l10n.dateTimeLabel),
+              subtitle: Text(
+                  date == null ? l10n.pickTime : _date(date!)),
+              onTap: () async {
+                final d = await showDatePicker(
+                    context: context,
+                    firstDate: DateTime.now(),
+                    lastDate: DateTime.now().add(const Duration(days: 3650)),
+                    initialDate: date ?? DateTime.now());
+                if (d == null || !context.mounted) return;
+                final t = await showTimePicker(
+                    context: context,
+                    initialTime:
+                        TimeOfDay.fromDateTime(date ?? DateTime.now()));
+                if (t != null) {
+                  setState(() => date = DateTime(
+                      d.year, d.month, d.day, t.hour, t.minute));
+                }
+              }),
+          FilledButton(
+              onPressed: saving ? null : save,
+              child: Text(saving ? l10n.saving : l10n.save))
+        ]));
+  }
 }
 
 class TimelineScreen extends ConsumerWidget {
@@ -1114,6 +1155,7 @@ class TimelineScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final value = ref.watch(timelineProvider);
+    final l10n = AppLocalizations.of(context);
     return value.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) =>
@@ -1121,10 +1163,10 @@ class TimelineScreen extends ConsumerWidget {
         data: (items) => RefreshIndicator(
             onRefresh: () => ref.refresh(timelineProvider.future),
             child: ListView(padding: const EdgeInsets.all(16), children: [
-              Text('Linimasa keluarga',
+              Text(l10n.familyTimeline,
                   style: Theme.of(context).textTheme.headlineSmall),
               if (items.isEmpty)
-                const _Empty(icon: Icons.history, text: 'Belum ada aktivitas.')
+                _Empty(icon: Icons.history, text: l10n.noActivity)
               else
                 ...items.map((i) => Card(
                     child: ListTile(
@@ -1145,15 +1187,20 @@ class _Retry extends StatelessWidget {
   final Object error;
   final Future<void> Function() retry;
   @override
-  Widget build(BuildContext context) => Center(
-      child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            const Icon(Icons.error_outline, size: 48),
-            Text(_message(error), textAlign: TextAlign.center),
-            const SizedBox(height: 8),
-            FilledButton(onPressed: retry, child: const Text('Coba lagi'))
-          ])));
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final cause = error;
+    final message = cause is AppError ? cause.message : l10n.requestFailed;
+    return Center(
+        child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              const Icon(Icons.error_outline, size: 48),
+              Text(message, textAlign: TextAlign.center),
+              const SizedBox(height: 8),
+              FilledButton(onPressed: retry, child: Text(l10n.retry))
+            ])));
+  }
 }
 
 class _Empty extends StatelessWidget {
