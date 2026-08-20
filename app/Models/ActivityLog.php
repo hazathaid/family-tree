@@ -43,6 +43,10 @@ class ActivityLog extends Model
 
     public const TREE_RELATIVE_CREATED = 'TREE_RELATIVE_CREATED';
 
+    public const GEDCOM_IMPORTED = 'GEDCOM_IMPORTED';
+
+    public const MEMBERS_IMPORTED = 'MEMBERS_IMPORTED';
+
     public const FILTERS = [
         'members' => [
             self::MEMBER_CREATED,
@@ -52,6 +56,8 @@ class ActivityLog extends Model
             self::MEMBER_ACCOUNT_INVITED,
             self::MEMBER_ACCOUNT_CLAIMED,
             self::TREE_RELATIVE_CREATED,
+            self::GEDCOM_IMPORTED,
+            self::MEMBERS_IMPORTED,
         ],
         'articles' => [self::ARTICLE_CREATED],
         'photos' => [self::PHOTO_UPLOADED],

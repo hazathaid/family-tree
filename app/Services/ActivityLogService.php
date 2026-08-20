@@ -59,6 +59,24 @@ class ActivityLogService
         ]);
     }
 
+    public function gedcomImported(User $user, FamilyMember $member, int $membersCreated, int $relationshipsCreated): ActivityLog
+    {
+        return $this->record($member->family_id, $user, ActivityLog::GEDCOM_IMPORTED, [
+            'subject_uuid' => $member->uuid,
+            'members_created' => $membersCreated,
+            'relationships_created' => $relationshipsCreated,
+        ]);
+    }
+
+    public function membersImported(User $user, FamilyMember $member, int $membersCreated, int $membersSkipped): ActivityLog
+    {
+        return $this->record($member->family_id, $user, ActivityLog::MEMBERS_IMPORTED, [
+            'subject_uuid' => $member->uuid,
+            'members_created' => $membersCreated,
+            'members_skipped' => $membersSkipped,
+        ]);
+    }
+
     public function photoUploaded(User $user, MemberPhoto $photo): ActivityLog
     {
         return $this->record($photo->family_id, $user, ActivityLog::PHOTO_UPLOADED, ['subject_uuid' => $photo->uuid, 'caption' => $photo->caption]);

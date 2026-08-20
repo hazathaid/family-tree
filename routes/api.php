@@ -16,12 +16,14 @@ use App\Http\Controllers\Api\V1\FamilyBranchController;
 use App\Http\Controllers\Api\V1\FamilyController;
 use App\Http\Controllers\Api\V1\FamilyDashboardController;
 use App\Http\Controllers\Api\V1\FamilyExportController;
+use App\Http\Controllers\Api\V1\FamilyImportController;
 use App\Http\Controllers\Api\V1\FamilyMemberController;
 use App\Http\Controllers\Api\V1\FamilyRoleController;
 use App\Http\Controllers\Api\V1\FamilyTreeController;
 use App\Http\Controllers\Api\V1\FeaturedArticleController;
 use App\Http\Controllers\Api\V1\GamificationController;
 use App\Http\Controllers\Api\V1\MemberAccountInvitationController;
+use App\Http\Controllers\Api\V1\MemberBulkController;
 use App\Http\Controllers\Api\V1\MemberPhotoController;
 use App\Http\Controllers\Api\V1\NotificationController;
 use App\Http\Controllers\Api\V1\PhotoAlbumController;
@@ -73,6 +75,7 @@ Route::prefix('v1')->name('api.')->middleware('throttle:api')->group(function ()
         Route::apiResource('families', FamilyController::class);
         Route::post('families/{family}/assets', [FamilyController::class, 'updateAssets'])->middleware('throttle:10,1');
         Route::get('families/{family}/export/gedcom', [FamilyExportController::class, 'gedcom'])->middleware('throttle:10,1');
+        Route::post('families/{family}/import/gedcom', [FamilyImportController::class, 'gedcom'])->middleware('throttle:10,1');
 
         Route::get('families/{family}/roles', [FamilyRoleController::class, 'index']);
         Route::post('families/{family}/roles/invite', [FamilyRoleController::class, 'invite']);
@@ -81,6 +84,8 @@ Route::prefix('v1')->name('api.')->middleware('throttle:api')->group(function ()
 
         Route::apiResource('families.branches', FamilyBranchController::class);
         Route::get('families/{family}/dashboard', [FamilyDashboardController::class, 'show']);
+        Route::post('families/{family}/members/import', [MemberBulkController::class, 'import'])->middleware('throttle:10,1');
+        Route::get('families/{family}/members/export', [MemberBulkController::class, 'export'])->middleware('throttle:10,1');
 
         Route::apiResource('family-members', FamilyMemberController::class);
         Route::post('family-members/{family_member}/photo', [FamilyMemberController::class, 'uploadPhoto']);
