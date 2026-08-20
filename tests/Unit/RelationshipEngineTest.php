@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Services\RelationshipResolverService;
 use App\Services\RelationshipTraversalService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
 
 class RelationshipEngineTest extends TestCase
@@ -83,6 +84,108 @@ class RelationshipEngineTest extends TestCase
         $this->assertSame([], $result['path']);
     }
 
+    public function test_resolver_rejects_members_from_different_families(): void
+    {
+        $graph = $this->relationshipGraph();
+        $other = Family::factory()->create(['created_by' => $graph['user']->id]);
+        $stranger = $this->member($other, 'Orang Lain', 'male', '1990-01-01', $graph['user']);
+
+        $this->expectException(ValidationException::class);
+
+        app(RelationshipResolverService::class)->resolve($graph['source'], $stranger);
+    }
+
+    public function test_resolver_names_child_and_spouse_gender_variants(): void
+    {
+        $graph = $this->relationshipGraph();
+        $resolver = app(RelationshipResolverService::class);
+
+        $this->assertSame('Anak Perempuan', $resolver->resolve($graph['source'], $graph['daughter'])['relationship']);
+        $this->assertSame('Anak Laki-Laki', $resolver->resolve($graph['source'], $graph['son'])['relationship']);
+        $this->assertSame('Istri', $resolver->resolve($graph['source'], $graph['spouse'])['relationship']);
+        $this->assertSame('Suami', $resolver->resolve($graph['femalePartner'], $graph['maleSpouse'])['relationship']);
+        $this->assertSame('Pasangan', $resolver->resolve($graph['source'], $graph['unknownSpouse'])['relationship']);
+        $this->assertSame('Cucu Perempuan', $resolver->resolve($graph['source'], $graph['grandChild'])['relationship']);
+        $this->assertSame('Cucu Laki-Laki', $resolver->resolve($graph['source'], $graph['maleGrandChild'])['relationship']);
+        $this->assertSame('Cucu', $resolver->resolve($graph['source'], $graph['unknownGrandChild'])['relationship']);
+    }
+
+    public function test_resolver_returns_null_for_unrecognized_path_sequence(): void
+    {
+        $graph = $this->relationshipGraph();
+        $path = [
+            ['from_member_id' => $graph['source']->id, 'to_member_id' => $graph['father']->id, 'relationship' => 'father'],
+            ['from_member_id' => $graph['father']->id, 'to_member_id' => $graph['olderUncle']->id, 'relationship' => 'spouse'],
+        ];
+
+        $result = app(RelationshipResolverService::class)->nameFromPath($graph['source'], $graph['olderUncle'], $path);
+
+        $this->assertNull($result);
+    }
+
+    public function test_traversal_returns_empty_for_cross_family_and_same_member(): void
+    {
+        $graph = $this->relationshipGraph();
+        $other = Family::factory()->create(['created_by' => $graph['user']->id]);
+        $stranger = $this->member($other, 'Orang Lain', 'male', '1990-01-01', $graph['user']);
+        $traversal = app(RelationshipTraversalService::class);
+
+        $this->assertSame([], $traversal->shortestPath($graph['source'], $stranger));
+        $this->assertSame([], $traversal->shortestPath($graph['source'], $graph['source']));
+    }
+
+    public function test_traversal_reads_cached_path_on_second_call(): void
+    {
+        $graph = $this->relationshipGraph();
+        $traversal = app(RelationshipTraversalService::class);
+
+        $first = $traversal->shortestPath($graph['source'], $graph['cousin']);
+        $second = $traversal->shortestPath($graph['source'], $graph['cousin']);
+
+        $this->assertSame($first, $second);
+        $this->assertCount(4, $second);
+    }
+
+    public function test_traversal_supports_child_edges_and_parent_gender(): void
+    {
+        $graph = $this->relationshipGraph();
+        $traversal = app(RelationshipTraversalService::class);
+
+        $parentMale = $this->member($graph['family'], 'Bapak', 'male', '1960-01-01', $graph['user']);
+        $childA = $this->member($graph['family'], 'Anak A', 'male', '1990-01-01', $graph['user']);
+        $this->relationship($childA, $parentMale, 'child');
+        $this->assertSame(['father'], array_column($traversal->shortestPath($childA, $parentMale), 'relationship'));
+
+        $parentFemale = $this->member($graph['family'], 'Ibu', 'female', '1962-01-01', $graph['user']);
+        $childB = $this->member($graph['family'], 'Anak B', 'male', '1991-01-01', $graph['user']);
+        $this->relationship($childB, $parentFemale, 'child');
+        $this->assertSame(['mother'], array_column($traversal->shortestPath($childB, $parentFemale), 'relationship'));
+
+        $parentUnknown = $this->member($graph['family'], 'Orang Tua', null, '1963-01-01', $graph['user']);
+        $childC = $this->member($graph['family'], 'Anak C', 'male', '1992-01-01', $graph['user']);
+        $this->relationship($childC, $parentUnknown, 'child');
+        $this->assertSame(['parent'], array_column($traversal->shortestPath($childC, $parentUnknown), 'relationship'));
+    }
+
+    public function test_traversal_ignores_soft_deleted_members(): void
+    {
+        $graph = $this->relationshipGraph();
+        $traversal = app(RelationshipTraversalService::class);
+        $intermediate = $this->member($graph['family'], 'Penerus', 'male', '1980-01-01', $graph['user']);
+        $targetA = $this->member($graph['family'], 'Target A', 'male', '2000-01-01', $graph['user']);
+        $targetB = $this->member($graph['family'], 'Target B', 'male', '2001-01-01', $graph['user']);
+
+        $this->relationship($graph['source'], $intermediate, 'father');
+        $this->relationship($intermediate, $targetA, 'father');
+        $this->relationship($intermediate, $targetB, 'father');
+
+        $this->assertCount(2, $traversal->shortestPath($graph['source'], $targetA));
+
+        $intermediate->delete();
+
+        $this->assertSame([], $traversal->shortestPath($graph['source'], $targetB));
+    }
+
     /**
      * @return array<string, mixed>
      */
@@ -115,6 +218,11 @@ class RelationshipEngineTest extends TestCase
         $daughterInLaw = $this->member($family, 'Menantu Perempuan', 'female', '2019-01-01', $user);
         $grandChild = $this->member($family, 'Cucu', 'female', '2040-01-01', $user);
         $greatGrandChild = $this->member($family, 'Cicit', 'male', '2060-01-01', $user);
+        $maleSpouse = $this->member($family, 'Suami Lain', 'male', '1995-01-01', $user);
+        $femalePartner = $this->member($family, 'Pasangan Wanita', 'female', '1997-01-01', $user);
+        $unknownSpouse = $this->member($family, 'Pasangan Tanpa Gender', null, '1994-01-01', $user);
+        $maleGrandChild = $this->member($family, 'Cucu Laki', 'male', '2041-01-01', $user);
+        $unknownGrandChild = $this->member($family, 'Cucu Tanpa Gender', null, '2042-01-01', $user);
 
         $this->relationship($greatGrandFather, $grandFather, 'father');
         $this->relationship($greatGrandMother, $grandFather, 'mother');
@@ -138,6 +246,8 @@ class RelationshipEngineTest extends TestCase
         $this->relationship($mother, $sister, 'mother');
         $this->relationship($brother, $nephew, 'father');
         $this->relationship($source, $spouse, 'husband');
+        $this->relationship($source, $unknownSpouse, 'husband');
+        $this->relationship($femalePartner, $maleSpouse, 'wife');
         $this->relationship($fatherInLaw, $spouse, 'father');
         $this->relationship($motherInLaw, $spouse, 'mother');
         $this->relationship($source, $son, 'father');
@@ -146,6 +256,8 @@ class RelationshipEngineTest extends TestCase
         $this->relationship($spouse, $daughter, 'mother');
         $this->relationship($son, $daughterInLaw, 'husband');
         $this->relationship($daughter, $grandChild, 'mother');
+        $this->relationship($daughter, $maleGrandChild, 'mother');
+        $this->relationship($daughter, $unknownGrandChild, 'mother');
         $this->relationship($grandChild, $greatGrandChild, 'mother');
 
         return compact(
@@ -171,10 +283,19 @@ class RelationshipEngineTest extends TestCase
             'motherInLaw',
             'daughterInLaw',
             'greatGrandChild',
+            'son',
+            'daughter',
+            'spouse',
+            'grandChild',
+            'maleSpouse',
+            'femalePartner',
+            'unknownSpouse',
+            'maleGrandChild',
+            'unknownGrandChild',
         );
     }
 
-    private function member(Family $family, string $name, string $gender, string $birthDate, User $user): FamilyMember
+    private function member(Family $family, string $name, ?string $gender, string $birthDate, User $user): FamilyMember
     {
         return FamilyMember::factory()->create([
             'family_id' => $family->id,

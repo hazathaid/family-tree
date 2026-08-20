@@ -14,7 +14,9 @@
     </div>
 
     @if(!$root)
-        <x-empty-state title="Belum ada anggota keluarga" description="Tambahkan anggota pertama untuk mulai membangun pohon keluarga." action-label="Tambah anggota" :action-url="route('members.create')" />
+        <x-empty-state title="Belum ada anggota keluarga" message="Tambahkan anggota pertama untuk mulai membangun pohon keluarga.">
+            <a class="btn btn-primary" href="{{ route('members.create') }}">Tambah anggota</a>
+        </x-empty-state>
     @else
         <x-card class="mb-3">
             <form method="GET" action="{{ route('tree.index') }}" class="row g-3 align-items-end" aria-label="Pengaturan pohon keluarga">

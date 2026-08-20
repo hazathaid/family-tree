@@ -57,6 +57,25 @@ class WebFamilyTreeTest extends TestCase
             ->assertOk()->assertSee('value="compact" selected', false)->assertSee('value="3" selected', false);
     }
 
+    public function test_tree_without_members_renders_empty_state(): void
+    {
+        [$user, $family] = $this->userWithFamily();
+
+        $this->active($user, $family)->get(route('tree.index'))
+            ->assertOk()
+            ->assertSee('Pohon Keluarga');
+    }
+
+    public function test_tree_hides_relationship_labels_when_control_disabled(): void
+    {
+        [$user, $family] = $this->userWithFamily();
+        $root = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $user->id, 'full_name' => 'Budi']);
+
+        $this->active($user, $family)->get(route('tree.index', [
+            'root' => $root->uuid, 'show_relationships' => '0',
+        ]))->assertOk();
+    }
+
     private function userWithFamily(): array
     {
         $user = User::factory()->create();

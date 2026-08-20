@@ -90,7 +90,7 @@ class RelationshipCacheServiceTest extends TestCase
 
         $this->assertDatabaseCount('member_relationship_cache', 1);
 
-        app(FamilyMemberService::class)->update($target, [
+        app(FamilyMemberService::class)->update($user, $target, [
             'full_name' => 'Updated Father',
             'gender' => 'male',
             'birth_date' => '1970-01-01',
@@ -122,6 +122,38 @@ class RelationshipCacheServiceTest extends TestCase
         $cache = MemberRelationshipCache::query()->firstOrFail();
 
         $this->assertTrue($cache->expires_at->between(now()->addHours(23)->addMinutes(59), now()->addHours(24)->addMinute()));
+    }
+
+    public function test_forget_expired_removes_only_expired_entries(): void
+    {
+        [$source, $target] = $this->parentGraph();
+
+        MemberRelationshipCache::query()->create([
+            'family_id' => $source->family_id,
+            'source_member_id' => $source->id,
+            'target_member_id' => $target->id,
+            'relationship_name' => 'Ayah',
+            'relationship_path' => [],
+            'is_connected' => true,
+            'expires_at' => now()->addHour(),
+        ]);
+        MemberRelationshipCache::query()->create([
+            'family_id' => $source->family_id,
+            'source_member_id' => $source->id,
+            'target_member_id' => $source->id,
+            'relationship_name' => 'Saya',
+            'relationship_path' => [],
+            'is_connected' => false,
+            'expires_at' => now()->subMinute(),
+        ]);
+
+        app(RelationshipCacheService::class)->forgetExpired();
+
+        $this->assertDatabaseCount('member_relationship_cache', 1);
+        $this->assertDatabaseHas('member_relationship_cache', [
+            'source_member_id' => $source->id,
+            'target_member_id' => $target->id,
+        ]);
     }
 
     /**

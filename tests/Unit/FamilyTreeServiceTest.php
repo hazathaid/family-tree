@@ -8,6 +8,7 @@ use App\Models\MemberRelationship;
 use App\Models\User;
 use App\Services\FamilyTreeService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
 
 class FamilyTreeServiceTest extends TestCase
@@ -29,5 +30,16 @@ class FamilyTreeServiceTest extends TestCase
         $this->assertCount(3, $service->generate($child, 'ancestor', 2)['nodes']);
         $this->assertCount(3, $service->generate($grandfather, 'descendant', 2)['nodes']);
         $this->assertTrue($service->generate($child, 'ancestor', 2)['cached']);
+    }
+
+    public function test_rejects_invalid_mode_and_depth(): void
+    {
+        $user = User::factory()->create();
+        $family = Family::factory()->create(['created_by' => $user->id]);
+        $member = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $user->id]);
+
+        $this->expectException(ValidationException::class);
+
+        app(FamilyTreeService::class)->generate($member, 'invalid', 1);
     }
 }
