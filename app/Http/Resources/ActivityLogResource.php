@@ -28,6 +28,9 @@ class ActivityLogResource extends JsonResource
     {
         return match ($activity->activity_type) {
             ActivityLog::MEMBER_CREATED => ($activity->payload['name'] ?? 'Anggota').' ditambahkan ke keluarga',
+            ActivityLog::MEMBER_UPDATED => ($activity->payload['name'] ?? 'Anggota').' diperbarui',
+            ActivityLog::MEMBER_DELETED => ($activity->payload['name'] ?? 'Anggota').' dihapus',
+            ActivityLog::MEMBER_PHOTO_UPDATED => 'Foto '.($activity->payload['name'] ?? 'anggota').' diperbarui',
             ActivityLog::ARTICLE_CREATED => 'Artikel "'.($activity->payload['title'] ?? 'Tanpa judul').'" dibuat',
             ActivityLog::PHOTO_UPLOADED => 'Foto baru diunggah',
             ActivityLog::EVENT_CREATED => 'Event "'.($activity->payload['title'] ?? 'Tanpa judul').'" dibuat',

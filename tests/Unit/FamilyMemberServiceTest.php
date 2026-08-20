@@ -67,6 +67,7 @@ class FamilyMemberServiceTest extends TestCase
         Storage::disk('public')->put('old/thumb_photo.png', 'old');
 
         $updated = app(FamilyMemberService::class)->uploadPhoto(
+            $user,
             $member,
             UploadedFile::fake()->createWithContent('profile.png', $this->tinyPng())
         );

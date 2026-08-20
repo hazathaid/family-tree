@@ -39,23 +39,25 @@ class FamilyMemberService
         return $member;
     }
 
-    public function update(FamilyMember $member, array $data): FamilyMember
+    public function update(User $user, FamilyMember $member, array $data): FamilyMember
     {
         $updated = $this->members->update($member, $this->memberAttributes($member->family, $data));
         $this->relationshipCache->invalidateMember($updated);
         $this->treeCache->invalidateFamily($updated->family_id);
+        $this->activityLog->memberUpdated($user, $updated);
 
         return $updated;
     }
 
-    public function delete(FamilyMember $member): void
+    public function delete(User $user, FamilyMember $member): void
     {
+        $this->activityLog->memberDeleted($user, $member);
         $this->members->delete($member);
         $this->relationshipCache->invalidateMember($member);
         $this->treeCache->invalidateFamily($member->family_id);
     }
 
-    public function uploadPhoto(FamilyMember $member, UploadedFile $photo): FamilyMember
+    public function uploadPhoto(User $user, FamilyMember $member, UploadedFile $photo): FamilyMember
     {
         $disk = Storage::disk('public');
 
@@ -80,6 +82,7 @@ class FamilyMemberService
 
         $this->relationshipCache->invalidateMember($updated);
         $this->treeCache->invalidateFamily($updated->family_id);
+        $this->activityLog->memberPhotoUpdated($user, $updated);
 
         return $updated;
     }

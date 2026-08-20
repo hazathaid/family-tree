@@ -16,7 +16,22 @@ class ActivityLogService
 
     public function memberCreated(User $user, FamilyMember $member): ActivityLog
     {
-        return $this->record($member->family_id, $user, ActivityLog::MEMBER_CREATED, ['subject_uuid' => $member->uuid, 'name' => $member->full_name]);
+        return $this->record($member->family_id, $user, ActivityLog::MEMBER_CREATED, $this->memberPayload($member));
+    }
+
+    public function memberUpdated(User $user, FamilyMember $member): ActivityLog
+    {
+        return $this->record($member->family_id, $user, ActivityLog::MEMBER_UPDATED, $this->memberPayload($member));
+    }
+
+    public function memberDeleted(User $user, FamilyMember $member): ActivityLog
+    {
+        return $this->record($member->family_id, $user, ActivityLog::MEMBER_DELETED, $this->memberPayload($member));
+    }
+
+    public function memberPhotoUpdated(User $user, FamilyMember $member): ActivityLog
+    {
+        return $this->record($member->family_id, $user, ActivityLog::MEMBER_PHOTO_UPDATED, $this->memberPayload($member));
     }
 
     public function articleCreated(User $user, Article $article): ActivityLog
@@ -57,5 +72,10 @@ class ActivityLogService
     public function record(int $familyId, ?User $user, string $type, array $payload): ActivityLog
     {
         return $this->activities->create(['family_id' => $familyId, 'user_id' => $user?->id, 'activity_type' => $type, 'payload' => $payload]);
+    }
+
+    private function memberPayload(FamilyMember $member): array
+    {
+        return ['subject_uuid' => $member->uuid, 'name' => $member->full_name];
     }
 }

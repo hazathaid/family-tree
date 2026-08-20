@@ -25,6 +25,12 @@ class ActivityLog extends Model
 
     public const MEMBER_CREATED = 'MEMBER_CREATED';
 
+    public const MEMBER_UPDATED = 'MEMBER_UPDATED';
+
+    public const MEMBER_DELETED = 'MEMBER_DELETED';
+
+    public const MEMBER_PHOTO_UPDATED = 'MEMBER_PHOTO_UPDATED';
+
     public const ARTICLE_CREATED = 'ARTICLE_CREATED';
 
     public const PHOTO_UPLOADED = 'PHOTO_UPLOADED';
@@ -38,7 +44,15 @@ class ActivityLog extends Model
     public const TREE_RELATIVE_CREATED = 'TREE_RELATIVE_CREATED';
 
     public const FILTERS = [
-        'members' => [self::MEMBER_CREATED, self::MEMBER_ACCOUNT_INVITED, self::MEMBER_ACCOUNT_CLAIMED, self::TREE_RELATIVE_CREATED],
+        'members' => [
+            self::MEMBER_CREATED,
+            self::MEMBER_UPDATED,
+            self::MEMBER_DELETED,
+            self::MEMBER_PHOTO_UPDATED,
+            self::MEMBER_ACCOUNT_INVITED,
+            self::MEMBER_ACCOUNT_CLAIMED,
+            self::TREE_RELATIVE_CREATED,
+        ],
         'articles' => [self::ARTICLE_CREATED],
         'photos' => [self::PHOTO_UPLOADED],
         'events' => [self::EVENT_CREATED],

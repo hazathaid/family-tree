@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\ActivityLog;
 use App\Models\Family;
 use App\Models\FamilyBranch;
 use App\Models\FamilyMember;
@@ -49,6 +50,14 @@ class FamilyMemberApiTest extends TestCase
 
         $memberUuid = $response->json('data.uuid');
 
+        $this->assertDatabaseHas('activity_logs', [
+            'family_id' => $family->id,
+            'user_id' => $owner->id,
+            'activity_type' => ActivityLog::MEMBER_CREATED,
+            'payload->subject_uuid' => $memberUuid,
+            'payload->name' => 'Siti Aminah',
+        ]);
+
         $this->getJson('/api/v1/family-members/'.$memberUuid)
             ->assertOk()
             ->assertJsonPath('data.nickname', 'Siti');
@@ -75,6 +84,14 @@ class FamilyMemberApiTest extends TestCase
             ->assertJsonPath('data.memorial_prefix', 'Almh. ')
             ->assertJsonPath('data.death_date', '2024-05-01');
 
+        $this->assertDatabaseHas('activity_logs', [
+            'family_id' => $family->id,
+            'user_id' => $owner->id,
+            'activity_type' => ActivityLog::MEMBER_UPDATED,
+            'payload->subject_uuid' => $memberUuid,
+            'payload->name' => 'Siti Aminah Rahman',
+        ]);
+
         $member = FamilyMember::query()->where('uuid', $memberUuid)->firstOrFail();
 
         $this->deleteJson('/api/v1/family-members/'.$memberUuid)
@@ -82,6 +99,13 @@ class FamilyMemberApiTest extends TestCase
             ->assertJsonPath('message', 'Family member deleted');
 
         $this->assertSoftDeleted('family_members', ['id' => $member->id]);
+        $this->assertDatabaseHas('activity_logs', [
+            'family_id' => $family->id,
+            'user_id' => $owner->id,
+            'activity_type' => ActivityLog::MEMBER_DELETED,
+            'payload->subject_uuid' => $memberUuid,
+            'payload->name' => 'Siti Aminah Rahman',
+        ]);
     }
 
     public function test_member_can_view_but_cannot_create_member(): void
@@ -160,6 +184,13 @@ class FamilyMemberApiTest extends TestCase
 
         Storage::disk('public')->assertExists($response->json('data.profile_photo'));
         Storage::disk('public')->assertExists($response->json('data.profile_photo_thumbnail'));
+        $this->assertDatabaseHas('activity_logs', [
+            'family_id' => $family->id,
+            'user_id' => $owner->id,
+            'activity_type' => ActivityLog::MEMBER_PHOTO_UPDATED,
+            'payload->subject_uuid' => $member->uuid,
+            'payload->name' => $member->full_name,
+        ]);
     }
 
     public function test_directory_filters_sorts_and_paginates_with_family_isolation(): void

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/errors/app_error.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../core/http/page_data.dart';
 import '../../../core/models.dart';
 import '../../../core/providers.dart';
@@ -75,6 +76,7 @@ class _MemberDirectoryScreenState extends ConsumerState<MemberDirectoryScreen> {
     final branches =
         await ref.read(familyRepositoryProvider).branches(family.uuid);
     if (!mounted) return;
+    final l10n = AppLocalizations.of(context);
     await showModalBottomSheet<void>(
         context: context,
         isScrollControlled: true,
@@ -83,51 +85,51 @@ class _MemberDirectoryScreenState extends ConsumerState<MemberDirectoryScreen> {
                 padding: EdgeInsets.fromLTRB(
                     16, 16, 16, MediaQuery.viewInsetsOf(context).bottom + 24),
                 child: Column(mainAxisSize: MainAxisSize.min, children: [
-                  const Text('Filter anggota',
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  Text(l10n.memberFilters,
+                      style: const TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.bold)),
                   DropdownButtonFormField<String?>(
                       initialValue: gender,
-                      decoration: const InputDecoration(labelText: 'Gender'),
-                      items: const [
-                        DropdownMenuItem(value: null, child: Text('Semua')),
+                      decoration: InputDecoration(labelText: l10n.gender),
+                      items: [
+                        DropdownMenuItem(value: null, child: Text(l10n.all)),
+                        DropdownMenuItem(value: 'male', child: Text(l10n.male)),
                         DropdownMenuItem(
-                            value: 'male', child: Text('Laki-laki')),
-                        DropdownMenuItem(
-                            value: 'female', child: Text('Perempuan'))
+                            value: 'female', child: Text(l10n.female))
                       ],
                       onChanged: (v) => setSheet(() => gender = v)),
                   DropdownButtonFormField<bool?>(
                       initialValue: alive,
-                      decoration: const InputDecoration(labelText: 'Status'),
-                      items: const [
-                        DropdownMenuItem(value: null, child: Text('Semua')),
-                        DropdownMenuItem(value: true, child: Text('Hidup')),
-                        DropdownMenuItem(value: false, child: Text('Meninggal'))
+                      decoration: InputDecoration(labelText: l10n.status),
+                      items: [
+                        DropdownMenuItem(value: null, child: Text(l10n.all)),
+                        DropdownMenuItem(value: true, child: Text(l10n.alive)),
+                        DropdownMenuItem(
+                            value: false, child: Text(l10n.deceased))
                       ],
                       onChanged: (v) => setSheet(() => alive = v)),
                   DropdownButtonFormField<String?>(
                       initialValue: branch,
-                      decoration: const InputDecoration(labelText: 'Cabang'),
+                      decoration: InputDecoration(labelText: l10n.branch),
                       items: [
-                        const DropdownMenuItem(
-                            value: null, child: Text('Semua')),
+                        DropdownMenuItem(value: null, child: Text(l10n.all)),
                         ...branches.map((b) => DropdownMenuItem(
                             value: b.uuid, child: Text(b.name)))
                       ],
                       onChanged: (v) => setSheet(() => branch = v)),
                   DropdownButtonFormField<String>(
                       initialValue: sort,
-                      decoration: const InputDecoration(labelText: 'Urutkan'),
-                      items: const [
+                      decoration: InputDecoration(labelText: l10n.sort),
+                      items: [
                         DropdownMenuItem(
-                            value: 'name', child: Text('Nama A–Z')),
+                            value: 'name', child: Text(l10n.sortNameAscending)),
                         DropdownMenuItem(
-                            value: 'name_desc', child: Text('Nama Z–A')),
+                            value: 'name_desc',
+                            child: Text(l10n.sortNameDescending)),
                         DropdownMenuItem(
-                            value: 'newest', child: Text('Terbaru')),
+                            value: 'newest', child: Text(l10n.sortNewest)),
                         DropdownMenuItem(
-                            value: 'oldest', child: Text('Terlama'))
+                            value: 'oldest', child: Text(l10n.sortOldest))
                       ],
                       onChanged: (v) => setSheet(() => sort = v!)),
                   const SizedBox(height: 16),
@@ -138,7 +140,7 @@ class _MemberDirectoryScreenState extends ConsumerState<MemberDirectoryScreen> {
                             Navigator.pop(context);
                             load();
                           },
-                          child: const Text('Terapkan'))),
+                          child: Text(l10n.apply))),
                 ]))));
   }
 
@@ -146,14 +148,15 @@ class _MemberDirectoryScreenState extends ConsumerState<MemberDirectoryScreen> {
   Widget build(BuildContext context) {
     final family = ref.watch(currentFamilyProvider);
     final canManage = family?.canManage ?? false;
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
-        appBar: AppBar(title: const Text('Anggota keluarga'), actions: [
+        appBar: AppBar(title: Text(l10n.membersTitle), actions: [
           IconButton(
-              tooltip: 'Kelola relationship',
+              tooltip: l10n.manageRelationships,
               onPressed: () => context.push('/relationships'),
               icon: const Icon(Icons.device_hub)),
           IconButton(
-              tooltip: 'Resolver relationship',
+              tooltip: l10n.relationshipResolver,
               onPressed: () => context.push('/relationship-resolver'),
               icon: const Icon(Icons.route))
         ]),
@@ -163,7 +166,7 @@ class _MemberDirectoryScreenState extends ConsumerState<MemberDirectoryScreen> {
                   await context.push('/members/new');
                   load();
                 },
-                tooltip: 'Tambah anggota',
+                tooltip: l10n.addMember,
                 child: const Icon(Icons.person_add))
             : null,
         body: Column(children: [
@@ -173,20 +176,20 @@ class _MemberDirectoryScreenState extends ConsumerState<MemberDirectoryScreen> {
                 Expanded(
                     child: SearchBar(
                         controller: search,
-                        hintText: 'Cari nama atau panggilan',
+                        hintText: l10n.searchMemberNameOrNickname,
                         leading: const Icon(Icons.search),
                         onSubmitted: (_) => load())),
                 const SizedBox(width: 8),
                 IconButton.filledTonal(
                     onPressed: filters,
-                    tooltip: 'Filter dan urutkan',
+                    tooltip: l10n.filterAndSort,
                     icon: const Icon(Icons.tune))
               ])),
-          Expanded(child: _body(canManage)),
+          Expanded(child: _body(canManage, l10n)),
         ]));
   }
 
-  Widget _body(bool canManage) {
+  Widget _body(bool canManage, AppLocalizations l10n) {
     if (loading && data == null) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -195,22 +198,22 @@ class _MemberDirectoryScreenState extends ConsumerState<MemberDirectoryScreen> {
           child: FilledButton.icon(
               onPressed: load,
               icon: const Icon(Icons.refresh),
-              label: const Text('Coba lagi')));
+              label: Text(l10n.retry)));
     }
     final page = data;
     if (page == null || page.items.isEmpty) {
-      return const Center(child: Text('Belum ada anggota yang sesuai.'));
+      return Center(child: Text(l10n.noMatchingMembers));
     }
     final tablet = MediaQuery.sizeOf(context).width >= 600;
     final content = tablet
         ? SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: DataTable(
-                columns: const [
-                  DataColumn(label: Text('Nama')),
-                  DataColumn(label: Text('Gender')),
-                  DataColumn(label: Text('Status')),
-                  DataColumn(label: Text('Cabang'))
+                columns: [
+                  DataColumn(label: Text(l10n.memberName)),
+                  DataColumn(label: Text(l10n.gender)),
+                  DataColumn(label: Text(l10n.status)),
+                  DataColumn(label: Text(l10n.branch))
                 ],
                 rows: page.items
                     .map((m) => DataRow(
@@ -218,9 +221,9 @@ class _MemberDirectoryScreenState extends ConsumerState<MemberDirectoryScreen> {
                                 context.push('/members/${m.uuid}'),
                             cells: [
                               DataCell(Text(m.displayName)),
-                              DataCell(Text(_gender(m.gender))),
-                              DataCell(Text(m.isAlive ? 'Hidup' : 'Meninggal')),
-                              DataCell(Text(m.branchName ?? '—'))
+                              DataCell(Text(_gender(l10n, m.gender))),
+                              DataCell(Text(m.isAlive ? l10n.alive : l10n.deceased)),
+                              DataCell(Text(m.branchName ?? l10n.noValue))
                             ]))
                     .toList()))
         : ListView.builder(
@@ -235,7 +238,7 @@ class _MemberDirectoryScreenState extends ConsumerState<MemberDirectoryScreen> {
                       leading: _MemberAvatar(member: m),
                       title: Text(m.displayName),
                       subtitle: Text(
-                          '${_gender(m.gender)} · ${m.isAlive ? 'Hidup' : 'Meninggal'}'),
+                          '${_gender(l10n, m.gender)} · ${m.isAlive ? l10n.alive : l10n.deceased}'),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () => context.push('/members/${m.uuid}')));
             });
@@ -247,14 +250,14 @@ class _MemberDirectoryScreenState extends ConsumerState<MemberDirectoryScreen> {
           padding: const EdgeInsets.all(12),
           child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             IconButton(
-                tooltip: 'Halaman sebelumnya',
+                tooltip: l10n.previousPage,
                 onPressed: page.currentPage > 1
                     ? () => load(page.currentPage - 1)
                     : null,
                 icon: const Icon(Icons.chevron_left)),
-            Text('Halaman ${page.currentPage} dari ${page.lastPage}'),
+            Text(l10n.pageOf(page.currentPage, page.lastPage)),
             IconButton(
-                tooltip: 'Halaman berikutnya',
+                tooltip: l10n.nextPage,
                 onPressed:
                     page.hasMore ? () => load(page.currentPage + 1) : null,
                 icon: const Icon(Icons.chevron_right))
@@ -284,17 +287,18 @@ class MemberDetailScreen extends ConsumerWidget {
         if (snapshot.hasError) {
           return Scaffold(
               appBar: AppBar(),
-              body: const Center(
-                  child: Text('Detail anggota tidak dapat dimuat.')));
+              body: Center(
+                  child: Text(AppLocalizations.of(context).memberDetailLoadFailed)));
         }
         final member = snapshot.data![0] as FamilyMember;
         final relations = snapshot.data![1] as PageData<MemberRelationship>;
         final canManage = ref.read(currentFamilyProvider)?.canManage ?? false;
+        final l10n = AppLocalizations.of(context);
         return Scaffold(
           appBar: AppBar(title: Text(member.displayName), actions: [
             if (canManage)
               IconButton(
-                  tooltip: 'Edit anggota',
+                  tooltip: l10n.editMember,
                   onPressed: () => context.push('/members/${member.uuid}/edit',
                       extra: member),
                   icon: const Icon(Icons.edit)),
@@ -305,39 +309,40 @@ class MemberDetailScreen extends ConsumerWidget {
               Center(
                   child: Chip(
                       avatar: const Icon(Icons.family_restroom, size: 18),
-                      label: Text('${member.relationshipToViewer} untuk Anda'),
+                      label: Text(l10n.relationshipToYou(
+                          member.relationshipToViewer!)),
                       backgroundColor:
                           Theme.of(context).colorScheme.primaryContainer,
                       labelStyle: TextStyle(
                           color: Theme.of(context).colorScheme.onPrimaryContainer,
                           fontWeight: FontWeight.w600))),
             if (!member.isAlive)
-              const Center(
+              Center(
                   child: Chip(
-                      avatar: Icon(Icons.local_florist, size: 18),
-                      label: Text('Dalam kenangan'))),
+                      avatar: const Icon(Icons.local_florist, size: 18),
+                      label: Text(l10n.inMemory))),
             const SizedBox(height: 16),
-            _Section(title: 'Informasi dasar', children: [
-              _Info('Nama lengkap', member.fullName),
-              _Info('Nama panggilan', member.nickname),
-              _Info('Gender', _gender(member.gender)),
-              _Info('Agama/kepercayaan', _religion(member.religion)),
-              _Info('Lahir', _datePlace(member.birthDate, member.birthPlace)),
+            _Section(title: l10n.basicInformation, children: [
+              _Info(l10n.fullName, member.fullName),
+              _Info(l10n.nickname, member.nickname),
+              _Info(l10n.gender, _gender(l10n, member.gender)),
+              _Info(l10n.religionBelief, _religion(l10n, member.religion)),
+              _Info(l10n.born, _datePlace(member.birthDate, member.birthPlace)),
               if (!member.isAlive)
-                _Info('Wafat', _datePlace(member.deathDate, member.deathPlace))
+                _Info(l10n.died, _datePlace(member.deathDate, member.deathPlace))
             ]),
-            _Section(title: 'Keluarga', children: [
-              _Info('Cabang', member.branchName ?? 'Tidak ada cabang')
+            _Section(title: l10n.family, children: [
+              _Info(l10n.branch, member.branchName ?? l10n.noBranch)
             ]),
-            _Section(title: 'Biografi', children: [
+            _Section(title: l10n.biography, children: [
               Text(member.biography?.isNotEmpty == true
                   ? member.biography!
-                  : 'Belum ada biografi.')
+                  : l10n.noBiography)
             ]),
             _Section(
-                title: 'Relationship dasar',
+                title: l10n.basicRelationships,
                 children: relations.items.isEmpty
-                    ? [const Text('Belum ada relationship dasar.')]
+                    ? [Text(l10n.noBasicRelationships)]
                     : relations.items
                         .map((r) => ListTile(
                             contentPadding: EdgeInsets.zero,
@@ -345,20 +350,19 @@ class MemberDetailScreen extends ConsumerWidget {
                             title: Text(r.sourceUuid == uuid
                                 ? r.targetName
                                 : r.sourceName),
-                            subtitle: Text(r.type)))
+                            subtitle: Text(_relationshipType(l10n, r.type))))
                         .toList()),
-            const _Section(title: 'Konten terkait', children: [
+            _Section(title: l10n.relatedContent, children: [
               ListTile(
                   contentPadding: EdgeInsets.zero,
-                  leading: Icon(Icons.photo_outlined),
-                  title: Text('Foto terkait'),
-                  subtitle:
-                      Text('Belum ada konten terkait untuk ditampilkan.')),
+                  leading: const Icon(Icons.photo_outlined),
+                  title: Text(l10n.relatedPhotos),
+                  subtitle: Text(l10n.noRelatedContent)),
               ListTile(
                   contentPadding: EdgeInsets.zero,
-                  leading: Icon(Icons.article_outlined),
-                  title: Text('Artikel terkait'),
-                  subtitle: Text('Belum ada konten terkait untuk ditampilkan.'))
+                  leading: const Icon(Icons.article_outlined),
+                  title: Text(l10n.relatedArticles),
+                  subtitle: Text(l10n.noRelatedContent))
             ]),
           ]),
         );
@@ -426,7 +430,7 @@ class _MemberFormScreenState extends ConsumerState<MemberFormScreen> {
           : await repo.update(widget.member!.uuid, values);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Anggota berhasil disimpan.')));
+            SnackBar(content: Text(AppLocalizations.of(context).memberSaved)));
         context.go('/members/${saved.uuid}');
       }
     } on AppError catch (e) {
@@ -448,7 +452,7 @@ class _MemberFormScreenState extends ConsumerState<MemberFormScreen> {
           .uploadPhoto(widget.member!.uuid, picked.path);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Foto berhasil diperbarui.')));
+            SnackBar(content: Text(AppLocalizations.of(context).photoUpdated)));
       }
     } on AppError catch (e) {
       if (mounted) {
@@ -461,18 +465,20 @@ class _MemberFormScreenState extends ConsumerState<MemberFormScreen> {
   Future<void> remove() async {
     final ok = await showDialog<bool>(
         context: context,
-        builder: (_) => AlertDialog(
-                title: Text('Hapus ${widget.member!.fullName}?'),
-                content: const Text(
-                    'Anggota akan dihapus secara lunak dan tidak tampil lagi.'),
+        builder: (dialogContext) {
+          final l10n = AppLocalizations.of(dialogContext);
+          return AlertDialog(
+                title: Text(l10n.deleteMemberTitle(widget.member!.fullName)),
+                content: Text(l10n.deleteMemberConfirmation),
                 actions: [
                   TextButton(
                       onPressed: () => Navigator.pop(context, false),
-                      child: const Text('Batal')),
+                      child: Text(l10n.cancel)),
                   FilledButton(
                       onPressed: () => Navigator.pop(context, true),
-                      child: const Text('Hapus'))
-                ]));
+                      child: Text(l10n.delete))
+                ]);
+        });
     if (ok == true) {
       await ref
           .read(memberRepositoryProvider)
@@ -484,10 +490,10 @@ class _MemberFormScreenState extends ConsumerState<MemberFormScreen> {
   @override
   Widget build(BuildContext context) {
     final family = ref.watch(currentFamilyProvider);
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
         appBar: AppBar(
-            title: Text(
-                widget.member == null ? 'Tambah anggota' : 'Edit anggota')),
+            title: Text(widget.member == null ? l10n.addMember : l10n.editMember)),
         body: FutureBuilder(
             future: ref.read(familyRepositoryProvider).branches(family!.uuid),
             builder: (context, snapshot) {
@@ -498,104 +504,97 @@ class _MemberFormScreenState extends ConsumerState<MemberFormScreen> {
                     TextFormField(
                         controller: name,
                         decoration: InputDecoration(
-                            labelText: 'Nama lengkap',
+                            labelText: l10n.fullName,
                             errorText: errors['full_name']?.first),
                         validator: (v) => v?.trim().isEmpty == true
-                            ? 'Nama lengkap wajib diisi.'
+                            ? l10n.fullNameRequired
                             : null),
                     TextFormField(
                         controller: nickname,
-                        decoration:
-                            const InputDecoration(labelText: 'Nama panggilan')),
+                        decoration: InputDecoration(labelText: l10n.nickname)),
                     DropdownButtonFormField<String?>(
                         initialValue: gender,
-                        decoration: const InputDecoration(labelText: 'Gender'),
-                        items: const [
+                        decoration: InputDecoration(labelText: l10n.gender),
+                        items: [
                           DropdownMenuItem(
-                              value: null, child: Text('Tidak ditentukan')),
+                              value: null, child: Text(l10n.unspecified)),
                           DropdownMenuItem(
-                              value: 'male', child: Text('Laki-laki')),
+                              value: 'male', child: Text(l10n.male)),
                           DropdownMenuItem(
-                              value: 'female', child: Text('Perempuan'))
+                              value: 'female', child: Text(l10n.female))
                         ],
                         onChanged: (v) => setState(() => gender = v)),
                     DropdownButtonFormField<String?>(
                         initialValue: religion,
                         decoration: InputDecoration(
-                            labelText: 'Agama/kepercayaan',
+                            labelText: l10n.religionBelief,
                             errorText: errors['religion']?.first),
-                        items: const [
+                        items: [
                           DropdownMenuItem(
-                              value: null, child: Text('Belum ditentukan')),
-                          DropdownMenuItem(value: 'islam', child: Text('Islam')),
+                              value: null, child: Text(l10n.unspecified)),
+                          DropdownMenuItem(value: 'islam', child: Text(l10n.islam)),
                           DropdownMenuItem(
-                              value: 'christian', child: Text('Kristen')),
+                              value: 'christian', child: Text(l10n.christian)),
                           DropdownMenuItem(
-                              value: 'catholic', child: Text('Katolik')),
-                          DropdownMenuItem(value: 'hindu', child: Text('Hindu')),
+                              value: 'catholic', child: Text(l10n.catholic)),
+                          DropdownMenuItem(value: 'hindu', child: Text(l10n.hindu)),
                           DropdownMenuItem(
-                              value: 'buddhist', child: Text('Buddha')),
+                              value: 'buddhist', child: Text(l10n.buddhist)),
                           DropdownMenuItem(
-                              value: 'confucian', child: Text('Konghucu')),
+                              value: 'confucian', child: Text(l10n.confucian)),
                           DropdownMenuItem(
-                              value: 'belief',
-                              child: Text('Penghayat kepercayaan')),
-                          DropdownMenuItem(
-                              value: 'other', child: Text('Lainnya'))
+                              value: 'belief', child: Text(l10n.belief)),
+                          DropdownMenuItem(value: 'other', child: Text(l10n.other))
                         ],
                         onChanged: (v) => setState(() => religion = v)),
                     DropdownButtonFormField<String?>(
                         initialValue: branch,
-                        decoration: const InputDecoration(labelText: 'Cabang'),
+                        decoration: InputDecoration(labelText: l10n.branch),
                         items: [
-                          const DropdownMenuItem(
-                              value: null, child: Text('Tanpa cabang')),
+                          DropdownMenuItem(
+                              value: null, child: Text(l10n.noBranchShort)),
                           ...branches.map((b) => DropdownMenuItem(
                               value: b.uuid, child: Text(b.name)))
                         ],
                         onChanged: (v) => setState(() => branch = v)),
                     TextFormField(
                         controller: birthDate,
-                        decoration: const InputDecoration(
-                            labelText: 'Tanggal lahir (YYYY-MM-DD)')),
+                        decoration: InputDecoration(labelText: l10n.birthDate)),
                     TextFormField(
                         controller: birthPlace,
-                        decoration:
-                            const InputDecoration(labelText: 'Tempat lahir')),
+                        decoration: InputDecoration(labelText: l10n.birthPlace)),
                     SwitchListTile(
                         contentPadding: EdgeInsets.zero,
-                        title: const Text('Masih hidup'),
+                        title: Text(l10n.stillAlive),
                         value: alive,
                         onChanged: (v) => setState(() => alive = v)),
                     if (!alive) ...[
                       TextFormField(
                           controller: deathDate,
                           decoration: InputDecoration(
-                              labelText: 'Tanggal wafat (YYYY-MM-DD)',
+                              labelText: l10n.deathDate,
                               errorText: errors['death_date']?.first)),
                       TextFormField(
                           controller: deathPlace,
-                          decoration:
-                              const InputDecoration(labelText: 'Tempat wafat'))
+                          decoration: InputDecoration(labelText: l10n.deathPlace))
                     ],
                     TextFormField(
                         controller: biography,
                         maxLines: 5,
-                        decoration:
-                            const InputDecoration(labelText: 'Biografi')),
+                        decoration: InputDecoration(labelText: l10n.biography)),
                     const SizedBox(height: 20),
                     FilledButton(
                         onPressed: saving ? null : save,
-                        child: Text(saving ? 'Menyimpan…' : 'Simpan')),
+                        child: Text(saving ? l10n.saving : l10n.save)),
                     if (widget.member != null) ...[
                       OutlinedButton.icon(
                           onPressed: photo,
                           icon: const Icon(Icons.photo_camera),
-                          label: const Text('Ganti foto')),
+                          label: Text(l10n.replacePhoto)),
                       TextButton(
                           onPressed: remove,
-                          child: const Text('Hapus anggota',
-                              style: TextStyle(color: Colors.red)))
+                          child: Text(l10n.deleteMember,
+                              style: const TextStyle(color: Colors.red)))
                     ]
                   ]));
             }));
@@ -619,15 +618,16 @@ class _RelationshipManagementScreenState
   @override
   Widget build(BuildContext context) {
     final canManage = ref.watch(currentFamilyProvider)?.canManage ?? false;
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
-        appBar: AppBar(title: const Text('Relationship dasar')),
+        appBar: AppBar(title: Text(l10n.basicRelationships)),
         floatingActionButton: canManage
             ? FloatingActionButton(
                 onPressed: () async {
                   await _relationshipDialog(context, ref);
                   refresh();
                 },
-                tooltip: 'Tambah relationship',
+                tooltip: l10n.addRelationship,
                 child: const Icon(Icons.add))
             : null,
         body: FutureBuilder(
@@ -639,18 +639,17 @@ class _RelationshipManagementScreenState
               if (snapshot.hasError) {
                 return Center(
                     child: FilledButton(
-                        onPressed: refresh, child: const Text('Coba lagi')));
+                        onPressed: refresh, child: Text(l10n.retry)));
               }
               final items = snapshot.data!.items;
               if (items.isEmpty) {
-                return const Center(
-                    child: Text('Belum ada relationship dasar.'));
+                return Center(child: Text(l10n.noBasicRelationships));
               }
               return ListView(
                   children: items
                       .map((r) => ListTile(
                           title: Text('${r.sourceName} → ${r.targetName}'),
-                          subtitle: Text(r.type),
+                          subtitle: Text(_relationshipType(l10n, r.type)),
                           trailing: canManage
                               ? PopupMenuButton<String>(
                                   onSelected: (action) async {
@@ -664,12 +663,12 @@ class _RelationshipManagementScreenState
                                     }
                                     refresh();
                                   },
-                                  itemBuilder: (_) => const [
+                                  itemBuilder: (_) => [
                                         PopupMenuItem(
-                                            value: 'edit', child: Text('Edit')),
+                                            value: 'edit', child: Text(l10n.editRelationship)),
                                         PopupMenuItem(
                                             value: 'delete',
-                                            child: Text('Hapus'))
+                                            child: Text(l10n.delete))
                                       ])
                               : null))
                       .toList());
@@ -712,10 +711,11 @@ class _RelationshipResolverScreenState
   @override
   Widget build(BuildContext context) {
     final familyUuid = ref.read(currentFamilyProvider)!.uuid;
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
-        appBar: AppBar(title: const Text('Resolver relationship')),
+        appBar: AppBar(title: Text(l10n.relationshipResolver)),
         body: ListView(padding: const EdgeInsets.all(16), children: [
-          _memberPickerTile('Anggota sumber', sourceName, () async {
+          _memberPickerTile(l10n.sourceMember, sourceName, l10n, () async {
             final member = await _selectMember(context, familyUuid);
             if (member != null) {
               setState(() {
@@ -724,7 +724,7 @@ class _RelationshipResolverScreenState
               });
             }
           }),
-          _memberPickerTile('Anggota tujuan', targetName, () async {
+          _memberPickerTile(l10n.targetMember, targetName, l10n, () async {
             final member = await _selectMember(context, familyUuid);
             if (member != null) {
               setState(() {
@@ -737,7 +737,7 @@ class _RelationshipResolverScreenState
               onPressed:
                   loading || source == null || target == null ? null : resolve,
               icon: const Icon(Icons.route),
-              label: Text(loading ? 'Menghitung…' : 'Temukan relationship')),
+              label: Text(loading ? l10n.calculating : l10n.findRelationship)),
           if (result != null)
             Card(
                 child: Padding(
@@ -745,13 +745,13 @@ class _RelationshipResolverScreenState
                     child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(result!.relationship ?? 'Tidak terhubung',
+                          Text(result!.relationship ?? l10n.notConnected,
                               style: Theme.of(context).textTheme.headlineSmall),
                           const SizedBox(height: 8),
                           if (result!.path.isEmpty)
                             Text(result!.isConnected
-                                ? 'Anggota yang sama.'
-                                : 'Tidak ditemukan jalur relationship.')
+                                ? l10n.sameMember
+                                : l10n.relationshipPathNotFound)
                           else
                             ...result!.path.map((s) => ListTile(
                                 contentPadding: EdgeInsets.zero,
@@ -766,6 +766,7 @@ class _RelationshipResolverScreenState
 Future<void> _relationshipDialog(BuildContext context, WidgetRef ref,
     {MemberRelationship? relationship}) async {
   final family = ref.read(currentFamilyProvider)!;
+  final l10n = AppLocalizations.of(context);
   String? source = relationship?.sourceUuid;
   String? target = relationship?.targetUuid;
   String? sourceName = relationship?.sourceName;
@@ -776,11 +777,11 @@ Future<void> _relationshipDialog(BuildContext context, WidgetRef ref,
       builder: (dialogContext) => StatefulBuilder(
           builder: (_, setDialog) => AlertDialog(
                   title: Text(relationship == null
-                      ? 'Tambah relationship'
-                      : 'Edit relationship'),
+                      ? l10n.addRelationship
+                      : l10n.editRelationship),
                   content: SingleChildScrollView(
                       child: Column(mainAxisSize: MainAxisSize.min, children: [
-                    _memberPickerTile('Sumber', sourceName, () async {
+                    _memberPickerTile(l10n.source, sourceName, l10n, () async {
                       final member =
                           await _selectMember(dialogContext, family.uuid);
                       if (member != null) {
@@ -790,7 +791,7 @@ Future<void> _relationshipDialog(BuildContext context, WidgetRef ref,
                         });
                       }
                     }),
-                    _memberPickerTile('Tujuan', targetName, () async {
+                    _memberPickerTile(l10n.target, targetName, l10n, () async {
                       final member =
                           await _selectMember(dialogContext, family.uuid);
                       if (member != null) {
@@ -800,26 +801,20 @@ Future<void> _relationshipDialog(BuildContext context, WidgetRef ref,
                         });
                       }
                     }),
-                    DropdownButtonFormField(
+                    DropdownButtonFormField<String>(
                         initialValue: type,
-                        decoration:
-                            const InputDecoration(labelText: 'Tipe dasar'),
-                        items: const [
-                          'father',
-                          'mother',
-                          'child',
-                          'husband',
-                          'wife'
-                        ]
-                            .map((v) =>
-                                DropdownMenuItem(value: v, child: Text(v)))
+                        decoration: InputDecoration(labelText: l10n.relationshipType),
+                        items: const ['father', 'mother', 'child', 'husband', 'wife']
+                            .map((value) => DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(_relationshipType(l10n, value))))
                             .toList(),
                         onChanged: (v) => setDialog(() => type = v!))
                   ])),
                   actions: [
                     TextButton(
                         onPressed: () => Navigator.pop(dialogContext),
-                        child: const Text('Batal')),
+                        child: Text(l10n.cancel)),
                     FilledButton(
                         onPressed: source == null || target == null
                             ? null
@@ -844,15 +839,16 @@ Future<void> _relationshipDialog(BuildContext context, WidgetRef ref,
                                   Navigator.pop(dialogContext);
                                 }
                               },
-                        child: const Text('Simpan'))
+                        child: Text(l10n.save))
                   ])));
 }
 
-Widget _memberPickerTile(String label, String? name, VoidCallback onTap) =>
+Widget _memberPickerTile(
+        String label, String? name, AppLocalizations l10n, VoidCallback onTap) =>
     ListTile(
         contentPadding: EdgeInsets.zero,
         title: Text(label),
-        subtitle: Text(name ?? 'Pilih anggota'),
+        subtitle: Text(name ?? l10n.selectMember),
         trailing: const Icon(Icons.search),
         onTap: onTap);
 
@@ -893,15 +889,17 @@ class _PaginatedMemberPickerDialogState
   }
 
   @override
-  Widget build(BuildContext context) => AlertDialog(
-          title: const Text('Pilih anggota'),
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return AlertDialog(
+          title: Text(l10n.selectMemberTitle),
           content: SizedBox(
               width: 480,
               height: 480,
               child: Column(children: [
                 SearchBar(
                     controller: search,
-                    hintText: 'Cari anggota',
+                    hintText: l10n.searchMembers,
                     onSubmitted: (_) => reload()),
                 const SizedBox(height: 8),
                 Expanded(
@@ -917,7 +915,7 @@ class _PaginatedMemberPickerDialogState
                             return Center(
                                 child: FilledButton(
                                     onPressed: reload,
-                                    child: const Text('Coba lagi')));
+                                    child: Text(l10n.retry)));
                           }
                           final result = snapshot.data!;
                           return Column(children: [
@@ -927,7 +925,7 @@ class _PaginatedMemberPickerDialogState
                                         .map((member) => ListTile(
                                             title: Text(member.displayName),
                                             subtitle: Text(member.branchName ??
-                                                'Tanpa cabang'),
+                                                l10n.noBranchShort),
                                             onTap: () =>
                                                 Navigator.pop(context, member)))
                                         .toList())),
@@ -935,15 +933,15 @@ class _PaginatedMemberPickerDialogState
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   IconButton(
-                                      tooltip: 'Halaman sebelumnya',
+                                      tooltip: l10n.previousPage,
                                       onPressed: result.currentPage > 1
                                           ? () => reload(result.currentPage - 1)
                                           : null,
                                       icon: const Icon(Icons.chevron_left)),
-                                  Text(
-                                      '${result.currentPage} / ${result.lastPage}'),
+                                  Text(l10n.pageFraction(
+                                      result.currentPage, result.lastPage)),
                                   IconButton(
-                                      tooltip: 'Halaman berikutnya',
+                                      tooltip: l10n.nextPage,
                                       onPressed: result.hasMore
                                           ? () => reload(result.currentPage + 1)
                                           : null,
@@ -955,8 +953,9 @@ class _PaginatedMemberPickerDialogState
           actions: [
             TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('Batal'))
+                child: Text(l10n.cancel))
           ]);
+  }
 }
 
 class _MemberAvatar extends StatelessWidget {
@@ -967,7 +966,11 @@ class _MemberAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     final radius = large ? 48.0 : 24.0;
     return Semantics(
-        label: '${member.displayName}, ${member.isAlive ? 'hidup' : 'meninggal'}',
+        label: AppLocalizations.of(context).memberSemantics(
+            member.displayName,
+            member.isAlive
+                ? AppLocalizations.of(context).alive
+                : AppLocalizations.of(context).deceased),
         child: CircleAvatar(
             radius: radius,
             foregroundImage:
@@ -1004,26 +1007,38 @@ class _Info extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
         SizedBox(width: 120, child: Text(label)),
-        Expanded(child: Text(value?.isNotEmpty == true ? value! : '—'))
+        Expanded(child: Text(value?.isNotEmpty == true
+            ? value!
+            : AppLocalizations.of(context).noValue))
       ]));
 }
 
-String _gender(String? value) => value == 'male'
-    ? 'Laki-laki'
+String _gender(AppLocalizations l10n, String? value) => value == 'male'
+    ? l10n.male
     : value == 'female'
-        ? 'Perempuan'
-        : 'Tidak ditentukan';
-String _religion(String? value) => const {
-      'islam': 'Islam',
-      'christian': 'Kristen',
-      'catholic': 'Katolik',
-      'hindu': 'Hindu',
-      'buddhist': 'Buddha',
-      'confucian': 'Konghucu',
-      'belief': 'Penghayat kepercayaan',
-      'other': 'Lainnya',
-    }[value] ??
-    'Belum ditentukan';
+        ? l10n.female
+        : l10n.unspecified;
+
+String _religion(AppLocalizations l10n, String? value) => switch (value) {
+      'islam' => l10n.islam,
+      'christian' => l10n.christian,
+      'catholic' => l10n.catholic,
+      'hindu' => l10n.hindu,
+      'buddhist' => l10n.buddhist,
+      'confucian' => l10n.confucian,
+      'belief' => l10n.belief,
+      'other' => l10n.other,
+      _ => l10n.unspecified,
+    };
+
+String _relationshipType(AppLocalizations l10n, String value) => switch (value) {
+      'father' => l10n.father,
+      'mother' => l10n.mother,
+      'child' => l10n.child,
+      'husband' => l10n.husband,
+      'wife' => l10n.wife,
+      _ => value,
+    };
 String _datePlace(DateTime? date, String? place) => [
       if (date != null) _iso(date),
       if (place?.isNotEmpty == true) place!

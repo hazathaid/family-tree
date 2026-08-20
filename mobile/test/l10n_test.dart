@@ -20,6 +20,11 @@ void main() {
       expect(l10n.showingStoredData('now'), isNotEmpty);
       expect(l10n.resendIn(10), contains('10'));
       expect(l10n.statusLabel('owner'), isNotEmpty);
+      expect(l10n.membersTitle, isNotEmpty);
+      expect(l10n.family, isNotEmpty);
+      expect(l10n.pageOf(1, 2), isNotEmpty);
+      expect(l10n.memberSemantics('Ada', l10n.alive), isNotEmpty);
+      expect(l10n.deleteMemberTitle('Ada'), isNotEmpty);
     }
   });
 }

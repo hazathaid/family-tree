@@ -49,7 +49,7 @@ class MemberController extends Controller
         $member = $this->members->create($request->user(), $family, $request->validated());
 
         if ($request->hasFile('photo')) {
-            $this->members->uploadPhoto($member, $request->file('photo'));
+            $this->members->uploadPhoto($request->user(), $member, $request->file('photo'));
         }
 
         return redirect()->route('members.show', $member)->with('status', 'Anggota berhasil ditambahkan.');
@@ -79,10 +79,10 @@ class MemberController extends Controller
     {
         $this->ensureActiveFamilyMember($request, $member);
         Gate::authorize('update', $member);
-        $member = $this->members->update($member, $request->validated());
+        $member = $this->members->update($request->user(), $member, $request->validated());
 
         if ($request->hasFile('photo')) {
-            $member = $this->members->uploadPhoto($member, $request->file('photo'));
+            $member = $this->members->uploadPhoto($request->user(), $member, $request->file('photo'));
         }
 
         return redirect()->route('members.show', $member)->with('status', 'Anggota berhasil diperbarui.');
@@ -92,7 +92,7 @@ class MemberController extends Controller
     {
         $this->ensureActiveFamilyMember($request, $member);
         Gate::authorize('delete', $member);
-        $this->members->delete($member);
+        $this->members->delete($request->user(), $member);
 
         return redirect()->route('members.index')->with('status', 'Anggota berhasil dihapus.');
     }

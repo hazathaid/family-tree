@@ -92,7 +92,7 @@ class FamilyMemberController extends Controller
     {
         Gate::authorize('update', $familyMember);
 
-        $member = $this->memberService->update($familyMember, $request->validated());
+        $member = $this->memberService->update($request->user(), $familyMember, $request->validated());
 
         return response()->json([
             'success' => true,
@@ -101,11 +101,11 @@ class FamilyMemberController extends Controller
         ]);
     }
 
-    public function destroy(FamilyMember $familyMember): JsonResponse
+    public function destroy(Request $request, FamilyMember $familyMember): JsonResponse
     {
         Gate::authorize('delete', $familyMember);
 
-        $this->memberService->delete($familyMember);
+        $this->memberService->delete($request->user(), $familyMember);
 
         return response()->json([
             'success' => true,
@@ -118,7 +118,7 @@ class FamilyMemberController extends Controller
     {
         Gate::authorize('update', $familyMember);
 
-        $member = $this->memberService->uploadPhoto($familyMember, $request->file('photo'));
+        $member = $this->memberService->uploadPhoto($request->user(), $familyMember, $request->file('photo'));
 
         return response()->json([
             'success' => true,
