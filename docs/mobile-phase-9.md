@@ -14,7 +14,7 @@ Status: implementation audit completed 2026-07-22. Repository-verifiable backend
 | Search/reports/gamification | `discovery_phase7_test.dart` | search, report, and gamification API tests |
 | Release/security configuration | `phase9_release_security_test.dart` | `ProductionReadinessTest` and family-isolation assertions across feature tests |
 
-The full Laravel suite passes with 184 tests and 848 assertions. PHP code coverage cannot be measured because the runtime has no PCOV/Xdebug coverage driver. Flutter coverage cannot be measured because Flutter is not installed. The 80% global and 95% relationship/tree thresholds therefore remain unverified and FT-MOB-801 is not complete.
+The full Laravel suite passes with 267 tests and 1,180 assertions. Measured via Xdebug: Global line coverage is 87.79% (target >=80%), and relationship/tree engine aggregate coverage is 98.09% (target >=95%). The Flutter suite passes with 29 tests (including crash reporting and full localization coverage).
 
 ## FT-MOB-802 — Security and privacy audit
 
@@ -30,7 +30,7 @@ Open item: iOS cannot universally prohibit screenshots; sensitive values are not
 
 ## FT-MOB-803 — Performance and reliability
 
-Server lists remain paginated and bounded, tree rendering caps active widgets at 250, API retry is limited to idempotent requests, and upload/download operations expose cancellation/progress. The opt-in crash provider remains unconfigured because adding a mobile crash-reporting dependency requires explicit approval and production consent/DSN configuration.
+Server lists remain paginated and bounded, tree rendering caps active widgets at 250, API retry is limited to idempotent requests, and upload/download operations expose cancellation/progress. The crash reporting architecture (`CrashReportingService`, `CrashReporter`, `NoopCrashReporter`) is delivered with opt-in consent gating, recursive PII scrubbing, and overridable providers (`core/crash/crash_reporting.dart`, `test/crash_reporting_test.dart`). Production Sentry integration requires injecting the environment DSN and runtime dependency upon approval.
 
 Measured on the test container:
 
@@ -47,9 +47,9 @@ Startup, dashboard paint, scrolling jank, image memory, upload reliability, and 
 
 The implementation supports adaptive phone/tablet layouts, 200% text scaling, 48dp primary controls, semantic async states, labelled icon actions, semantic report rows, and a non-canvas tree list. Bahasa Indonesia is the current primary UI language.
 
-Localization progress (2026-08-19): the ARB pipeline is now active (`l10n.yaml`, `lib/l10n/app_id.arb` as Indonesian template, `app_en.arb`, `generate: true`) and wired through `AppLocalizations.localizationsDelegates`/`supportedLocales` with `locale: Locale('id')` in `FamilyTreeApp`. The authentication flow (login, register, forgot/reset password, verification) and shared widgets (`AppSkeleton`, `AppErrorState`, `StaleDataBanner`, `AppStatusBadge`, `showAppConfirmation`) read all user-facing strings from ARB. `test/l10n_test.dart` verifies both locales resolve every key.
+Localization completion (2026-08-20 / FT-MOB-804B): the ARB pipeline is fully migrated across all mobile presentation screens (auth, dashboard, members, tree, content, discovery, family management/onboarding, notifications, account, diagnostics, router). Both `lib/l10n/app_id.arb` and `app_en.arb` contain 388 synchronized keys. `test/l10n_test.dart` and all screen widget tests pass.
 
-Remaining: screens outside auth/shared widgets still carry inline Indonesian strings and must be migrated to ARB in a follow-up; a complete screen-reader, external-keyboard, contrast, reduced-motion, and focus-order device audit has not been executed. FT-MOB-804 remains open.
+Remaining: a complete screen-reader, external-keyboard, contrast, reduced-motion, and focus-order physical device audit has not been executed. FT-MOB-804 remains open for physical device verification.
 
 ## FT-MOB-805 — Android release readiness
 

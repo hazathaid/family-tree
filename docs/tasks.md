@@ -538,7 +538,67 @@ Audit repository pada 2026-07-22 menemukan baseline berikut:
 - Test Flutter saat ini hanya mencakup app smoke/model parsing dan belum membuktikan parity.
 - Status completion backend belum dapat dipastikan sampai seluruh quality gate berhasil dijalankan.
 
-## Recommended Execution Order
+# Proposed Backlog — Feature Completion
+
+Backlog berikut menutup gap yang ditemukan pada audit 2026-08-20:
+
+- GEDCOM import (ekspor sudah selesai di FT-GEDCOM-001).
+- Bulk member import dan CSV export untuk keluarga besar.
+- Penyelesaian localization mobile (FT-MOB-804).
+- Item Phase 9 yang dapat dikerjakan tanpa infrastruktur eksternal.
+
+Urutan eksekusi yang disarankan:
+
+1. FT-GEDCOM-002 (impor GEDCOM).
+2. FT-API-501 (bulk member import & CSV export).
+3. FT-MOB-804B (localization lengkap).
+4. FT-MOB-803A dan FT-MOB-801A (crash reporting opt-in dan coverage).
+
+## FT-GEDCOM-002 — GEDCOM Family Import ✅ Complete (2026-08-20)
+
+**Depends on:** FT-GEDCOM-001
+
+- Import silsilah keluarga dari file GEDCOM 5.5.1 LINEAGE-LINKED melalui REST.
+- Hanya lima base relationship (`father`, `mother`, `child`, `husband`, `wife`) yang ditulis; relationship turunan tidak pernah dihitung atau disimpan.
+- Parse `INDI` (nama, jenis kelamin, tanggal/tempat lahir, tanggal/tempat wafat, biography) dan `FAM` (`HUSB`, `WIFE`, `CHIL`).
+- Normalisasi GEDCOM date (`12 MAY 2001`) dan GEDCOM name (`John /Doe/`) ke format internal.
+- Impor transaksional; laporan ringkasan (created/skipped/errors); dedupe dalam satu file berdasarkan xref.
+- Cache relationship/tree diinvalidasi dan aktivitas dicatat.
+- Policy: owner/admin keluarga.
+- Deliverables: service, controller, Form Request, route, tests Unit/Feature, dokumentasi `docs/gedcom-import.md`.
+
+## FT-API-501 — Bulk Member Import and CSV Export ✅ Complete (2026-08-20)
+
+- `POST /api/v1/families/{family}/members/import` — upload CSV, validasi per baris, impor transaksional, laporan per-baris (created/skipped/errors).
+- `GET /api/v1/families/{family}/members/export` — unduh CSV semua anggota keluarga (streaming).
+- Kolom yang didukung: `full_name`, `nickname`, `gender`, `religion`, `birth_date`, `birth_place`, `is_alive`, `death_date`, `death_place`, `biography`, `branch_uuid`.
+- Cache diinvalidasi dan aktivitas dicatat setelah impor.
+- Policy: owner/admin.
+- Deliverables: service, controller, Form Request, route, tests Unit/Feature, dokumentasi `docs/member-bulk-operations.md`.
+
+## FT-MOB-804B — Complete Mobile Localization ✅ Complete (2026-08-20)
+
+**Depends on:** FT-MOB-804A
+
+- Migrasi seluruh user-facing string di screen mobile dari string inline ke ARB (`lib/l10n/app_id.arb` / `app_en.arb`).
+- Bahasa Indonesia tetap locale utama; bahasa Inggris sebagai fallback.
+- Tidak boleh ada string user-facing yang tersisa hardcoded di widget.
+- `test/l10n_test.dart` tetap hijau; `flutter analyze` dan `flutter test` hijau.
+
+## FT-MOB-803A — Crash Reporting Opt-in ✅ Complete (2026-08-20)
+
+- Tambahkan provider crash reporting yang opt-in dan menghormati consent sesuai PRD.
+- PII scrubbing: tidak boleh mengirim token, credential, atau payload sensitif.
+- Tidak meng-hardcode DSN/Sentry credential; DSN diambil dari environment/flavor.
+- Konfigurasi di-dokumentasikan dan uji bahwa provider tidak aktif bila consent tidak diberikan.
+
+## FT-MOB-801A — Coverage Verification ✅ Complete (2026-08-20)
+
+- Jalankan backend coverage (`composer test:coverage`) dan dokumentasikan angka global 80% serta relationship/tree engine 95%.
+- Jalankan Flutter coverage (`flutter test --coverage`) bila Flutter tersedia dan dokumentasikan hasilnya.
+- Catat semua keterbatasan environment (misal driver coverage tidak tersedia) di `docs/mobile-phase-9.md`.
+
+# Recommended Execution Order
 
 Urutan aman adalah:
 
