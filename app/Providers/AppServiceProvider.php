@@ -9,10 +9,13 @@ use App\Models\Event;
 use App\Models\Family;
 use App\Models\FamilyBranch;
 use App\Models\FamilyMember;
+use App\Models\FamilyUserRole;
 use App\Models\MemberPhoto;
+use App\Models\MemberRelationship;
 use App\Models\PersonalAccessToken;
 use App\Models\PhotoAlbum;
 use App\Models\User;
+use App\Observers\AuditObserver;
 use App\Policies\AccountPolicy;
 use App\Policies\ArticleCategoryPolicy;
 use App\Policies\ArticleCommentPolicy;
@@ -146,6 +149,12 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Event::class, EventPolicy::class);
         Gate::policy(User::class, AccountPolicy::class);
         Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
+
+        Family::observe(AuditObserver::class);
+        FamilyBranch::observe(AuditObserver::class);
+        FamilyMember::observe(AuditObserver::class);
+        FamilyUserRole::observe(AuditObserver::class);
+        MemberRelationship::observe(AuditObserver::class);
 
         ResetPassword::createUrlUsing(function (object $user, string $token): string {
             return route('password.reset', ['token' => $token, 'email' => $user->email]);

@@ -14,10 +14,10 @@ class AuditLogService
 {
     public function __construct(private readonly AuditLogRepositoryInterface $auditLogs) {}
 
-    public function record(User $actor, string $action, Model $subject, array $oldValues = [], array $newValues = []): AuditLog
+    public function record(?User $actor, string $action, Model $subject, array $oldValues = [], array $newValues = []): AuditLog
     {
         return $this->auditLogs->create([
-            'user_id' => $actor->id,
+            'user_id' => $actor?->id,
             'action' => $action,
             'auditable_type' => $subject->getMorphClass(),
             'auditable_id' => $subject->getKey(),
