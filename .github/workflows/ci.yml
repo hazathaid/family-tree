@@ -60,6 +60,9 @@ jobs:
       - name: Tests with coverage
         run: composer test:coverage
 
+      - name: Coverage gate (80% global, 95% engine)
+        run: composer test:coverage:enforce
+
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v4
         with:

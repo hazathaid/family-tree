@@ -47,6 +47,7 @@
         ],
         "test": "php -d memory_limit=512M vendor/bin/phpunit",
         "test:coverage": "php -d memory_limit=512M -d xdebug.mode=coverage vendor/bin/phpunit --coverage-text --coverage-clover coverage.xml",
+        "test:coverage:enforce": "@php artisan coverage:gate coverage.xml --min=80 --engine-min=95",
         "analyse": "phpstan analyse --memory-limit=1G",
         "pint": "pint"
     },
