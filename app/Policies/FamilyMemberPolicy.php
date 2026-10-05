@@ -66,6 +66,11 @@ class FamilyMemberPolicy
         ], true);
     }
 
+    public function merge(User $user, FamilyMember $member): bool
+    {
+        return $this->delete($user, $member);
+    }
+
     private function role(User $user, Family $family): ?string
     {
         return $this->familyRoles->findActive($family, $user)?->role;

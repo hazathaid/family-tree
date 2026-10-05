@@ -29,6 +29,8 @@ class ActivityLog extends Model
 
     public const MEMBER_DELETED = 'MEMBER_DELETED';
 
+    public const MEMBER_MERGED = 'MEMBER_MERGED';
+
     public const MEMBER_PHOTO_UPDATED = 'MEMBER_PHOTO_UPDATED';
 
     public const ARTICLE_CREATED = 'ARTICLE_CREATED';
@@ -52,6 +54,7 @@ class ActivityLog extends Model
             self::MEMBER_CREATED,
             self::MEMBER_UPDATED,
             self::MEMBER_DELETED,
+            self::MEMBER_MERGED,
             self::MEMBER_PHOTO_UPDATED,
             self::MEMBER_ACCOUNT_INVITED,
             self::MEMBER_ACCOUNT_CLAIMED,

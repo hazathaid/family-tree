@@ -29,6 +29,15 @@ class ActivityLogService
         return $this->record($member->family_id, $user, ActivityLog::MEMBER_DELETED, $this->memberPayload($member));
     }
 
+    public function memberMerged(User $user, FamilyMember $primary, FamilyMember $duplicate): ActivityLog
+    {
+        return $this->record($primary->family_id, $user, ActivityLog::MEMBER_MERGED, [
+            'subject_uuid' => $primary->uuid,
+            'merged_uuid' => $duplicate->uuid,
+            'name' => $primary->full_name,
+        ]);
+    }
+
     public function memberPhotoUpdated(User $user, FamilyMember $member): ActivityLog
     {
         return $this->record($member->family_id, $user, ActivityLog::MEMBER_PHOTO_UPDATED, $this->memberPayload($member));

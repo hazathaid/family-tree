@@ -638,6 +638,13 @@ Urutan eksekusi yang disarankan:
 - Menutup gap BR-I06 untuk graf keluarga inti.
 - Deliverable: `app/Observers/AuditObserver.php`, `tests/Feature/AuditCoverageTest.php`.
 
+## FT-BE-007 — Member Duplicate Detection and Merge ✅ Complete (2026-09-30)
+
+- `GET /api/v1/families/{family}/members/duplicates` mendeteksi pasangan kandidat duplikat dalam satu keluarga berdasarkan nama ternormalisasi dengan confidence/reasons dan batas `limit`.
+- `POST /api/v1/family-members/{family_member}/merge` menggabungkan duplikat ke primary secara transaksional: transfer akun (menolak dua akun berbeda), isi field kosong, reassign base relationship tanpa edge ganda, reassign tag foto dan undangan, soft-delete duplikat, invalidasi cache, serta activity + audit log.
+- Syarat owner/admin; hanya lima base relationship yang disentuh.
+- Deliverable: `app/Services/MemberMergeService.php`, `app/Http/Controllers/Api/V1/MemberMergeController.php`, `tests/Feature/MemberMergeApiTest.php`, `docs/member-merge.md`.
+
 # Recommended Execution Order
 
 Urutan aman adalah:

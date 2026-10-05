@@ -24,6 +24,7 @@ use App\Http\Controllers\Api\V1\FeaturedArticleController;
 use App\Http\Controllers\Api\V1\GamificationController;
 use App\Http\Controllers\Api\V1\MemberAccountInvitationController;
 use App\Http\Controllers\Api\V1\MemberBulkController;
+use App\Http\Controllers\Api\V1\MemberMergeController;
 use App\Http\Controllers\Api\V1\MemberPhotoController;
 use App\Http\Controllers\Api\V1\NotificationController;
 use App\Http\Controllers\Api\V1\PhotoAlbumController;
@@ -86,6 +87,8 @@ Route::prefix('v1')->name('api.')->middleware('throttle:api')->group(function ()
         Route::get('families/{family}/dashboard', [FamilyDashboardController::class, 'show']);
         Route::post('families/{family}/members/import', [MemberBulkController::class, 'import'])->middleware('throttle:10,1');
         Route::get('families/{family}/members/export', [MemberBulkController::class, 'export'])->middleware('throttle:10,1');
+        Route::get('families/{family}/members/duplicates', [MemberMergeController::class, 'duplicates'])->middleware('throttle:30,1');
+        Route::post('family-members/{family_member}/merge', [MemberMergeController::class, 'merge'])->middleware('throttle:10,1');
 
         Route::apiResource('family-members', FamilyMemberController::class);
         Route::post('family-members/{family_member}/photo', [FamilyMemberController::class, 'uploadPhoto']);

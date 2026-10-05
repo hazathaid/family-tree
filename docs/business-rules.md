@@ -108,7 +108,7 @@ Sources: `NotificationService`, `NotifyFamilyOfUpdate`, `SendBirthdayGreetings`,
 |---|---|---|
 | BR-I01 | Historical rules allow gender/living `unknown`; migration/request may use a different representation (`is_alive`). | Decide in an approved member-contract task; do not infer in Flutter. |
 | BR-I02 | Historical minimum parent age gap/gender enforcement is not evidenced consistently in current `RelationshipService`. | Add only with product approval, migration/request/service tests. |
-| BR-I03 | Duplicate detection/merge and member documents are described historically but not implemented. | Non-goal until backlog tasks exist. |
+| BR-I03 | Duplicate detection/merge and member documents are described historically but not implemented. | Duplicate detection/merge delivered by FT-BE-007 (2026-09-30): owner/admin can list candidates and merge a duplicate into a primary within one family, reassigning only base relationships, photo tags, and invitations. Member documents remain a non-goal until a backlog task exists. |
 | BR-I04 | Privacy taxonomy in old docs may not exactly match actual family request enum/default. | API actual values govern; FT-API-202 must reconcile. |
 | BR-I05 | Account session list/revoke and REST preferences were absent. | Closed by FT-API-101 (2026-07-22). |
 | BR-I06 | Not every critical action currently has both activity and audit records. | Closed for the core family graph by `AuditObserver` (FT-BE-006, 2026-09-30): family, branch, member, membership, and relationship mutations are audited; super-admin actions remain in `AdministrationService`. |
