@@ -23,22 +23,45 @@ class EloquentSearchRepository implements SearchRepositoryInterface
 
     public function members(User $user, SearchCriteria $criteria): Collection
     {
-        $query = FamilyMember::query()->with(['family', 'branch'])
-            ->whereHas('family.userRoles', fn (Builder $query) => $query->where('user_id', $user->id))
-            ->tap(fn (Builder $query) => $this->familyScope($query, $criteria))
-            ->when($criteria->keyword, fn (Builder $query, string $keyword) => $this->memberText($query, $keyword))
-            ->when($criteria->name, fn (Builder $query, string $name) => $query->where(fn (Builder $nested) => $nested->where('full_name', 'like', '%'.$name.'%')->orWhere('nickname', 'like', '%'.$name.'%')))
-            ->when($criteria->city, fn (Builder $query, string $city) => $query->where(fn (Builder $nested) => $nested->where('birth_place', 'like', '%'.$city.'%')->orWhere('death_place', 'like', '%'.$city.'%')))
-            ->when($criteria->status, fn (Builder $query, string $status) => $query->where('is_alive', $status === 'alive'))
-            ->orderBy('full_name');
+        $query = $this->memberQuery($user, $criteria);
 
-        if ($criteria->generation === null) {
-            $query->offset(($criteria->page - 1) * $criteria->limit)->limit($criteria->limit);
-        } else {
-            $query->limit(100000);
-        }
+        $query->offset(($criteria->page - 1) * $criteria->limit)->limit($criteria->limit);
 
         return $query->get();
+    }
+
+    /**
+     * @param  array<int, int>  $memberIds
+     */
+    public function membersForIds(User $user, SearchCriteria $criteria, array $memberIds): Collection
+    {
+        if ($memberIds === []) {
+            return collect();
+        }
+
+        $query = $this->memberQuery($user, $criteria)
+            ->whereIn('id', $memberIds)
+            ->offset(($criteria->page - 1) * $criteria->limit)
+            ->limit($criteria->limit);
+
+        return $query->get();
+    }
+
+    private function memberQuery(User $user, SearchCriteria $criteria): Builder
+    {
+        $query = FamilyMember::query()->with(['family', 'branch'])
+            ->whereHas('family.userRoles', fn (Builder $nested) => $nested->where('user_id', $user->id));
+        $query = $this->familyScope($query, $criteria);
+
+        $query = $query
+            ->when($criteria->keyword, fn (Builder $nested, string $keyword) => $this->memberText($nested, $keyword))
+            ->when($criteria->name, fn (Builder $nested, string $name) => $nested->where(fn (Builder $inner) => $inner->where('full_name', 'like', '%'.$name.'%')->orWhere('nickname', 'like', '%'.$name.'%')))
+            ->when($criteria->city, fn (Builder $nested, string $city) => $nested->where(fn (Builder $inner) => $inner->where('birth_place', 'like', '%'.$city.'%')->orWhere('death_place', 'like', '%'.$city.'%')))
+            ->when($criteria->status, fn (Builder $nested, string $status) => $nested->where('is_alive', $status === 'alive'));
+
+        $query->orderBy('full_name');
+
+        return $query;
     }
 
     public function articles(User $user, SearchCriteria $criteria): Collection
@@ -70,14 +93,14 @@ class EloquentSearchRepository implements SearchRepositoryInterface
             ->orderBy('event_date')->offset(($criteria->page - 1) * $criteria->limit)->limit($criteria->limit)->get();
     }
 
-    private function familyScope(Builder $query, SearchCriteria $criteria): void
+    private function familyScope(Builder $query, SearchCriteria $criteria): Builder
     {
-        $query->when($criteria->familyUuid, fn (Builder $nested, string $uuid) => $nested->whereHas('family', fn (Builder $family) => $family->where('uuid', $uuid)))
+        return $query->when($criteria->familyUuid, fn (Builder $nested, string $uuid) => $nested->whereHas('family', fn (Builder $family) => $family->where('uuid', $uuid)))
             ->when($criteria->familyId, fn (Builder $nested, int $id) => $nested->where('family_id', $id));
     }
 
-    private function memberText(Builder $query, string $keyword): void
+    private function memberText(Builder $query, string $keyword): Builder
     {
-        $query->where(fn (Builder $nested) => $nested->where('full_name', 'like', '%'.$keyword.'%')->orWhere('nickname', 'like', '%'.$keyword.'%')->orWhere('birth_place', 'like', '%'.$keyword.'%'));
+        return $query->where(fn (Builder $nested) => $nested->where('full_name', 'like', '%'.$keyword.'%')->orWhere('nickname', 'like', '%'.$keyword.'%')->orWhere('birth_place', 'like', '%'.$keyword.'%'));
     }
 }

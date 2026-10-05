@@ -12,16 +12,14 @@ class SearchService
 {
     public function __construct(
         private readonly SearchRepositoryInterface $search,
-        private readonly TreeGraphBuilderService $graphBuilder,
+        private readonly GenerationMapService $generations,
     ) {}
 
     public function search(User $user, SearchCriteria $criteria): array
     {
-        $members = $this->search->members($user, $criteria);
-
-        if ($criteria->generation !== null) {
-            $members = $this->filterGeneration($user, $members, $criteria);
-        }
+        $members = $criteria->generation === null
+            ? $this->search->members($user, $criteria)
+            : $this->generationMembers($user, $criteria);
 
         return [
             'members' => $members,
@@ -30,34 +28,16 @@ class SearchService
         ];
     }
 
-    private function filterGeneration(User $user, Collection $members, SearchCriteria $criteria): Collection
+    private function generationMembers(User $user, SearchCriteria $criteria): Collection
     {
         $root = $this->search->rootMember($user, (string) $criteria->rootMemberUuid);
         if (! $root || ($criteria->familyUuid && $root->family->uuid !== $criteria->familyUuid) || ($criteria->familyId && $root->family_id !== $criteria->familyId)) {
             throw ValidationException::withMessages(['root_member_uuid' => ['Root member must belong to the selected family.']]);
         }
 
-        $graph = $this->graphBuilder->build($root->family_id);
-        $generations = [$root->id => 0];
-        $queue = new \SplQueue;
-        $queue->enqueue($root->id);
+        $memberIds = $this->generations->memberIdsAtGeneration($root->family_id, $root->id, (int) $criteria->generation);
+        $members = $this->search->membersForIds($user, $criteria, $memberIds);
 
-        while (! $queue->isEmpty()) {
-            $current = $queue->dequeue();
-            foreach ($graph['adjacency'][$current] ?? [] as $edge) {
-                if (isset($generations[$edge['to']])) {
-                    continue;
-                }
-                $generations[$edge['to']] = $generations[$current] + $edge['delta'];
-                $queue->enqueue($edge['to']);
-            }
-        }
-
-        return $members->filter(function ($member) use ($criteria, $generations): bool {
-            $generation = $generations[$member->id] ?? null;
-            $member->setAttribute('generation', $generation);
-
-            return $generation === $criteria->generation;
-        })->slice(($criteria->page - 1) * $criteria->limit, $criteria->limit)->values();
+        return $members->each(fn ($member) => $member->setAttribute('generation', $criteria->generation));
     }
 }

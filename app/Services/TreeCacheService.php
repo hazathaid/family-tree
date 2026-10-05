@@ -7,7 +7,10 @@ use App\Repositories\Contracts\TreeRepositoryInterface;
 
 class TreeCacheService
 {
-    public function __construct(private readonly TreeRepositoryInterface $repository) {}
+    public function __construct(
+        private readonly TreeRepositoryInterface $repository,
+        private readonly GenerationMapService $generations,
+    ) {}
 
     public function get(FamilyMember $root, string $mode, int $depth): ?array
     {
@@ -22,5 +25,6 @@ class TreeCacheService
     public function invalidateFamily(int $familyId): void
     {
         $this->repository->invalidateFamily($familyId);
+        $this->generations->invalidateFamily($familyId);
     }
 }

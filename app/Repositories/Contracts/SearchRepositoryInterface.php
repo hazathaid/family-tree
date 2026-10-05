@@ -11,6 +11,11 @@ interface SearchRepositoryInterface
 {
     public function members(User $user, SearchCriteria $criteria): Collection;
 
+    /**
+     * @param  array<int, int>  $memberIds
+     */
+    public function membersForIds(User $user, SearchCriteria $criteria, array $memberIds): Collection;
+
     public function articles(User $user, SearchCriteria $criteria): Collection;
 
     public function events(User $user, SearchCriteria $criteria): Collection;
