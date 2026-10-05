@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\DTOs\ArticleData;
 use App\Events\ArticlePublished;
+use App\Jobs\NotifyFamilyOfUpdate;
 use App\Models\Article;
 use App\Models\ArticleCategory;
 use App\Models\Family;
@@ -33,6 +34,7 @@ class ArticleService
         $article = $this->articles->create(['family_id' => $family->id, 'author_id' => $user->id, 'category_id' => $category->id, 'title' => $data->title, 'slug' => $this->uniqueSlug($family, $data->title), 'excerpt' => $data->excerpt, 'content' => $this->sanitizer->sanitize($data->content), 'status' => $data->status, 'published_at' => $data->status === Article::STATUS_PUBLISHED ? now() : null]);
         if ($article->status === Article::STATUS_PUBLISHED) {
             ArticlePublished::dispatch($article);
+            $this->notifyFamilyArticlePublished($article, $user);
         }
         $this->activityLog->articleCreated($user, $article);
         $this->gamification->award($family, $user, GamificationService::ACTION_WRITE_ARTICLE, Article::class, $article->id);
@@ -68,6 +70,7 @@ class ArticleService
         if ($article->status !== Article::STATUS_PUBLISHED) {
             DB::transaction(fn () => $this->articles->update($article, ['status' => Article::STATUS_PUBLISHED, 'published_at' => now()]));
             ArticlePublished::dispatch($article->refresh());
+            $this->notifyFamilyArticlePublished($article, $user);
         }
 
         return $this->articles->loadDetails($article->refresh(), $user);
@@ -90,6 +93,18 @@ class ArticleService
         }
 
         return $this->articles->loadDetails($article->refresh(), $user);
+    }
+
+    private function notifyFamilyArticlePublished(Article $article, User $author): void
+    {
+        NotifyFamilyOfUpdate::dispatch(
+            $article->family_id,
+            'article_published',
+            'Artikel baru: '.$article->title,
+            'Sebuah artikel baru telah diterbitkan di keluarga Anda.',
+            ['article_uuid' => $article->uuid, 'target_type' => 'article', 'target_uuid' => $article->uuid],
+            $author->id,
+        )->afterCommit();
     }
 
     private function validateInitialStatus(string $status): void

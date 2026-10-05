@@ -32,13 +32,16 @@ class EventReminderService
 
             $title = 'Pengingat acara: '.$event->title;
             $body = $event->title.' akan berlangsung pada '.$event->event_date->format('d-m-Y H:i').($event->location ? ' di '.$event->location : '').'.';
-            $userIds = User::query()->where('status', 'active')->whereHas('familyRoles', fn ($query) => $query->where('family_id', $event->family_id))->pluck('id');
-            foreach ($userIds as $userId) {
-                $this->notifications->notifyEvent($userId, $event, $title, $body);
+            $users = User::query()->where('status', 'active')->whereHas('familyRoles', fn ($query) => $query->where('family_id', $event->family_id))->get();
+            $sent = 0;
+            foreach ($users as $user) {
+                if ($this->notifications->notifyEvent($user, $event, $title, $body) !== null) {
+                    $sent++;
+                }
             }
             $event->update(['reminder_sent_at' => now()]);
 
-            return $userIds->count();
+            return $sent;
         });
     }
 }

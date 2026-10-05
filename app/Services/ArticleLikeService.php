@@ -9,12 +9,20 @@ use Illuminate\Validation\ValidationException;
 
 class ArticleLikeService
 {
-    public function __construct(private readonly ArticleLikeRepositoryInterface $likes) {}
+    public function __construct(
+        private readonly ArticleLikeRepositoryInterface $likes,
+        private readonly NotificationService $notifications,
+    ) {}
 
     public function like(Article $article, User $user): array
     {
         $this->ensurePublished($article);
+        $isNew = ! $this->likes->exists($article, $user);
         $this->likes->like($article, $user);
+
+        if ($isNew) {
+            $this->notifyAuthor($article, $user);
+        }
 
         return $this->state($article, $user);
     }
@@ -37,5 +45,23 @@ class ArticleLikeService
         if ($article->status !== Article::STATUS_PUBLISHED) {
             throw ValidationException::withMessages(['article' => ['Only published articles can be liked.']]);
         }
+    }
+
+    private function notifyAuthor(Article $article, User $liker): void
+    {
+        $author = $article->author;
+
+        if (! $author instanceof User || $author->id === $liker->id) {
+            return;
+        }
+
+        $this->notifications->dispatchForUser(
+            $author,
+            NotificationService::CATEGORY_FAMILY_UPDATES,
+            'article_like',
+            'Suka baru pada artikel Anda',
+            $liker->name.' menyukai "'.$article->title.'".',
+            ['article_uuid' => $article->uuid, 'target_type' => 'article', 'target_uuid' => $article->uuid],
+        );
     }
 }

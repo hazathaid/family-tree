@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Eloquent;
 
+use App\Models\Event;
 use App\Models\Notification;
 use App\Models\User;
 use App\Repositories\Contracts\NotificationRepositoryInterface;
@@ -15,11 +16,16 @@ class EloquentNotificationRepository implements NotificationRepositoryInterface
         return Notification::query()->create($attributes);
     }
 
-    public function createForEvent(int $userId, int $eventId, string $title, string $body): Notification
+    public function createForEvent(int $userId, Event $event, string $title, string $body): Notification
     {
         return Notification::query()->firstOrCreate(
-            ['event_id' => $eventId, 'user_id' => $userId],
-            ['type' => 'event_reminder', 'title' => $title, 'body' => $body, 'data' => ['event_id' => $eventId]],
+            ['event_id' => $event->id, 'user_id' => $userId],
+            [
+                'type' => 'event_reminder',
+                'title' => $title,
+                'body' => $body,
+                'data' => ['event_uuid' => $event->uuid, 'target_type' => 'event', 'target_uuid' => $event->uuid],
+            ],
         );
     }
 

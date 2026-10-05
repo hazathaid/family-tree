@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\DTOs\EventData;
+use App\Jobs\NotifyFamilyOfUpdate;
 use App\Models\Event;
 use App\Models\EventAttendee;
 use App\Models\Family;
@@ -25,6 +26,15 @@ class EventService
             'organizer_id' => $user->id,
         ]);
         $this->activityLog->eventCreated($user, $event);
+
+        NotifyFamilyOfUpdate::dispatch(
+            $family->id,
+            'event_created',
+            'Acara baru: '.$event->title,
+            $event->title.' dijadwalkan pada '.$event->event_date->format('d-m-Y H:i').($event->location ? ' di '.$event->location : '').'.',
+            ['event_uuid' => $event->uuid, 'target_type' => 'event', 'target_uuid' => $event->uuid],
+            $user->id,
+        )->afterCommit();
 
         return $this->events->loadDetails($event, $user);
     }
