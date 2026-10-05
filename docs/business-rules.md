@@ -80,10 +80,13 @@ FT-API-202 confirms that the current family privacy contract is fixed to active 
 - Read sets `is_read` and `read_at`; read-all is scoped to the authenticated user.
 - Push device token belongs to the authenticated user, platform is Android/iOS, and unregister/deactivate must not affect another user.
 - User notification preferences are stored as normalized JSON and are available through owner-only account REST endpoints.
+- Domain notifications are produced by `NotificationService` for article publication, article comments, article likes, event creation, event reminders and birthdays. In-app records are always created when the category is enabled; push is queued when the `push` channel is enabled and email is queued when the `email` channel is enabled.
+- Category gating: `event_reminders` governs event reminder notifications; `family_updates` governs article publication/comment/like, event creation and birthday notifications. Actions never notify the acting user about their own action.
+- Email fan-out for family-wide updates runs through the queued `NotifyFamilyOfUpdate` job with bounded chunks; birthday greetings run through the scheduled `SendBirthdayGreetings` job.
 - Mobile device sessions are Sanctum personal access tokens. Lists expose only public UUID, device name, current flag, and timestamps; revoke is restricted to the authenticated user's token.
 - Payloads use safe target metadata and must not expose private family data on a locked screen.
 
-Sources: `NotificationService`, `PushDeviceService`, profile web service/controller.
+Sources: `NotificationService`, `NotifyFamilyOfUpdate`, `SendBirthdayGreetings`, `PushDeviceService`, profile web service/controller.
 
 ## Gamification, reports and search
 
@@ -108,4 +111,4 @@ Sources: `NotificationService`, `PushDeviceService`, profile web service/control
 | BR-I03 | Duplicate detection/merge and member documents are described historically but not implemented. | Non-goal until backlog tasks exist. |
 | BR-I04 | Privacy taxonomy in old docs may not exactly match actual family request enum/default. | API actual values govern; FT-API-202 must reconcile. |
 | BR-I05 | Account session list/revoke and REST preferences were absent. | Closed by FT-API-101 (2026-07-22). |
-| BR-I06 | Not every critical action currently has both activity and audit records. | Security hardening task must inventory coverage. |
+| BR-I06 | Not every critical action currently has both activity and audit records. | Closed for the core family graph by `AuditObserver` (FT-BE-006, 2026-09-30): family, branch, member, membership, and relationship mutations are audited; super-admin actions remain in `AdministrationService`. |

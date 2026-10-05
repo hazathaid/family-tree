@@ -598,6 +598,46 @@ Urutan eksekusi yang disarankan:
 - Jalankan Flutter coverage (`flutter test --coverage`) bila Flutter tersedia dan dokumentasikan hasilnya.
 - Catat semua keterbatasan environment (misal driver coverage tidak tersedia) di `docs/mobile-phase-9.md`.
 
+## FT-BE-001 — Backend Indonesian Localization ✅ Complete (2026-09-30)
+
+- Tambah `lang/id/auth.php`, `passwords.php`, `pagination.php`, dan `validation.php` (termasuk nama atribut) agar pesan validasi dan kata sandi konsisten dengan `APP_LOCALE=id`.
+- English tetap menjadi fallback locale; tidak ada perubahan route/service.
+- Deliverable: `tests/Feature/LocalizationTest.php` memverifikasi locale utama dan pesan validasi API berbahasa Indonesia.
+
+## FT-BE-002 — Scalable Generation Search ✅ Complete (2026-09-30)
+
+- Hapus pemuatan `limit(100000)` dan pemotongan koleksi di memori; generation di-resolve server-side melalui `GenerationMapService` (BFS atas base relationship, cache 30 menit, invalidasi mengikuti `TreeCacheService`).
+- Repository hanya mengambil anggota pada generation yang diminta dengan `whereIn` + `page`/`limit`.
+- Migration `2026_09_30_000000_add_search_indexes_to_family_members` menambahkan composite index pencarian.
+- Deliverable: `tests/Unit/SearchServiceTest.php`, `tests/Feature/GenerationMapServiceTest.php`, `tests/Feature/SearchApiTest.php`.
+
+## FT-BE-003 — Domain Notification Pipeline ✅ Complete (2026-09-30)
+
+- `NotificationService` kini menyediakan `dispatchForUser` yang menghormati preferensi `event_reminders`, `family_updates`, `push`, dan `email`.
+- Notifikasi domain: artikel diterbitkan, komentar artikel, like artikel, acara baru, pengingat acara, dan ulang tahun.
+- Fan-out keluarga melalui job `NotifyFamilyOfUpdate` (chunked, mengecualikan aktor) dan ulang tahun melalui `SendBirthdayGreetings` terjadwal.
+- Email queued melalui `FamilyActivityNotification`; tidak ada data keluarga privat pada payload.
+- Deliverable: `tests/Feature/DomainNotificationTest.php`, `tests/Unit/EventReminderServiceTest.php`, `tests/Unit/NotificationServiceTest.php`.
+
+## FT-BE-004 — Enforced Coverage Gate ✅ Complete (2026-09-30)
+
+- Tambah command `coverage:gate` yang mem-parse Clover `coverage.xml` dan gagal bila line coverage global < 80% atau engine relationship/tree < 95%.
+- Composer script `test:coverage:enforce` dan langkah CI dijalankan setelah `composer test:coverage`; CI tidak lagi sekadar meng-upload artefak.
+- Deliverable: `app/Console/Commands/CheckCoverageCommand.php`, `tests/Feature/CoverageGateCommandTest.php`.
+
+## FT-BE-005 — Generated OpenAPI Contract ✅ Complete (2026-09-30)
+
+- Tambah command `openapi:generate` yang menurunkan OpenAPI 3.1 dari route `/api/v1` (paths, tags, security sanctum, response standar) ke `docs/openapi.json`.
+- Tambah contract test yang gagal bila spesifikasi committed menyimpang dari route atau ada route yang belum terdokumentasi.
+- Deliverable: `app/Services/OpenApiSpecService.php`, `app/Console/Commands/GenerateOpenApiCommand.php`, `docs/openapi.json`, `tests/Feature/OpenApiContractTest.php`.
+
+## FT-BE-006 — Audit Coverage for Critical Mutations ✅ Complete (2026-09-30)
+
+- `AuditObserver` mencatat create/update/delete untuk `Family`, `FamilyBranch`, `FamilyMember`, `FamilyUserRole`, dan `MemberRelationship` ke `audit_logs` dengan aktor, nilai lama/baru, dan konteks request.
+- Mutasi console/system tanpa aktor tidak diaudit agar bulk seed tidak membludak; aksi super-admin tetap melalui `AdministrationService`.
+- Menutup gap BR-I06 untuk graf keluarga inti.
+- Deliverable: `app/Observers/AuditObserver.php`, `tests/Feature/AuditCoverageTest.php`.
+
 # Recommended Execution Order
 
 Urutan aman adalah:

@@ -72,6 +72,8 @@ Structured logs use correlation/request IDs, environment, operation and sanitize
 
 Install locked dependencies, run `composer test`, `composer analyse`, `composer pint`, `npm run build`, `flutter analyze`, `flutter test`, secret scanning and dependency audit. Release adds signed Android/iOS builds, environment smoke tests, migration review, rollback artifact and store metadata. Deploy migrations before compatible app traffic and preserve backward-compatible API contracts during mobile rollout.
 
+Coverage is enforced, not just reported: `composer test:coverage` writes `coverage.xml` and `composer test:coverage:enforce` runs `php artisan coverage:gate`, failing CI when global line coverage drops below 80% or the relationship/tree engine drops below 95%.
+
 ## Phase 3 implementation
 
 - The family/user-isolated dashboard endpoint is the single mobile aggregate for six statistics, recent activity, birthdays, events, notifications, facts and recent members. Every collection is server-bounded and cached for five minutes.
@@ -103,6 +105,13 @@ Install locked dependencies, run `composer test`, `composer analyse`, `composer 
 - Generation filters send the selected root UUID to Laravel; Dart displays the returned generation and never traverses the family graph.
 - Reports request statistics, activity, and insight series concurrently. Period values are device-local calendar dates and the visible filter identifies the device timezone.
 - Points, badges, awards, and ranks are rendered verbatim from the server. Charts use bounded progress visuals with equivalent labelled rows for assistive technology.
+
+## Backend localization and notification pipeline
+
+- `lang/id` provides Indonesian `auth`, `passwords`, `pagination`, and `validation` lines (including custom attribute names) so Laravel validation and password messages match `APP_LOCALE=id`; English remains the fallback locale.
+- `NotificationService::dispatchForUser` is the preference-aware entry point for domain notifications, while the legacy `notify()` remains for already-consented system messages. Email uses the queued `FamilyActivityNotification`.
+- Family-wide updates are fanned out by `NotifyFamilyOfUpdate` (chunked, excludes the actor); birthdays are emitted by the scheduled `SendBirthdayGreetings` job.
+- Generation search resolves the root's generation map through `GenerationMapService` (BFS over base relationships, 30-minute cache invalidated with the tree cache) and queries only the requested generation server-side.
 
 ## Current gaps
 

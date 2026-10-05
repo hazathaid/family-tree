@@ -89,3 +89,11 @@ Phase 5 adds no migration. Layout-independent graphs remain in `member_tree_cach
 ## Phase 6 mobile parity note
 
 Phase 6 adds no migration. Flutter consumes the existing article/comment/like, album/photo/tag, event/attendee, activity, notification and push-device tables exclusively through `/api/v1`; UUIDs remain public identifiers and all family isolation remains server enforced.
+
+## Search index note
+
+Migration `2026_09_30_000000_add_search_indexes_to_family_members` adds composite indexes to support server-side member search at scale: `family_members(family_id, full_name)`, `family_members(family_id, is_alive)`, `family_members(family_id, birth_place)`, and `member_relationships(family_id, relationship_type)`. These back the family-scoped search filters and the generation BFS edge scan; they are additive and do not change any column or relationship rule.
+
+## Audit coverage note
+
+No schema change: `audit_logs` now also receives domain mutations (family, branch, member, membership, relationship) through `AuditObserver`, in addition to the existing super-admin actions recorded by `AdministrationService`. Rows remain immutable operationally and store actor, action, auditable reference, old/new values, and request context.

@@ -2,6 +2,8 @@
 
 Status: single mobile contract audited against `routes/api.php`, controllers, Form Requests, Resources and Phase 1–16 API notes on 2026-07-22.
 
+A machine-readable OpenAPI 3.1 document is generated from the registered routes at `docs/openapi.json` (`php artisan openapi:generate`). `OpenApiContractTest` fails when the generated document drifts from `routes/api.php` or when a route is undocumented. This markdown file remains the authoritative field-level contract; the OpenAPI file documents the operation surface.
+
 ## Protocol
 
 Base path is `/api/v1`. Send `Accept: application/json`; authenticated endpoints require `Authorization: Bearer <Sanctum token>`. JSON requests use UTF-8; files use `multipart/form-data`. Route model bindings shown as `{family}`, `{article}`, etc. resolve public UUIDs through models; clients must always send UUIDs.
@@ -162,6 +164,8 @@ Lazy expansion uses `replace_depth`: repeat the same root/mode/layout request wi
 | POST `/push-devices` | platform android/ios, token | device resource; 20/min |
 | DELETE `/push-devices/{device}` | none | null, owner only |
 
+Domain notification types are `event_reminder`, `article_published`, `article_comment`, `article_like`, `event_created`, and `birthday`. Each notification carries safe `data` keys only (`article_uuid`, `event_uuid`, `member_uuid`, plus `target_type`/`target_uuid` for allowlisted deep links) and never private family records or internal numeric IDs. Delivery is preference-gated server-side: `event_reminders` gates reminders, `family_updates` gates the remaining domain types, `push` gates push delivery, and `email` gates queued email. Disabling a category suppresses the in-app record and all channels.
+
 ### Search, reports and gamification
 
 | Method/path | Request / filters | Response |
@@ -175,6 +179,8 @@ Lazy expansion uses `replace_depth`: repeat the same root/mode/layout request wi
 | GET `/leaderboard/families` | limit<=100 | family leaderboard |
 
 FT-API-401 closes API-G05: generation search is server-computed through BFS, and the mobile report contract now includes the city, growth, and activity-trend series used by web.
+
+Generation filtering is resolved server-side: the root member's generation map is computed once per family/root (BFS over base relationships, cached 30 minutes and invalidated with the tree cache) and only the requested generation is queried with `whereIn` plus `page`/`limit`. The client receives the verbatim `generation` attribute; no client-side graph traversal is performed.
 
 ### Super-admin (web-console support, excluded from mobile)
 
