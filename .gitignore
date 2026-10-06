@@ -3,7 +3,8 @@
 /public/build
 .env
 .phpunit.result.cache
-/bootstrap/cache
+/bootstrap/cache/*
+!/bootstrap/cache/.gitignore
 /storage/*.key
 /storage/logs
 /storage/framework
