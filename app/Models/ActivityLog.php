@@ -43,6 +43,10 @@ class ActivityLog extends Model
 
     public const MEMBER_ACCOUNT_CLAIMED = 'MEMBER_ACCOUNT_CLAIMED';
 
+    public const MEMBER_DOCUMENT_UPLOADED = 'MEMBER_DOCUMENT_UPLOADED';
+
+    public const MEMBER_DOCUMENT_DELETED = 'MEMBER_DOCUMENT_DELETED';
+
     public const TREE_RELATIVE_CREATED = 'TREE_RELATIVE_CREATED';
 
     public const GEDCOM_IMPORTED = 'GEDCOM_IMPORTED';
@@ -58,6 +62,8 @@ class ActivityLog extends Model
             self::MEMBER_PHOTO_UPDATED,
             self::MEMBER_ACCOUNT_INVITED,
             self::MEMBER_ACCOUNT_CLAIMED,
+            self::MEMBER_DOCUMENT_UPLOADED,
+            self::MEMBER_DOCUMENT_DELETED,
             self::TREE_RELATIVE_CREATED,
             self::GEDCOM_IMPORTED,
             self::MEMBERS_IMPORTED,

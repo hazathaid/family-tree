@@ -6,6 +6,7 @@ use App\Models\ActivityLog;
 use App\Models\Article;
 use App\Models\Event;
 use App\Models\FamilyMember;
+use App\Models\MemberDocument;
 use App\Models\MemberPhoto;
 use App\Models\User;
 use App\Repositories\Contracts\ActivityLogRepositoryInterface;
@@ -56,6 +57,24 @@ class ActivityLogService
     public function memberAccountClaimed(User $user, FamilyMember $member): ActivityLog
     {
         return $this->record($member->family_id, $user, ActivityLog::MEMBER_ACCOUNT_CLAIMED, ['subject_uuid' => $member->uuid]);
+    }
+
+    public function memberDocumentUploaded(User $user, FamilyMember $member, MemberDocument $document): ActivityLog
+    {
+        return $this->record($member->family_id, $user, ActivityLog::MEMBER_DOCUMENT_UPLOADED, [
+            'subject_uuid' => $member->uuid,
+            'document_uuid' => $document->uuid,
+            'title' => $document->title,
+        ]);
+    }
+
+    public function memberDocumentDeleted(User $user, MemberDocument $document): ActivityLog
+    {
+        return $this->record($document->family_id, $user, ActivityLog::MEMBER_DOCUMENT_DELETED, [
+            'subject_uuid' => $document->member->uuid,
+            'document_uuid' => $document->uuid,
+            'title' => $document->title,
+        ]);
     }
 
     public function treeRelativeCreated(User $user, FamilyMember $member, FamilyMember $relative, string $relation): ActivityLog

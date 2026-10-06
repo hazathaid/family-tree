@@ -24,6 +24,7 @@ use App\Http\Controllers\Api\V1\FeaturedArticleController;
 use App\Http\Controllers\Api\V1\GamificationController;
 use App\Http\Controllers\Api\V1\MemberAccountInvitationController;
 use App\Http\Controllers\Api\V1\MemberBulkController;
+use App\Http\Controllers\Api\V1\MemberDocumentController;
 use App\Http\Controllers\Api\V1\MemberMergeController;
 use App\Http\Controllers\Api\V1\MemberPhotoController;
 use App\Http\Controllers\Api\V1\NotificationController;
@@ -92,6 +93,11 @@ Route::prefix('v1')->name('api.')->middleware('throttle:api')->group(function ()
 
         Route::apiResource('family-members', FamilyMemberController::class);
         Route::post('family-members/{family_member}/photo', [FamilyMemberController::class, 'uploadPhoto']);
+        Route::get('family-members/{family_member}/documents', [MemberDocumentController::class, 'index']);
+        Route::post('family-members/{family_member}/documents', [MemberDocumentController::class, 'store'])->middleware('throttle:20,1');
+        Route::get('member-documents/{member_document}', [MemberDocumentController::class, 'show']);
+        Route::get('member-documents/{member_document}/download', [MemberDocumentController::class, 'download'])->middleware('throttle:30,1');
+        Route::delete('member-documents/{member_document}', [MemberDocumentController::class, 'destroy']);
         Route::post('family-members/{family_member}/account-invitations', [MemberAccountInvitationController::class, 'store']);
         Route::post('family-members/{family_member}/relatives', [TreeRelativeMemberController::class, 'store']);
 

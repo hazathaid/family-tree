@@ -30,6 +30,7 @@ Status: audited against all migrations present on 2026-07-22. Migrations are aut
 | `photo_albums` | uuid, family_id, created_by, name, description | family cascade, creator restrict; soft delete |
 | `member_photos` | uuid, family/album/uploader IDs, paths, file metadata, caption, captured_at | family cascade, album null, uploader restrict; soft delete |
 | `member_photo_tags` | photo_id, family_member_id | unique pair; both cascade; timestamps; no UUID |
+| `member_documents` | uuid, family_id, family_member_id, uploaded_by, title, category, path, original_name, mime_type, size, document_date, notes | family/member cascade, uploader restrict; family/time and member/time indexes; soft delete |
 | `activity_logs` | uuid, family_id, user_id, activity_type, payload | family/time/type indexes; family cascade, user null; immutable operationally |
 | `events` | uuid, family_id, title, description, date, location, organizer_id, reminder_sent_at | family/date and reminder indexes; family cascade, organizer restrict; soft delete |
 | `event_attendees` | uuid, event_id, user_id, status | unique event+user; cascades |
@@ -57,7 +58,7 @@ Status: audited against all migrations present on 2026-07-22. Migrations are aut
 
 | ID | Difference / risk | Follow-up |
 |---|---|---|
-| DB-001 | Historical docs list `member_documents`; no migration/model/API exists. | Product/API task required before use. |
+| DB-001 | Historical docs list `member_documents`; no migration/model/API exists. | Resolved by FT-BE-008 (2026-09-30): `member_documents` table, model, repository, service, API and tests delivered. |
 | DB-002 | Historical schema duplicated `family_members.uuid` and described gender/status values unlike the migration. Actual migration is authoritative. | Resolve in a future schema/business-rule task. |
 | DB-003 | Not every entity/pivot/framework table has UUID or soft deletes, contrary to the old blanket statement. | Treat conventions as “domain/public entities where appropriate.” |
 | DB-004 | `notifications` has unique `(event_id,user_id)` while non-event notifications use nullable event IDs; behavior depends on MySQL NULL uniqueness. | Review when notification expansion is implemented. |

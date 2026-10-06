@@ -645,6 +645,14 @@ Urutan eksekusi yang disarankan:
 - Syarat owner/admin; hanya lima base relationship yang disentuh.
 - Deliverable: `app/Services/MemberMergeService.php`, `app/Http/Controllers/Api/V1/MemberMergeController.php`, `tests/Feature/MemberMergeApiTest.php`, `docs/member-merge.md`.
 
+## FT-BE-008 — Member Documents ✅ Complete (2026-09-30)
+
+- Tambah tabel/model/repository `member_documents` dan endpoint list, upload, show, download, delete yang family/member-scoped.
+- Upload memvalidasi jpg/jpeg/png/webp/pdf maksimal 20 MB; penyimpanan per keluarga/anggota di disk `public`.
+- Otorisasi: owner/admin dapat mengelola dokumen anggota mana pun; user yang tertaut hanya profilnya sendiri; anggota lain read-only.
+- Activity log `MEMBER_DOCUMENT_UPLOADED`/`MEMBER_DOCUMENT_DELETED`; menutup DB-001 dan paruh kedua BR-I03.
+- Deliverable: `database/migrations/2026_09_30_000100_create_member_documents_table.php`, `app/Services/MemberDocumentService.php`, `tests/Feature/MemberDocumentApiTest.php`, `docs/member-documents.md`.
+
 # Recommended Execution Order
 
 Urutan aman adalah:

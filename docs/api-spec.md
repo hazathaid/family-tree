@@ -98,6 +98,9 @@ An accepted claim sets `family_members.user_id`, restores/creates a `member` fam
 | POST `/family-members/{family_member}/relatives` | `relation` parent/spouse/child, `full_name`, `gender`; optional birth, death, biography fields | created relative; allowed only for the linked member or family owner |
 | GET `/families/{family}/members/duplicates` | optional `limit` 1–100 | bounded candidate duplicate pairs with confidence/reasons; owner/admin only |
 | POST `/family-members/{family_member}/merge` | `duplicate_uuid` (same family) | merged primary member; owner/admin only; reassigns base relationships/tags/invitations and soft-deletes the duplicate |
+| GET/POST `/family-members/{family_member}/documents` | POST multipart `file` (jpg/jpeg/png/webp/pdf, <=20 MB), `title`, optional `category`, `document_date`, `notes`; GET `limit`<=100 | paginated documents / created document; member-scoped |
+| GET/DELETE `/member-documents/{member_document}` | none | document / soft-deleted null; family/policy scoped |
+| GET `/member-documents/{member_document}/download` | none | authenticated binary attachment; 30/min |
 | GET `/relationships` | family/member filters + pagination | base relationship resources |
 | POST `/relationships` | family/source/target UUID, type; optional dates/notes | base relationship; type only father/mother/child/husband/wife |
 | GET/PUT/DELETE `/relationships/{relationship}` | update base-edge fields | relationship / updated / null |
