@@ -175,4 +175,23 @@ class _Members implements MemberRepository {
   Future<RelationshipResolution> resolve(
           String sourceUuid, String targetUuid) =>
       throw UnimplementedError();
+  @override
+  Future<List<MemberDocument>> documents(String memberUuid) async => const [];
+  @override
+  Future<MemberDocument> uploadDocument(String memberUuid,
+          {required String path,
+          required String title,
+          String? category,
+          String? documentDate,
+          String? notes}) =>
+      throw UnimplementedError();
+  @override
+  Future<void> deleteDocument(String documentUuid) async {}
+  @override
+  Future<List<DuplicateCandidate>> duplicateCandidates(String familyUuid,
+          {int limit = 25}) async =>
+      const [];
+  @override
+  Future<FamilyMember> mergeMember(String primaryUuid, String duplicateUuid) =>
+      throw UnimplementedError();
 }

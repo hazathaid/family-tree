@@ -2425,6 +2425,222 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'Laporan'**
   String get reportsMenu;
+
+  /// No description provided for @documentsTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'Dokumen'**
+  String get documentsTitle;
+
+  /// No description provided for @manageDocuments.
+  ///
+  /// In id, this message translates to:
+  /// **'Kelola dokumen'**
+  String get manageDocuments;
+
+  /// No description provided for @noDocuments.
+  ///
+  /// In id, this message translates to:
+  /// **'Belum ada dokumen'**
+  String get noDocuments;
+
+  /// No description provided for @addDocument.
+  ///
+  /// In id, this message translates to:
+  /// **'Tambah dokumen'**
+  String get addDocument;
+
+  /// No description provided for @documentTitleLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'Judul dokumen'**
+  String get documentTitleLabel;
+
+  /// No description provided for @documentCategoryLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'Kategori'**
+  String get documentCategoryLabel;
+
+  /// No description provided for @documentDateLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'Tanggal dokumen'**
+  String get documentDateLabel;
+
+  /// No description provided for @documentNotesLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'Catatan'**
+  String get documentNotesLabel;
+
+  /// No description provided for @uploadDocument.
+  ///
+  /// In id, this message translates to:
+  /// **'Unggah dokumen'**
+  String get uploadDocument;
+
+  /// No description provided for @documentUploaded.
+  ///
+  /// In id, this message translates to:
+  /// **'Dokumen berhasil diunggah'**
+  String get documentUploaded;
+
+  /// No description provided for @documentDeleted.
+  ///
+  /// In id, this message translates to:
+  /// **'Dokumen dihapus'**
+  String get documentDeleted;
+
+  /// No description provided for @deleteDocumentTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'Hapus dokumen?'**
+  String get deleteDocumentTitle;
+
+  /// No description provided for @deleteDocumentConfirmation.
+  ///
+  /// In id, this message translates to:
+  /// **'Dokumen akan dihapus permanen dari arsip keluarga.'**
+  String get deleteDocumentConfirmation;
+
+  /// No description provided for @documentFileHint.
+  ///
+  /// In id, this message translates to:
+  /// **'Pilih gambar dokumen (JPG/PNG/WebP). PDF hanya melalui web.'**
+  String get documentFileHint;
+
+  /// No description provided for @categoryIdentity.
+  ///
+  /// In id, this message translates to:
+  /// **'Identitas'**
+  String get categoryIdentity;
+
+  /// No description provided for @categoryFamilyCard.
+  ///
+  /// In id, this message translates to:
+  /// **'Kartu keluarga'**
+  String get categoryFamilyCard;
+
+  /// No description provided for @categoryCertificate.
+  ///
+  /// In id, this message translates to:
+  /// **'Sertifikat'**
+  String get categoryCertificate;
+
+  /// No description provided for @categoryEducation.
+  ///
+  /// In id, this message translates to:
+  /// **'Pendidikan'**
+  String get categoryEducation;
+
+  /// No description provided for @categoryLegal.
+  ///
+  /// In id, this message translates to:
+  /// **'Legal'**
+  String get categoryLegal;
+
+  /// No description provided for @categoryMedical.
+  ///
+  /// In id, this message translates to:
+  /// **'Medis'**
+  String get categoryMedical;
+
+  /// No description provided for @categoryUnspecified.
+  ///
+  /// In id, this message translates to:
+  /// **'Tanpa kategori'**
+  String get categoryUnspecified;
+
+  /// No description provided for @documentDated.
+  ///
+  /// In id, this message translates to:
+  /// **'Tanggal: {date}'**
+  String documentDated(String date);
+
+  /// No description provided for @duplicatesTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'Kandidat duplikat'**
+  String get duplicatesTitle;
+
+  /// No description provided for @duplicatesTooltip.
+  ///
+  /// In id, this message translates to:
+  /// **'Cari duplikat'**
+  String get duplicatesTooltip;
+
+  /// No description provided for @noDuplicates.
+  ///
+  /// In id, this message translates to:
+  /// **'Tidak ada kandidat duplikat'**
+  String get noDuplicates;
+
+  /// No description provided for @mergeMembers.
+  ///
+  /// In id, this message translates to:
+  /// **'Gabungkan'**
+  String get mergeMembers;
+
+  /// No description provided for @mergeDialogTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'Gabungkan anggota'**
+  String get mergeDialogTitle;
+
+  /// No description provided for @mergeKeepHint.
+  ///
+  /// In id, this message translates to:
+  /// **'Pilih data yang dipertahankan:'**
+  String get mergeKeepHint;
+
+  /// No description provided for @keepMember.
+  ///
+  /// In id, this message translates to:
+  /// **'Pertahankan {name}'**
+  String keepMember(String name);
+
+  /// No description provided for @mergedSuccessfully.
+  ///
+  /// In id, this message translates to:
+  /// **'Anggota berhasil digabungkan'**
+  String get mergedSuccessfully;
+
+  /// No description provided for @confidenceHigh.
+  ///
+  /// In id, this message translates to:
+  /// **'Kecocokan tinggi'**
+  String get confidenceHigh;
+
+  /// No description provided for @confidenceMedium.
+  ///
+  /// In id, this message translates to:
+  /// **'Kecocokan sedang'**
+  String get confidenceMedium;
+
+  /// No description provided for @confidenceLow.
+  ///
+  /// In id, this message translates to:
+  /// **'Kecocokan rendah'**
+  String get confidenceLow;
+
+  /// No description provided for @reasonSameName.
+  ///
+  /// In id, this message translates to:
+  /// **'Nama sama'**
+  String get reasonSameName;
+
+  /// No description provided for @reasonSameBirthDate.
+  ///
+  /// In id, this message translates to:
+  /// **'Tanggal lahir sama'**
+  String get reasonSameBirthDate;
+
+  /// No description provided for @reasonDifferentBirthDate.
+  ///
+  /// In id, this message translates to:
+  /// **'Tanggal lahir berbeda'**
+  String get reasonDifferentBirthDate;
 }
 
 class _AppLocalizationsDelegate

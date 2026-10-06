@@ -158,7 +158,12 @@ class _MemberDirectoryScreenState extends ConsumerState<MemberDirectoryScreen> {
           IconButton(
               tooltip: l10n.relationshipResolver,
               onPressed: () => context.push('/relationship-resolver'),
-              icon: const Icon(Icons.route))
+              icon: const Icon(Icons.route)),
+          if (canManage)
+            IconButton(
+                tooltip: l10n.duplicatesTooltip,
+                onPressed: () => context.push('/members/duplicates'),
+                icon: const Icon(Icons.content_copy))
         ]),
         floatingActionButton: canManage
             ? FloatingActionButton(
@@ -352,6 +357,16 @@ class MemberDetailScreen extends ConsumerWidget {
                                 : r.sourceName),
                             subtitle: Text(_relationshipType(l10n, r.type))))
                         .toList()),
+            if (canManage || member.isOwnProfile)
+              _Section(title: l10n.documentsTitle, children: [
+                ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.folder_outlined),
+                    title: Text(l10n.manageDocuments),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => context.push('/members/$uuid/documents',
+                        extra: canManage || member.isOwnProfile))
+              ]),
             _Section(title: l10n.relatedContent, children: [
               ListTile(
                   contentPadding: EdgeInsets.zero,
@@ -1047,3 +1062,412 @@ String _iso(DateTime? date) => date == null
     ? ''
     : '${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
 String? _null(String value) => value.trim().isEmpty ? null : value.trim();
+
+String _documentCategory(AppLocalizations l10n, String? value) =>
+    switch (value) {
+      'identity' => l10n.categoryIdentity,
+      'family_card' => l10n.categoryFamilyCard,
+      'certificate' => l10n.categoryCertificate,
+      'education' => l10n.categoryEducation,
+      'legal' => l10n.categoryLegal,
+      'medical' => l10n.categoryMedical,
+      _ => l10n.categoryUnspecified,
+    };
+
+String _confidence(AppLocalizations l10n, String value) => switch (value) {
+      'high' => l10n.confidenceHigh,
+      'low' => l10n.confidenceLow,
+      _ => l10n.confidenceMedium,
+    };
+
+String _reason(AppLocalizations l10n, String value) => switch (value) {
+      'same_name' => l10n.reasonSameName,
+      'same_birth_date' => l10n.reasonSameBirthDate,
+      'different_birth_date' => l10n.reasonDifferentBirthDate,
+      _ => value,
+    };
+
+class MemberDocumentsScreen extends ConsumerStatefulWidget {
+  const MemberDocumentsScreen(
+      {required this.memberUuid, this.canWrite = false, super.key});
+  final String memberUuid;
+  final bool canWrite;
+  @override
+  ConsumerState<MemberDocumentsScreen> createState() =>
+      _MemberDocumentsScreenState();
+}
+
+class _MemberDocumentsScreenState extends ConsumerState<MemberDocumentsScreen> {
+  List<MemberDocument>? documents;
+  Object? error;
+  bool loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(load);
+  }
+
+  Future<void> load() async {
+    setState(() {
+      loading = true;
+      error = null;
+    });
+    try {
+      final items = await ref
+          .read(memberRepositoryProvider)
+          .documents(widget.memberUuid);
+      if (mounted) {
+        setState(() {
+          documents = items;
+          loading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          error = e;
+          loading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> add() async {
+    final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (picked == null || !mounted) return;
+    final form = await _documentForm(context);
+    if (form == null || !mounted) return;
+    try {
+      await ref.read(memberRepositoryProvider).uploadDocument(
+            widget.memberUuid,
+            path: picked.path,
+            title: form.title,
+            category: form.category,
+            documentDate: form.documentDate,
+            notes: form.notes,
+          );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(AppLocalizations.of(context).documentUploaded)));
+      }
+      await load();
+    } on AppError catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.message)));
+      }
+    }
+  }
+
+  Future<void> remove(MemberDocument document) async {
+    final ok = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) {
+          final l10n = AppLocalizations.of(dialogContext);
+          return AlertDialog(
+              title: Text(l10n.deleteDocumentTitle),
+              content: Text(l10n.deleteDocumentConfirmation),
+              actions: [
+                TextButton(
+                    onPressed: () => Navigator.pop(dialogContext, false),
+                    child: Text(l10n.cancel)),
+                FilledButton(
+                    onPressed: () => Navigator.pop(dialogContext, true),
+                    child: Text(l10n.delete))
+              ]);
+        });
+    if (ok != true) return;
+    try {
+      await ref.read(memberRepositoryProvider).deleteDocument(document.uuid);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(AppLocalizations.of(context).documentDeleted)));
+      }
+      await load();
+    } on AppError catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.message)));
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Scaffold(
+        appBar: AppBar(title: Text(l10n.documentsTitle)),
+        floatingActionButton: widget.canWrite
+            ? FloatingActionButton(
+                onPressed: add,
+                tooltip: l10n.addDocument,
+                child: const Icon(Icons.note_add))
+            : null,
+        body: _body(l10n));
+  }
+
+  Widget _body(AppLocalizations l10n) {
+    if (loading && documents == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (error != null) {
+      return Center(
+          child: FilledButton.icon(
+              onPressed: load,
+              icon: const Icon(Icons.refresh),
+              label: Text(l10n.retry)));
+    }
+    final items = documents ?? const <MemberDocument>[];
+    if (items.isEmpty) {
+      return Center(child: Text(l10n.noDocuments));
+    }
+    return ListView.builder(
+        itemCount: items.length,
+        itemBuilder: (_, i) {
+          final doc = items[i];
+          return Card(
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              child: ListTile(
+                  minTileHeight: 64,
+                  leading: const Icon(Icons.description_outlined),
+                  title: Text(doc.title),
+                  subtitle: Text([
+                    _documentCategory(l10n, doc.category),
+                    if (doc.documentDate != null)
+                      l10n.documentDated(_iso(doc.documentDate))
+                  ].join(' · ')),
+                  trailing: widget.canWrite
+                      ? IconButton(
+                          tooltip: l10n.delete,
+                          onPressed: () => remove(doc),
+                          icon: const Icon(Icons.delete_outline))
+                      : null));
+        });
+  }
+}
+
+Future<({String title, String? category, String? documentDate, String? notes})?>
+    _documentForm(BuildContext context) async {
+  final l10n = AppLocalizations.of(context);
+  final title = TextEditingController();
+  final date = TextEditingController();
+  final notes = TextEditingController();
+  String? category;
+  return showDialog<
+      ({String title, String? category, String? documentDate, String? notes})>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+          builder: (_, setDialog) => AlertDialog(
+                  title: Text(l10n.addDocument),
+                  content: SingleChildScrollView(
+                      child: Column(mainAxisSize: MainAxisSize.min, children: [
+                    TextField(
+                        controller: title,
+                        decoration:
+                            InputDecoration(labelText: l10n.documentTitleLabel)),
+                    DropdownButtonFormField<String?>(
+                        initialValue: category,
+                        decoration: InputDecoration(
+                            labelText: l10n.documentCategoryLabel),
+                        items: [
+                          DropdownMenuItem(
+                              value: null,
+                              child: Text(l10n.categoryUnspecified)),
+                          DropdownMenuItem(
+                              value: 'identity',
+                              child: Text(l10n.categoryIdentity)),
+                          DropdownMenuItem(
+                              value: 'family_card',
+                              child: Text(l10n.categoryFamilyCard)),
+                          DropdownMenuItem(
+                              value: 'certificate',
+                              child: Text(l10n.categoryCertificate)),
+                          DropdownMenuItem(
+                              value: 'education',
+                              child: Text(l10n.categoryEducation)),
+                          DropdownMenuItem(
+                              value: 'legal', child: Text(l10n.categoryLegal)),
+                          DropdownMenuItem(
+                              value: 'medical',
+                              child: Text(l10n.categoryMedical))
+                        ],
+                        onChanged: (value) => setDialog(() => category = value)),
+                    TextField(
+                        controller: date,
+                        decoration: InputDecoration(
+                            labelText: l10n.documentDateLabel,
+                            hintText: 'YYYY-MM-DD')),
+                    TextField(
+                        controller: notes,
+                        maxLines: 2,
+                        decoration:
+                            InputDecoration(labelText: l10n.documentNotesLabel)),
+                    const SizedBox(height: 8),
+                    Text(l10n.documentFileHint,
+                        style: Theme.of(context).textTheme.bodySmall)
+                  ])),
+                  actions: [
+                    TextButton(
+                        onPressed: () => Navigator.pop(dialogContext),
+                        child: Text(l10n.cancel)),
+                    FilledButton(
+                        onPressed: () {
+                          if (title.text.trim().isEmpty) return;
+                          Navigator.pop(dialogContext, (
+                            title: title.text.trim(),
+                            category: category,
+                            documentDate: _null(date.text),
+                            notes: _null(notes.text)
+                          ));
+                        },
+                        child: Text(l10n.uploadDocument))
+                  ])));
+}
+
+class MemberDuplicatesScreen extends ConsumerStatefulWidget {
+  const MemberDuplicatesScreen({super.key});
+  @override
+  ConsumerState<MemberDuplicatesScreen> createState() =>
+      _MemberDuplicatesScreenState();
+}
+
+class _MemberDuplicatesScreenState
+    extends ConsumerState<MemberDuplicatesScreen> {
+  List<DuplicateCandidate>? candidates;
+  Object? error;
+  bool loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(load);
+  }
+
+  Future<void> load() async {
+    final family = ref.read(currentFamilyProvider);
+    if (family == null) return;
+    setState(() {
+      loading = true;
+      error = null;
+    });
+    try {
+      final items = await ref
+          .read(memberRepositoryProvider)
+          .duplicateCandidates(family.uuid);
+      if (mounted) {
+        setState(() {
+          candidates = items;
+          loading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          error = e;
+          loading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> merge(DuplicateCandidate candidate) async {
+    final l10n = AppLocalizations.of(context);
+    final keepPrimary = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+                title: Text(l10n.mergeDialogTitle),
+                content: Column(mainAxisSize: MainAxisSize.min, children: [
+                  Text(l10n.mergeKeepHint),
+                  ListTile(
+                      title: Text(candidate.primary.displayName),
+                      onTap: () => Navigator.pop(dialogContext, true)),
+                  ListTile(
+                      title: Text(candidate.duplicate.displayName),
+                      onTap: () => Navigator.pop(dialogContext, false))
+                ]),
+                actions: [
+                  TextButton(
+                      onPressed: () => Navigator.pop(dialogContext),
+                      child: Text(l10n.cancel))
+                ]));
+    if (keepPrimary == null) return;
+    final primary =
+        keepPrimary ? candidate.primary.uuid : candidate.duplicate.uuid;
+    final duplicate =
+        keepPrimary ? candidate.duplicate.uuid : candidate.primary.uuid;
+    try {
+      await ref.read(memberRepositoryProvider).mergeMember(primary, duplicate);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(AppLocalizations.of(context).mergedSuccessfully)));
+      }
+      await load();
+    } on AppError catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.message)));
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Scaffold(
+        appBar: AppBar(title: Text(l10n.duplicatesTitle)),
+        body: _body(l10n));
+  }
+
+  Widget _body(AppLocalizations l10n) {
+    if (loading && candidates == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (error != null) {
+      return Center(
+          child: FilledButton.icon(
+              onPressed: load,
+              icon: const Icon(Icons.refresh),
+              label: Text(l10n.retry)));
+    }
+    final items = candidates ?? const <DuplicateCandidate>[];
+    if (items.isEmpty) {
+      return Center(child: Text(l10n.noDuplicates));
+    }
+    return RefreshIndicator(
+        onRefresh: load,
+        child: ListView.builder(
+            itemCount: items.length,
+            itemBuilder: (_, i) {
+              final candidate = items[i];
+              return Card(
+                  margin: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 4),
+                  child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(candidate.primary.displayName,
+                                style:
+                                    Theme.of(context).textTheme.titleMedium),
+                            const SizedBox(height: 4),
+                            Text('↔ ${candidate.duplicate.displayName}'),
+                            const SizedBox(height: 8),
+                            Wrap(spacing: 8, children: [
+                              Chip(
+                                  label: Text(
+                                      _confidence(l10n, candidate.confidence))),
+                              ...candidate.reasons.map((reason) =>
+                                  Chip(label: Text(_reason(l10n, reason))))
+                            ]),
+                            Align(
+                                alignment: Alignment.centerRight,
+                                child: FilledButton.icon(
+                                    onPressed: () => merge(candidate),
+                                    icon: const Icon(Icons.merge_type),
+                                    label: Text(l10n.mergeMembers)))
+                          ])));
+            }));
+  }
+}

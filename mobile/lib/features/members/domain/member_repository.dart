@@ -22,4 +22,15 @@ abstract interface class MemberRepository {
       String uuid, Map<String, dynamic> values);
   Future<void> deleteRelationship(String uuid);
   Future<RelationshipResolution> resolve(String sourceUuid, String targetUuid);
+  Future<List<MemberDocument>> documents(String memberUuid);
+  Future<MemberDocument> uploadDocument(String memberUuid,
+      {required String path,
+      required String title,
+      String? category,
+      String? documentDate,
+      String? notes});
+  Future<void> deleteDocument(String documentUuid);
+  Future<List<DuplicateCandidate>> duplicateCandidates(String familyUuid,
+      {int limit = 25});
+  Future<FamilyMember> mergeMember(String primaryUuid, String duplicateUuid);
 }

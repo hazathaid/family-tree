@@ -251,6 +251,7 @@ class FamilyMember {
       this.biography,
       this.photoUrl,
       this.generation,
+      this.isOwnProfile = false,
       this.relationshipToViewer});
   final String uuid;
   final String familyUuid;
@@ -269,6 +270,7 @@ class FamilyMember {
   final String? biography;
   final String? photoUrl;
   final int? generation;
+  final bool isOwnProfile;
   final String? relationshipToViewer;
 
   String get displayName => '$memorialPrefix$fullName';
@@ -292,6 +294,7 @@ class FamilyMember {
         photoUrl: (json['profile_photo_thumbnail_url'] ??
             json['profile_photo_url']) as String?,
         generation: json['generation'] as int?,
+        isOwnProfile: json['is_own_profile'] as bool? ?? false,
         relationshipToViewer: json['relationship_to_viewer'] as String?,
       );
 }
@@ -553,3 +556,73 @@ class FamilyTree {
         cached: json['cached'] as bool? ?? false);
   }
 }
+
+class MemberDocument {
+  const MemberDocument(
+      {required this.uuid,
+      required this.title,
+      this.category,
+      this.originalName,
+      this.mimeType,
+      this.size,
+      this.documentDate,
+      this.notes,
+      this.downloadUrl,
+      this.uploadedByName,
+      this.createdAt});
+
+  final String uuid;
+  final String title;
+  final String? category;
+  final String? originalName;
+  final String? mimeType;
+  final int? size;
+  final DateTime? documentDate;
+  final String? notes;
+  final String? downloadUrl;
+  final String? uploadedByName;
+  final DateTime? createdAt;
+
+  factory MemberDocument.fromJson(Map<String, dynamic> json) {
+    final uploader = json['uploaded_by'] as Map<String, dynamic>?;
+    return MemberDocument(
+      uuid: json['uuid'] as String,
+      title: json['title'] as String,
+      category: json['category'] as String?,
+      originalName: json['original_name'] as String?,
+      mimeType: json['mime_type'] as String?,
+      size: json['size'] as int?,
+      documentDate:
+          DateTime.tryParse(json['document_date'] as String? ?? ''),
+      notes: json['notes'] as String?,
+      downloadUrl: json['download_url'] as String?,
+      uploadedByName: uploader?['name'] as String?,
+      createdAt: DateTime.tryParse(json['created_at'] as String? ?? ''),
+    );
+  }
+}
+
+class DuplicateCandidate {
+  const DuplicateCandidate(
+      {required this.primary,
+      required this.duplicate,
+      required this.confidence,
+      required this.reasons});
+
+  final FamilyMember primary;
+  final FamilyMember duplicate;
+  final String confidence;
+  final List<String> reasons;
+
+  factory DuplicateCandidate.fromJson(Map<String, dynamic> json) =>
+      DuplicateCandidate(
+        primary: FamilyMember.fromJson(json['primary'] as Map<String, dynamic>),
+        duplicate:
+            FamilyMember.fromJson(json['duplicate'] as Map<String, dynamic>),
+        confidence: json['confidence'] as String? ?? 'medium',
+        reasons: (json['reasons'] as List<dynamic>? ?? const [])
+            .map((item) => '$item')
+            .toList(growable: false),
+      );
+}
+

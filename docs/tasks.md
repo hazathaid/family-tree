@@ -667,6 +667,13 @@ Urutan eksekusi yang disarankan:
 - Command `refresh-tokens:prune` menghapus refresh token kedaluwarsa dan yang sudah lama dicabut, dijadwalkan harian (`03:00`, tanpa tumpang tindih).
 - Deliverable: `config/sentry.php`, `app/Console/Commands/PruneRefreshTokensCommand.php`, `tests/Feature/PruneRefreshTokensCommandTest.php`.
 
+## FT-MOB-808A — Member Documents and Merge Mobile Parity ✅ Complete (2026-09-30)
+
+- Model `MemberDocument`/`DuplicateCandidate` dan kontrak repository mobile untuk daftar/unggah/hapus dokumen dan deteksi/merge duplikat.
+- Layar `MemberDocumentsScreen` (daftar, unggah gambar via `image_picker`, hapus) tersedia untuk manager dan pemilik profil; unggahan PDF tetap web-only karena keterbatasan pemilih berkas perangkat.
+- Layar `MemberDuplicatesScreen` menampilkan kandidat dengan chip confidence/alasan dan alur konfirmasi pilih-data-yang-dipertahankan sebelum merge.
+- Deliverable: `mobile/lib/features/members/presentation/member_screens.dart`, `mobile/lib/core/models.dart`, `mobile/test/member_phase4_test.dart`.
+
 # Recommended Execution Order
 
 Urutan aman adalah:

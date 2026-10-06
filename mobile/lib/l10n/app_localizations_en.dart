@@ -1262,4 +1262,118 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reportsMenu => 'Reports';
+
+  @override
+  String get documentsTitle => 'Documents';
+
+  @override
+  String get manageDocuments => 'Manage documents';
+
+  @override
+  String get noDocuments => 'No documents yet';
+
+  @override
+  String get addDocument => 'Add document';
+
+  @override
+  String get documentTitleLabel => 'Document title';
+
+  @override
+  String get documentCategoryLabel => 'Category';
+
+  @override
+  String get documentDateLabel => 'Document date';
+
+  @override
+  String get documentNotesLabel => 'Notes';
+
+  @override
+  String get uploadDocument => 'Upload document';
+
+  @override
+  String get documentUploaded => 'Document uploaded';
+
+  @override
+  String get documentDeleted => 'Document deleted';
+
+  @override
+  String get deleteDocumentTitle => 'Delete document?';
+
+  @override
+  String get deleteDocumentConfirmation =>
+      'The document will be permanently removed from the family archive.';
+
+  @override
+  String get documentFileHint =>
+      'Pick a document image (JPG/PNG/WebP). PDF upload is web-only.';
+
+  @override
+  String get categoryIdentity => 'Identity';
+
+  @override
+  String get categoryFamilyCard => 'Family card';
+
+  @override
+  String get categoryCertificate => 'Certificate';
+
+  @override
+  String get categoryEducation => 'Education';
+
+  @override
+  String get categoryLegal => 'Legal';
+
+  @override
+  String get categoryMedical => 'Medical';
+
+  @override
+  String get categoryUnspecified => 'No category';
+
+  @override
+  String documentDated(String date) {
+    return 'Date: $date';
+  }
+
+  @override
+  String get duplicatesTitle => 'Duplicate candidates';
+
+  @override
+  String get duplicatesTooltip => 'Find duplicates';
+
+  @override
+  String get noDuplicates => 'No duplicate candidates';
+
+  @override
+  String get mergeMembers => 'Merge';
+
+  @override
+  String get mergeDialogTitle => 'Merge members';
+
+  @override
+  String get mergeKeepHint => 'Choose which record to keep:';
+
+  @override
+  String keepMember(String name) {
+    return 'Keep $name';
+  }
+
+  @override
+  String get mergedSuccessfully => 'Members merged';
+
+  @override
+  String get confidenceHigh => 'High confidence';
+
+  @override
+  String get confidenceMedium => 'Medium confidence';
+
+  @override
+  String get confidenceLow => 'Low confidence';
+
+  @override
+  String get reasonSameName => 'Same name';
+
+  @override
+  String get reasonSameBirthDate => 'Same birth date';
+
+  @override
+  String get reasonDifferentBirthDate => 'Different birth date';
 }

@@ -89,4 +89,54 @@ class ApiMemberRepository implements MemberRepository {
             'source_member_uuid': sourceUuid,
             'target_member_uuid': targetUuid
           }) as Map<String, dynamic>);
+
+  @override
+  Future<List<MemberDocument>> documents(String memberUuid) async {
+    final data =
+        await api.get('/family-members/$memberUuid/documents') as List<dynamic>;
+    return data
+        .map((item) => MemberDocument.fromJson(item as Map<String, dynamic>))
+        .toList(growable: false);
+  }
+
+  @override
+  Future<MemberDocument> uploadDocument(String memberUuid,
+      {required String path,
+      required String title,
+      String? category,
+      String? documentDate,
+      String? notes}) async {
+    final form = FormData.fromMap({
+      'file': await MultipartFile.fromFile(path),
+      'title': title,
+      if (category != null) 'category': category,
+      if (documentDate != null) 'document_date': documentDate,
+      if (notes != null) 'notes': notes,
+    });
+    return MemberDocument.fromJson(await api
+        .post('/family-members/$memberUuid/documents', data: form) as Map<
+            String, dynamic>);
+  }
+
+  @override
+  Future<void> deleteDocument(String documentUuid) async {
+    await api.delete('/member-documents/$documentUuid');
+  }
+
+  @override
+  Future<List<DuplicateCandidate>> duplicateCandidates(String familyUuid,
+      {int limit = 25}) async {
+    final data = await api.get('/families/$familyUuid/members/duplicates',
+        query: {'limit': limit}) as List<dynamic>;
+    return data
+        .map((item) => DuplicateCandidate.fromJson(item as Map<String, dynamic>))
+        .toList(growable: false);
+  }
+
+  @override
+  Future<FamilyMember> mergeMember(
+          String primaryUuid, String duplicateUuid) async =>
+      FamilyMember.fromJson(await api.post('/family-members/$primaryUuid/merge',
+              data: {'duplicate_uuid': duplicateUuid})
+          as Map<String, dynamic>);
 }

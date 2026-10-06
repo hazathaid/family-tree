@@ -1262,4 +1262,118 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get reportsMenu => 'Laporan';
+
+  @override
+  String get documentsTitle => 'Dokumen';
+
+  @override
+  String get manageDocuments => 'Kelola dokumen';
+
+  @override
+  String get noDocuments => 'Belum ada dokumen';
+
+  @override
+  String get addDocument => 'Tambah dokumen';
+
+  @override
+  String get documentTitleLabel => 'Judul dokumen';
+
+  @override
+  String get documentCategoryLabel => 'Kategori';
+
+  @override
+  String get documentDateLabel => 'Tanggal dokumen';
+
+  @override
+  String get documentNotesLabel => 'Catatan';
+
+  @override
+  String get uploadDocument => 'Unggah dokumen';
+
+  @override
+  String get documentUploaded => 'Dokumen berhasil diunggah';
+
+  @override
+  String get documentDeleted => 'Dokumen dihapus';
+
+  @override
+  String get deleteDocumentTitle => 'Hapus dokumen?';
+
+  @override
+  String get deleteDocumentConfirmation =>
+      'Dokumen akan dihapus permanen dari arsip keluarga.';
+
+  @override
+  String get documentFileHint =>
+      'Pilih gambar dokumen (JPG/PNG/WebP). PDF hanya melalui web.';
+
+  @override
+  String get categoryIdentity => 'Identitas';
+
+  @override
+  String get categoryFamilyCard => 'Kartu keluarga';
+
+  @override
+  String get categoryCertificate => 'Sertifikat';
+
+  @override
+  String get categoryEducation => 'Pendidikan';
+
+  @override
+  String get categoryLegal => 'Legal';
+
+  @override
+  String get categoryMedical => 'Medis';
+
+  @override
+  String get categoryUnspecified => 'Tanpa kategori';
+
+  @override
+  String documentDated(String date) {
+    return 'Tanggal: $date';
+  }
+
+  @override
+  String get duplicatesTitle => 'Kandidat duplikat';
+
+  @override
+  String get duplicatesTooltip => 'Cari duplikat';
+
+  @override
+  String get noDuplicates => 'Tidak ada kandidat duplikat';
+
+  @override
+  String get mergeMembers => 'Gabungkan';
+
+  @override
+  String get mergeDialogTitle => 'Gabungkan anggota';
+
+  @override
+  String get mergeKeepHint => 'Pilih data yang dipertahankan:';
+
+  @override
+  String keepMember(String name) {
+    return 'Pertahankan $name';
+  }
+
+  @override
+  String get mergedSuccessfully => 'Anggota berhasil digabungkan';
+
+  @override
+  String get confidenceHigh => 'Kecocokan tinggi';
+
+  @override
+  String get confidenceMedium => 'Kecocokan sedang';
+
+  @override
+  String get confidenceLow => 'Kecocokan rendah';
+
+  @override
+  String get reasonSameName => 'Nama sama';
+
+  @override
+  String get reasonSameBirthDate => 'Tanggal lahir sama';
+
+  @override
+  String get reasonDifferentBirthDate => 'Tanggal lahir berbeda';
 }

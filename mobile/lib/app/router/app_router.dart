@@ -102,6 +102,9 @@ GoRouter createAppRouter(
         GoRoute(
             path: '/members/new', builder: (_, __) => const MemberFormScreen()),
         GoRoute(
+            path: '/members/duplicates',
+            builder: (_, __) => const MemberDuplicatesScreen()),
+        GoRoute(
             path: '/members/:uuid/edit',
             builder: (_, state) =>
                 MemberFormScreen(member: state.extra as FamilyMember?)),
@@ -189,6 +192,11 @@ GoRouter createAppRouter(
             path: '/members/:uuid',
             builder: (_, state) =>
                 MemberDetailScreen(uuid: state.pathParameters['uuid']!)),
+        GoRoute(
+            path: '/members/:uuid/documents',
+            builder: (_, state) => MemberDocumentsScreen(
+                memberUuid: state.pathParameters['uuid']!,
+                canWrite: state.extra as bool? ?? false)),
       ],
     );
 
