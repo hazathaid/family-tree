@@ -6,8 +6,6 @@
 /bootstrap/cache/*
 !/bootstrap/cache/.gitignore
 /storage/*.key
-/storage/logs
-/storage/framework
 /public/storage
 /mobile/test/failures
 /coverage.xml

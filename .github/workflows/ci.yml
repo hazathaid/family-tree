@@ -39,6 +39,9 @@ jobs:
           key: composer-${{ runner.os }}-${{ hashFiles('composer.lock') }}
           restore-keys: composer-${{ runner.os }}-
 
+      - name: Prepare cache directories
+        run: mkdir -p bootstrap/cache storage/framework/{cache,sessions,views}
+
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
 
