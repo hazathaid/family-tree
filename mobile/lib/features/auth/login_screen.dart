@@ -25,9 +25,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       emailError = null;
     });
     try {
-      final user = await ref
+      final result = await ref
           .read(authRepositoryProvider)
           .login(email.text.trim(), password.text);
+      if (result.twoFactorRequired) {
+        if (mounted) {
+          context.go(
+              '/two-factor-challenge?token=${Uri.encodeComponent(result.challengeToken ?? '')}');
+        }
+        return;
+      }
+      final user = result.user!;
       ref.read(currentUserProvider.notifier).state = user;
       final families = await ref.read(familyRepositoryProvider).all();
       ref.read(sessionControllerProvider).resolveUser(

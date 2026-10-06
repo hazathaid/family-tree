@@ -7,6 +7,7 @@ import '../../core/models.dart';
 import '../../l10n/app_localizations.dart';
 import '../../features/auth/login_screen.dart';
 import '../../features/auth/auth_screens.dart';
+import '../../features/auth/two_factor_screen.dart';
 import '../../features/account/presentation/account_screen.dart';
 import '../../features/family/presentation/family_onboarding_screen.dart';
 import '../../features/family/presentation/family_management_screen.dart';
@@ -31,6 +32,7 @@ GoRouter createAppRouter(
             location.startsWith('/register') ||
             location.startsWith('/forgot-password') ||
             location.startsWith('/reset-password') ||
+            location.startsWith('/two-factor-challenge') ||
             location.startsWith('/verify-email');
         if (session.status == SessionStatus.bootstrapping) {
           return location == '/splash' ? null : '/splash';
@@ -68,6 +70,10 @@ GoRouter createAppRouter(
             builder: (context, state) => const _SplashScreen()),
         GoRoute(
             path: '/login', builder: (context, state) => const LoginScreen()),
+        GoRoute(
+            path: '/two-factor-challenge',
+            builder: (context, state) => TwoFactorChallengeScreen(
+                challengeToken: state.uri.queryParameters['token'] ?? '')),
         GoRoute(path: '/register', builder: (_, __) => const RegisterScreen()),
         GoRoute(
             path: '/forgot-password',

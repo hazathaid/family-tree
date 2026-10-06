@@ -58,4 +58,38 @@ class ApiAccountRepository implements AccountRepository {
       (await api.delete('/profile/sessions/$uuid')
           as Map<String, dynamic>)['revoked_current'] as bool? ??
       false;
+
+  @override
+  Future<TwoFactorStatus> twoFactorStatus() async =>
+      TwoFactorStatus.fromJson(await api.get('/profile/two-factor')
+          as Map<String, dynamic>);
+
+  @override
+  Future<TwoFactorSetup> enableTwoFactor(String currentPassword) async =>
+      TwoFactorSetup.fromJson(await api.post('/profile/two-factor',
+          data: {'current_password': currentPassword}) as Map<String, dynamic>);
+
+  @override
+  Future<List<String>> confirmTwoFactor(String code) async {
+    final data = await api.post('/profile/two-factor/confirm',
+        data: {'code': code}) as Map<String, dynamic>;
+    return _codes(data);
+  }
+
+  @override
+  Future<void> disableTwoFactor(String currentPassword) =>
+      api.delete('/profile/two-factor',
+          data: {'current_password': currentPassword});
+
+  @override
+  Future<List<String>> regenerateRecoveryCodes(String currentPassword) async {
+    final data = await api.post('/profile/two-factor/recovery-codes',
+        data: {'current_password': currentPassword}) as Map<String, dynamic>;
+    return _codes(data);
+  }
+
+  List<String> _codes(Map<String, dynamic> data) =>
+      (data['recovery_codes'] as List<dynamic>? ?? const [])
+          .map((item) => '$item')
+          .toList(growable: false);
 }

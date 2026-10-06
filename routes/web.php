@@ -18,6 +18,7 @@ use App\Http\Controllers\Web\ReportController;
 use App\Http\Controllers\Web\SearchController;
 use App\Http\Controllers\Web\TimelineController;
 use App\Http\Controllers\Web\TreeRelativeMemberController;
+use App\Http\Controllers\Web\TwoFactorChallengeController;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome')->name('home');
@@ -36,6 +37,8 @@ Route::middleware('guest')->group(function (): void {
     Route::post('/forgot-password', [PasswordController::class, 'email'])->name('password.email');
     Route::get('/reset-password/{token}', [PasswordController::class, 'resetForm'])->name('password.reset');
     Route::post('/reset-password', [PasswordController::class, 'reset'])->name('password.update');
+    Route::get('/two-factor-challenge', [TwoFactorChallengeController::class, 'show'])->name('two-factor.challenge');
+    Route::post('/two-factor-challenge', [TwoFactorChallengeController::class, 'store'])->middleware('throttle:login')->name('two-factor.challenge.store');
 });
 
 Route::middleware('auth')->group(function (): void {

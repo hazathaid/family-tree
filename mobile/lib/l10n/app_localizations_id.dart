@@ -1376,4 +1376,61 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get reasonDifferentBirthDate => 'Tanggal lahir berbeda';
+
+  @override
+  String get twoFactorTitle => 'Autentikasi dua faktor';
+
+  @override
+  String get twoFactorEnabled => 'Aktif';
+
+  @override
+  String get twoFactorDisabled => 'Tidak aktif';
+
+  @override
+  String get twoFactorPending => 'Menunggu konfirmasi';
+
+  @override
+  String get twoFactorEnable => 'Aktifkan 2FA';
+
+  @override
+  String get twoFactorDisable => 'Nonaktifkan 2FA';
+
+  @override
+  String get twoFactorConfirm => 'Konfirmasi kode';
+
+  @override
+  String get twoFactorSecretHint =>
+      'Tambahkan kunci ini ke aplikasi autentikator Anda, lalu masukkan kode 6 digit.';
+
+  @override
+  String get twoFactorCodeLabel => 'Kode 6 digit';
+
+  @override
+  String get twoFactorRecoveryCodes => 'Kode pemulihan';
+
+  @override
+  String get twoFactorRecoveryCodesHint =>
+      'Simpan kode ini di tempat aman. Setiap kode hanya dapat dipakai sekali.';
+
+  @override
+  String get twoFactorChallengeTitle => 'Verifikasi dua faktor';
+
+  @override
+  String get twoFactorChallengePrompt =>
+      'Masukkan kode dari aplikasi autentikator Anda.';
+
+  @override
+  String get twoFactorRecoveryLabel => 'Kode pemulihan';
+
+  @override
+  String get twoFactorUseCode => 'Gunakan kode autentikator';
+
+  @override
+  String get twoFactorUseRecovery => 'Gunakan kode pemulihan';
+
+  @override
+  String get twoFactorVerify => 'Verifikasi';
+
+  @override
+  String get confirm => 'Konfirmasi';
 }

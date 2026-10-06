@@ -32,7 +32,7 @@ Dark mode decision: out of initial parity scope. Follow system brightness only a
 
 ## Mobile navigation
 
-Unauthenticated stack: splash/session bootstrap, login, register, forgot/reset password and verification. Authenticated root uses destinations Dashboard, Family/Tree, Activity, and More; a navigation rail replaces bottom navigation on tablet. More contains members, articles, photos, events, search, reports, gamification, family settings and account. Owner/admin actions are conditionally discoverable but server authorization remains mandatory. Family selector is available from the app bar/profile area.
+Unauthenticated stack: splash/session bootstrap, login, register, forgot/reset password and verification. When the account has two-factor authentication enabled, login leads to a verification step that accepts a 6-digit authenticator code or a single-use recovery code (web page and mobile screen). Authenticated root uses destinations Dashboard, Family/Tree, Activity, and More; a navigation rail replaces bottom navigation on tablet. More contains members, articles, photos, events, search, reports, gamification, family settings and account. Owner/admin actions are conditionally discoverable but server authorization remains mandatory. Family selector is available from the app bar/profile area.
 
 ## Reusable components
 

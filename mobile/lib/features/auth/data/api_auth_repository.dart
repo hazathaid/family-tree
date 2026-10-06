@@ -16,18 +16,37 @@ class ApiAuthRepository implements AuthRepository {
         'password_confirmation': password,
       }) as Map<String, dynamic>);
   @override
-  Future<User> login(String email, String password) async {
+  Future<AuthLoginResult> login(String email, String password) async {
     final data = await api.post('/auth/login', data: {
       'email': email,
       'password': password,
       'device_name': 'family-tree-mobile'
     }) as Map<String, dynamic>;
+    if (data['two_factor_required'] == true) {
+      return AuthLoginResult(challengeToken: data['challenge_token'] as String);
+    }
+    await _storeTokens(data);
+    return AuthLoginResult(user: User.fromJson(data['user'] as Map<String, dynamic>));
+  }
+
+  @override
+  Future<User> twoFactorChallenge(String challengeToken,
+      {String? code, String? recoveryCode}) async {
+    final data = await api.post('/auth/two-factor-challenge', data: {
+      'challenge_token': challengeToken,
+      if (code != null) 'code': code,
+      if (recoveryCode != null) 'recovery_code': recoveryCode,
+    }) as Map<String, dynamic>;
+    await _storeTokens(data);
+    return User.fromJson(data['user'] as Map<String, dynamic>);
+  }
+
+  Future<void> _storeTokens(Map<String, dynamic> data) async {
     await api.saveToken(data['token'] as String);
     final refreshToken = data['refresh_token'];
     if (refreshToken is String && refreshToken.isNotEmpty) {
       await api.saveRefreshToken(refreshToken);
     }
-    return User.fromJson(data['user'] as Map<String, dynamic>);
   }
 
   @override

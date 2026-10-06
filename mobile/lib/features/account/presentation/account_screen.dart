@@ -269,6 +269,8 @@ class _SecurityState extends ConsumerState<SecurityScreen> {
               onPressed: loading ? null : change,
               child: Text(l10n.changePassword)),
           const Divider(height: 32),
+          const _TwoFactorSection(),
+          const Divider(height: 32),
           Text(l10n.deviceSessions,
               style: Theme.of(context).textTheme.titleMedium),
           ref.watch(accountSessionsProvider).when(
@@ -302,6 +304,217 @@ class _SecurityState extends ConsumerState<SecurityScreen> {
         await ref.read(accountRepositoryProvider).revokeSession(session.uuid);
     ref.invalidate(accountSessionsProvider);
     if (currentRevoked) await ref.read(sessionControllerProvider).endSession();
+  }
+}
+
+class _TwoFactorSection extends ConsumerStatefulWidget {
+  const _TwoFactorSection();
+  @override
+  ConsumerState<_TwoFactorSection> createState() => _TwoFactorSectionState();
+}
+
+class _TwoFactorSectionState extends ConsumerState<_TwoFactorSection> {
+  TwoFactorStatus? status;
+  bool loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(load);
+  }
+
+  Future<void> load() async {
+    setState(() => loading = true);
+    try {
+      final value =
+          await ref.read(accountRepositoryProvider).twoFactorStatus();
+      if (mounted) {
+        setState(() {
+          status = value;
+          loading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => loading = false);
+    }
+  }
+
+  Future<String?> _askPassword() {
+    final controller = TextEditingController();
+    final l10n = AppLocalizations.of(context);
+    return showDialog<String>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+                title: Text(l10n.twoFactorTitle),
+                content: TextField(
+                    controller: controller,
+                    obscureText: true,
+                    decoration:
+                        InputDecoration(labelText: l10n.currentPassword)),
+                actions: [
+                  TextButton(
+                      onPressed: () => Navigator.pop(dialogContext),
+                      child: Text(l10n.cancel)),
+                  FilledButton(
+                      onPressed: () => Navigator.pop(dialogContext, controller.text),
+                      child: Text(l10n.confirm))
+                ]));
+  }
+
+  Future<String?> _askCode() {
+    final controller = TextEditingController();
+    final l10n = AppLocalizations.of(context);
+    return showDialog<String>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+                title: Text(l10n.twoFactorConfirm),
+                content: TextField(
+                    controller: controller,
+                    keyboardType: TextInputType.number,
+                    decoration:
+                        InputDecoration(labelText: l10n.twoFactorCodeLabel)),
+                actions: [
+                  TextButton(
+                      onPressed: () => Navigator.pop(dialogContext),
+                      child: Text(l10n.cancel)),
+                  FilledButton(
+                      onPressed: () =>
+                          Navigator.pop(dialogContext, controller.text),
+                      child: Text(l10n.confirm))
+                ]));
+  }
+
+  Future<void> _showSecret(TwoFactorSetup setup) => showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        final l10n = AppLocalizations.of(dialogContext);
+        return AlertDialog(
+            title: Text(l10n.twoFactorTitle),
+            content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(l10n.twoFactorSecretHint),
+                  const SizedBox(height: 8),
+                  SelectableText(setup.secret,
+                      style: const TextStyle(
+                          fontFamily: 'monospace', fontSize: 18)),
+                  const SizedBox(height: 8),
+                  Text(setup.otpauthUrl,
+                      style: Theme.of(dialogContext).textTheme.bodySmall)
+                ]),
+            actions: [
+              TextButton(
+                  onPressed: () => Navigator.pop(dialogContext),
+                  child: Text(l10n.close))
+            ]);
+      });
+
+  Future<void> _showRecoveryCodes(List<String> codes) => showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        final l10n = AppLocalizations.of(dialogContext);
+        return AlertDialog(
+            title: Text(l10n.twoFactorRecoveryCodes),
+            content: SingleChildScrollView(
+                child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                  Text(l10n.twoFactorRecoveryCodesHint),
+                  const SizedBox(height: 8),
+                  ...codes.map((code) => SelectableText(code,
+                      style: const TextStyle(fontFamily: 'monospace')))
+                ])),
+            actions: [
+              TextButton(
+                  onPressed: () => Navigator.pop(dialogContext),
+                  child: Text(l10n.close))
+            ]);
+      });
+
+  Future<void> _enable() async {
+    final password = await _askPassword();
+    if (password == null || password.isEmpty) return;
+    try {
+      final setup =
+          await ref.read(accountRepositoryProvider).enableTwoFactor(password);
+      if (!mounted) return;
+      await _showSecret(setup);
+      if (!mounted) return;
+      final code = await _askCode();
+      if (code == null || code.isEmpty) return;
+      final codes =
+          await ref.read(accountRepositoryProvider).confirmTwoFactor(code);
+      if (!mounted) return;
+      await _showRecoveryCodes(codes);
+      await load();
+    } on AppError catch (error) {
+      _notify(error.message);
+    }
+  }
+
+  Future<void> _disable() async {
+    final password = await _askPassword();
+    if (password == null || password.isEmpty) return;
+    try {
+      await ref.read(accountRepositoryProvider).disableTwoFactor(password);
+      await load();
+    } on AppError catch (error) {
+      _notify(error.message);
+    }
+  }
+
+  Future<void> _regenerate() async {
+    final password = await _askPassword();
+    if (password == null || password.isEmpty) return;
+    try {
+      final codes = await ref
+          .read(accountRepositoryProvider)
+          .regenerateRecoveryCodes(password);
+      if (mounted) await _showRecoveryCodes(codes);
+    } on AppError catch (error) {
+      _notify(error.message);
+    }
+  }
+
+  void _notify(String message) {
+    if (mounted) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(message)));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final value = status;
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Text(l10n.twoFactorTitle,
+          style: Theme.of(context).textTheme.titleMedium),
+      const SizedBox(height: 8),
+      if (loading)
+        const LinearProgressIndicator()
+      else
+        Text(value?.enabled == true
+            ? l10n.twoFactorEnabled
+            : value?.pending == true
+                ? l10n.twoFactorPending
+                : l10n.twoFactorDisabled),
+      const SizedBox(height: 8),
+      if (value?.enabled != true)
+        FilledButton.tonal(
+            onPressed: _enable, child: Text(l10n.twoFactorEnable))
+      else ...[
+        OutlinedButton(
+            onPressed: _regenerate,
+            child: Text(l10n.twoFactorRecoveryCodes)),
+        TextButton(
+            onPressed: _disable,
+            child: Text(l10n.twoFactorDisable,
+                style: const TextStyle(color: Colors.red)))
+      ]
+    ]);
   }
 }
 

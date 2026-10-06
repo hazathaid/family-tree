@@ -1376,4 +1376,61 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reasonDifferentBirthDate => 'Different birth date';
+
+  @override
+  String get twoFactorTitle => 'Two-factor authentication';
+
+  @override
+  String get twoFactorEnabled => 'Enabled';
+
+  @override
+  String get twoFactorDisabled => 'Disabled';
+
+  @override
+  String get twoFactorPending => 'Pending confirmation';
+
+  @override
+  String get twoFactorEnable => 'Enable 2FA';
+
+  @override
+  String get twoFactorDisable => 'Disable 2FA';
+
+  @override
+  String get twoFactorConfirm => 'Confirm code';
+
+  @override
+  String get twoFactorSecretHint =>
+      'Add this key to your authenticator app, then enter the 6-digit code.';
+
+  @override
+  String get twoFactorCodeLabel => '6-digit code';
+
+  @override
+  String get twoFactorRecoveryCodes => 'Recovery codes';
+
+  @override
+  String get twoFactorRecoveryCodesHint =>
+      'Store these codes somewhere safe. Each code can be used once.';
+
+  @override
+  String get twoFactorChallengeTitle => 'Two-factor verification';
+
+  @override
+  String get twoFactorChallengePrompt =>
+      'Enter the code from your authenticator app.';
+
+  @override
+  String get twoFactorRecoveryLabel => 'Recovery code';
+
+  @override
+  String get twoFactorUseCode => 'Use authenticator code';
+
+  @override
+  String get twoFactorUseRecovery => 'Use recovery code';
+
+  @override
+  String get twoFactorVerify => 'Verify';
+
+  @override
+  String get confirm => 'Confirm';
 }

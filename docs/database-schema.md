@@ -14,7 +14,7 @@ Status: audited against all migrations present on 2026-07-22. Migrations are aut
 
 | Table | Important columns | Keys, indexes and lifecycle |
 |---|---|---|
-| `users` | uuid, name, email, phone, password, avatar, verification/login timestamps, status, notification_preferences | unique email/uuid; phone/status indexes; no soft delete |
+| `users` | uuid, name, email, phone, password, avatar, verification/login timestamps, status, notification_preferences, two_factor_secret, two_factor_recovery_codes, two_factor_confirmed_at | unique email/uuid; phone/status indexes; no soft delete; 2FA secret and recovery codes stored encrypted |
 | `families` | uuid, name, slug, description, origin_city, logo, cover_image, privacy, created_by | unique uuid/slug; creator FK restrict; soft delete |
 | `family_user_roles` | uuid, family_id, user_id, role | unique family+user; cascade FKs; role index; timestamps |
 | `family_branches` | uuid, family_id, name, description | unique family+name; cascade family; soft delete |

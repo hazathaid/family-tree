@@ -602,8 +602,7 @@ class MemberDocument {
   }
 }
 
-class DuplicateCandidate {
-  const DuplicateCandidate(
+class DuplicateCandidate {  const DuplicateCandidate(
       {required this.primary,
       required this.duplicate,
       required this.confidence,
@@ -623,6 +622,39 @@ class DuplicateCandidate {
         reasons: (json['reasons'] as List<dynamic>? ?? const [])
             .map((item) => '$item')
             .toList(growable: false),
+      );
+}
+
+class AuthLoginResult {
+  const AuthLoginResult({this.user, this.challengeToken});
+  final User? user;
+  final String? challengeToken;
+  bool get twoFactorRequired => challengeToken != null;
+}
+
+class TwoFactorStatus {
+  const TwoFactorStatus(
+      {required this.enabled,
+      required this.pending,
+      required this.recoveryCodesCount});
+  final bool enabled;
+  final bool pending;
+  final int recoveryCodesCount;
+  factory TwoFactorStatus.fromJson(Map<String, dynamic> json) =>
+      TwoFactorStatus(
+        enabled: json['enabled'] as bool? ?? false,
+        pending: json['pending'] as bool? ?? false,
+        recoveryCodesCount: json['recovery_codes_count'] as int? ?? 0,
+      );
+}
+
+class TwoFactorSetup {
+  const TwoFactorSetup({required this.secret, required this.otpauthUrl});
+  final String secret;
+  final String otpauthUrl;
+  factory TwoFactorSetup.fromJson(Map<String, dynamic> json) => TwoFactorSetup(
+        secret: json['secret'] as String,
+        otpauthUrl: json['otpauth_url'] as String,
       );
 }
 

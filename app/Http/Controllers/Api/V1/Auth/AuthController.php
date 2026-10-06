@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RefreshTokenRequest;
 use App\Http\Requests\Auth\RegisterRequest;
+use App\Http\Requests\Auth\TwoFactorChallengeRequest;
 use App\Http\Resources\UserResource;
 use App\Services\AuthService;
 use Illuminate\Http\JsonResponse;
@@ -35,10 +36,43 @@ class AuthController extends Controller
             $request->string('device_name', 'api')->toString(),
         );
 
+        if ($payload['two_factor_required']) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Two-factor authentication required',
+                'data' => [
+                    'two_factor_required' => true,
+                    'challenge_token' => $payload['challenge_token'],
+                    'user' => new UserResource($payload['user']),
+                ],
+            ]);
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'Login successful',
             'data' => [
+                'two_factor_required' => false,
+                'token' => $payload['token'],
+                'refresh_token' => $payload['refresh_token'],
+                'user' => new UserResource($payload['user']),
+            ],
+        ]);
+    }
+
+    public function twoFactorChallenge(TwoFactorChallengeRequest $request): JsonResponse
+    {
+        $payload = $this->authService->twoFactorChallenge(
+            $request->validated('challenge_token'),
+            $request->validated('code'),
+            $request->validated('recovery_code'),
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Login successful',
+            'data' => [
+                'two_factor_required' => false,
                 'token' => $payload['token'],
                 'refresh_token' => $payload['refresh_token'],
                 'user' => new UserResource($payload['user']),

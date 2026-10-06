@@ -11,4 +11,9 @@ abstract interface class AccountRepository {
       NotificationPreferences value);
   Future<List<AccountSession>> sessions();
   Future<bool> revokeSession(String uuid);
+  Future<TwoFactorStatus> twoFactorStatus();
+  Future<TwoFactorSetup> enableTwoFactor(String currentPassword);
+  Future<List<String>> confirmTwoFactor(String code);
+  Future<void> disableTwoFactor(String currentPassword);
+  Future<List<String>> regenerateRecoveryCodes(String currentPassword);
 }

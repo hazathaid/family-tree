@@ -24,6 +24,8 @@ Authentication, authorization, missing resource, conflict/domain validation, thr
 
 Access tokens are Sanctum bearer tokens with a finite lifetime (`SANCTUM_EXPIRATION`, default 120 minutes). Login returns a single-use refresh token (TTL `SANCTUM_REFRESH_TOKEN_TTL`, default 30 days). `POST /auth/refresh` rotates both: the presented refresh token is revoked, the previous access token is deleted, and a new access/refresh pair is returned. Clients must retry once after a successful refresh and re-authenticate when refresh fails. Refresh tokens are stored hashed and are never returned after issuance.
 
+When a user has confirmed two-factor authentication, `/auth/login` returns `two_factor_required` and a short-lived `challenge_token` instead of tokens. The client completes login through `/auth/two-factor-challenge` using a TOTP code (SHA-1, 6 digits, 30-second period) or a single-use recovery code. The 2FA secret and recovery codes are stored encrypted and are never returned after issuance (except the setup secret and the codes at confirm/regenerate time).
+
 ## Pagination
 
 Laravel paginators serialized through Resource collections place the item list under `data.data` and paginator navigation/count fields alongside it (for example `current_page`, `last_page`, `per_page`, `total`, `links`, `first_page_url`, `last_page_url`, `next_page_url`, `prev_page_url`). Some bounded feeds use `page`/`limit` without a full total. Flutter must parse both documented shapes through a typed adapter and must not infer more pages from item count when explicit metadata exists. Default page size is generally 15; public `limit`/`per_page` is capped at 100 unless stated otherwise.
@@ -38,7 +40,8 @@ Legend: Public means no bearer token; all others require authentication and appl
 |---|---|---|
 | GET `/health` | none | service/dependency status; Public; 200 or 503 |
 | POST `/auth/register` | `name`, `email`, `password`, `password_confirmation`, optional phone | User resource; Public guest |
-| POST `/auth/login` | `email`, `password`, optional device name | `{user,token,refresh_token}`; Public guest; login throttle |
+| POST `/auth/login` | `email`, `password`, optional device name | `{user,token,refresh_token}` or, when 2FA is enabled, `{two_factor_required:true, challenge_token, user}`; Public guest; login throttle |
+| POST `/auth/two-factor-challenge` | `challenge_token` plus `code` or `recovery_code` | `{user,token,refresh_token}`; completes a challenged login; Public; login throttle |
 | POST `/auth/refresh` | `refresh_token`, optional device name | `{user,token,refresh_token}`; rotates the refresh token and revokes the previous access token; Public; 30/min |
 | POST `/auth/logout` | none | revokes current token and its refresh token |
 | GET `/auth/me` | none | User resource |
@@ -56,6 +59,9 @@ Legend: Public means no bearer token; all others require authentication and appl
 | PATCH `/profile/password` | current password, password + confirmation | null |
 | POST `/profile/avatar` | multipart `avatar`, image jpg/jpeg/png/webp <=5 MB | updated User |
 | GET/PUT `/profile/notification-preferences` | PUT requires boolean `email`, `push`, `event_reminders`, `family_updates` | normalized preferences |
+| GET/POST/DELETE `/profile/two-factor` | POST/DELETE require `current_password` | status `{enabled,pending,recovery_codes_count}` / setup `{secret,otpauth_url}` / null |
+| POST `/profile/two-factor/confirm` | `code` (6 digits) | `{recovery_codes[]}`; confirms and enables 2FA |
+| POST `/profile/two-factor/recovery-codes` | `current_password` | `{recovery_codes[]}`; regenerates single-use codes |
 | GET `/profile/sessions` | none | current user's bounded Sanctum device sessions; safe UUID/device/time/current fields only |
 | DELETE `/profile/sessions/{session_uuid}` | public session UUID | `{revoked_current}`; only the authenticated user's token |
 

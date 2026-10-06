@@ -2641,6 +2641,114 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'Tanggal lahir berbeda'**
   String get reasonDifferentBirthDate;
+
+  /// No description provided for @twoFactorTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'Autentikasi dua faktor'**
+  String get twoFactorTitle;
+
+  /// No description provided for @twoFactorEnabled.
+  ///
+  /// In id, this message translates to:
+  /// **'Aktif'**
+  String get twoFactorEnabled;
+
+  /// No description provided for @twoFactorDisabled.
+  ///
+  /// In id, this message translates to:
+  /// **'Tidak aktif'**
+  String get twoFactorDisabled;
+
+  /// No description provided for @twoFactorPending.
+  ///
+  /// In id, this message translates to:
+  /// **'Menunggu konfirmasi'**
+  String get twoFactorPending;
+
+  /// No description provided for @twoFactorEnable.
+  ///
+  /// In id, this message translates to:
+  /// **'Aktifkan 2FA'**
+  String get twoFactorEnable;
+
+  /// No description provided for @twoFactorDisable.
+  ///
+  /// In id, this message translates to:
+  /// **'Nonaktifkan 2FA'**
+  String get twoFactorDisable;
+
+  /// No description provided for @twoFactorConfirm.
+  ///
+  /// In id, this message translates to:
+  /// **'Konfirmasi kode'**
+  String get twoFactorConfirm;
+
+  /// No description provided for @twoFactorSecretHint.
+  ///
+  /// In id, this message translates to:
+  /// **'Tambahkan kunci ini ke aplikasi autentikator Anda, lalu masukkan kode 6 digit.'**
+  String get twoFactorSecretHint;
+
+  /// No description provided for @twoFactorCodeLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'Kode 6 digit'**
+  String get twoFactorCodeLabel;
+
+  /// No description provided for @twoFactorRecoveryCodes.
+  ///
+  /// In id, this message translates to:
+  /// **'Kode pemulihan'**
+  String get twoFactorRecoveryCodes;
+
+  /// No description provided for @twoFactorRecoveryCodesHint.
+  ///
+  /// In id, this message translates to:
+  /// **'Simpan kode ini di tempat aman. Setiap kode hanya dapat dipakai sekali.'**
+  String get twoFactorRecoveryCodesHint;
+
+  /// No description provided for @twoFactorChallengeTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'Verifikasi dua faktor'**
+  String get twoFactorChallengeTitle;
+
+  /// No description provided for @twoFactorChallengePrompt.
+  ///
+  /// In id, this message translates to:
+  /// **'Masukkan kode dari aplikasi autentikator Anda.'**
+  String get twoFactorChallengePrompt;
+
+  /// No description provided for @twoFactorRecoveryLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'Kode pemulihan'**
+  String get twoFactorRecoveryLabel;
+
+  /// No description provided for @twoFactorUseCode.
+  ///
+  /// In id, this message translates to:
+  /// **'Gunakan kode autentikator'**
+  String get twoFactorUseCode;
+
+  /// No description provided for @twoFactorUseRecovery.
+  ///
+  /// In id, this message translates to:
+  /// **'Gunakan kode pemulihan'**
+  String get twoFactorUseRecovery;
+
+  /// No description provided for @twoFactorVerify.
+  ///
+  /// In id, this message translates to:
+  /// **'Verifikasi'**
+  String get twoFactorVerify;
+
+  /// No description provided for @confirm.
+  ///
+  /// In id, this message translates to:
+  /// **'Konfirmasi'**
+  String get confirm;
 }
 
 class _AppLocalizationsDelegate

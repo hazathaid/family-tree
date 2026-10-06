@@ -493,5 +493,25 @@
   "confidenceLow": "Low confidence",
   "reasonSameName": "Same name",
   "reasonSameBirthDate": "Same birth date",
-  "reasonDifferentBirthDate": "Different birth date"
+  "reasonDifferentBirthDate": "Different birth date",
+
+  "twoFactorTitle": "Two-factor authentication",
+  "twoFactorEnabled": "Enabled",
+  "twoFactorDisabled": "Disabled",
+  "twoFactorPending": "Pending confirmation",
+  "twoFactorEnable": "Enable 2FA",
+  "twoFactorDisable": "Disable 2FA",
+  "twoFactorConfirm": "Confirm code",
+  "twoFactorSecretHint": "Add this key to your authenticator app, then enter the 6-digit code.",
+  "twoFactorCodeLabel": "6-digit code",
+  "twoFactorRecoveryCodes": "Recovery codes",
+  "twoFactorRecoveryCodesHint": "Store these codes somewhere safe. Each code can be used once.",
+  "twoFactorChallengeTitle": "Two-factor verification",
+  "twoFactorChallengePrompt": "Enter the code from your authenticator app.",
+  "twoFactorRecoveryLabel": "Recovery code",
+  "twoFactorUseCode": "Use authenticator code",
+  "twoFactorUseRecovery": "Use recovery code",
+  "twoFactorVerify": "Verify",
+  "close": "Close",
+  "confirm": "Confirm"
 }

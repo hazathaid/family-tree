@@ -7,6 +7,7 @@ use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\LogoutRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Services\AuthService;
+use App\Services\TwoFactorService;
 use App\Services\WebOnboardingService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -15,6 +16,7 @@ class AuthController extends Controller
 {
     public function __construct(
         private readonly AuthService $authService,
+        private readonly TwoFactorService $twoFactor,
         private readonly WebOnboardingService $onboarding,
     ) {}
 
@@ -25,7 +27,16 @@ class AuthController extends Controller
 
     public function login(LoginRequest $request): RedirectResponse
     {
-        $user = $this->authService->loginWeb($request->only('email', 'password'), $request->boolean('remember'));
+        $user = $this->authService->webCredentialsUser($request->only('email', 'password'));
+
+        if ($this->twoFactor->isEnabled($user)) {
+            $request->session()->put('two_factor.user_id', $user->id);
+            $request->session()->put('two_factor.remember', $request->boolean('remember'));
+
+            return redirect()->route('two-factor.challenge');
+        }
+
+        $this->authService->startWebSession($user, $request->boolean('remember'));
         $request->session()->regenerate();
 
         return redirect()->intended($user->hasVerifiedEmail() ? $this->onboarding->destinationFor($user) : route('verification.notice'));

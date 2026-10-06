@@ -500,5 +500,25 @@
   "confidenceLow": "Kecocokan rendah",
   "reasonSameName": "Nama sama",
   "reasonSameBirthDate": "Tanggal lahir sama",
-  "reasonDifferentBirthDate": "Tanggal lahir berbeda"
+  "reasonDifferentBirthDate": "Tanggal lahir berbeda",
+
+  "twoFactorTitle": "Autentikasi dua faktor",
+  "twoFactorEnabled": "Aktif",
+  "twoFactorDisabled": "Tidak aktif",
+  "twoFactorPending": "Menunggu konfirmasi",
+  "twoFactorEnable": "Aktifkan 2FA",
+  "twoFactorDisable": "Nonaktifkan 2FA",
+  "twoFactorConfirm": "Konfirmasi kode",
+  "twoFactorSecretHint": "Tambahkan kunci ini ke aplikasi autentikator Anda, lalu masukkan kode 6 digit.",
+  "twoFactorCodeLabel": "Kode 6 digit",
+  "twoFactorRecoveryCodes": "Kode pemulihan",
+  "twoFactorRecoveryCodesHint": "Simpan kode ini di tempat aman. Setiap kode hanya dapat dipakai sekali.",
+  "twoFactorChallengeTitle": "Verifikasi dua faktor",
+  "twoFactorChallengePrompt": "Masukkan kode dari aplikasi autentikator Anda.",
+  "twoFactorRecoveryLabel": "Kode pemulihan",
+  "twoFactorUseCode": "Gunakan kode autentikator",
+  "twoFactorUseRecovery": "Gunakan kode pemulihan",
+  "twoFactorVerify": "Verifikasi",
+  "close": "Tutup",
+  "confirm": "Konfirmasi"
 }

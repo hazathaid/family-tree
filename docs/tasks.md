@@ -674,6 +674,14 @@ Urutan eksekusi yang disarankan:
 - Layar `MemberDuplicatesScreen` menampilkan kandidat dengan chip confidence/alasan dan alur konfirmasi pilih-data-yang-dipertahankan sebelum merge.
 - Deliverable: `mobile/lib/features/members/presentation/member_screens.dart`, `mobile/lib/core/models.dart`, `mobile/test/member_phase4_test.dart`.
 
+## FT-BE-011 — Two-Factor Authentication (TOTP) ✅ Complete (2026-09-30)
+
+- `TotpService` mengimplementasikan RFC 6238 (SHA-1, 6 digit, 30 detik) tanpa dependensi eksternal; `TwoFactorService` menangani enroll/confirm/disable dan kode pemulihan sekali pakai.
+- Secret dan recovery codes disimpan terenkripsi pada kolom `users`; enabling/disabling memerlukan konfirmasi kata sandi saat ini.
+- Login API dan web membalas challenge ketika 2FA aktif; penyelesaian melalui `POST /api/v1/auth/two-factor-challenge` (kode TOTP atau kode pemulihan) dan halaman web `/two-factor-challenge`.
+- Endpoint profil: status/enable/confirm/disable/recovery-codes; Flutter menambah layar challenge dan seksi 2FA di Security.
+- Deliverable: `app/Services/TotpService.php`, `app/Services/TwoFactorService.php`, `app/Http/Controllers/Api/V1/TwoFactorController.php`, `tests/Feature/TwoFactorApiTest.php`, `tests/Feature/WebTwoFactorTest.php`, `mobile/lib/features/auth/two_factor_screen.dart`.
+
 # Recommended Execution Order
 
 Urutan aman adalah:

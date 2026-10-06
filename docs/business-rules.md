@@ -101,6 +101,7 @@ Sources: `NotificationService`, `NotifyFamilyOfUpdate`, `SendBirthdayGreetings`,
 - Form Requests validate every mutation; policies/gates authorize; controllers return safe envelopes.
 - Rate limits include global API throttle plus stricter login, upload/export, comments/likes, RSVP, push and search limits declared in routes.
 - Mobile access tokens expire. Login issues a single-use refresh token that is stored only as a hash, rotated on every refresh, and revoked on logout or when its linked access token is deleted; using a revoked or expired refresh token returns 401.
+- Two-factor authentication (TOTP) is optional and per-user. Enabling and disabling require the current password; the secret and recovery codes are stored encrypted; recovery codes are single-use. When enabled, API and web login require a valid TOTP or recovery code through `/api/v1/auth/two-factor-challenge` or the web challenge page.
 - Passwords/tokens/session payloads and internal exceptions are never returned or logged.
 
 ## Known rule/code discrepancies
