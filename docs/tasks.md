@@ -661,6 +661,12 @@ Urutan eksekusi yang disarankan:
 - Klien Flutter menyimpan refresh token di secure storage dan mencoba satu kali refresh saat 401 sebelum re-login.
 - Deliverable: `database/migrations/2026_09_30_000200_create_refresh_tokens_table.php`, `app/Services/RefreshTokenService.php`, `tests/Feature/RefreshTokenApiTest.php`, `mobile/test/refresh_token_test.dart`.
 
+## FT-BE-010 — Observability and Housekeeping Hardening ✅ Complete (2026-09-30)
+
+- `config/sentry.php` mendeklarasikan DSN/environment/release/sample-rate dari env dan memaksa `send_default_pii=false`; sisanya memakai default sentry-laravel.
+- Command `refresh-tokens:prune` menghapus refresh token kedaluwarsa dan yang sudah lama dicabut, dijadwalkan harian (`03:00`, tanpa tumpang tindih).
+- Deliverable: `config/sentry.php`, `app/Console/Commands/PruneRefreshTokensCommand.php`, `tests/Feature/PruneRefreshTokensCommandTest.php`.
+
 # Recommended Execution Order
 
 Urutan aman adalah:

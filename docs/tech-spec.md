@@ -66,7 +66,7 @@ Cache only safe read models with user+family+endpoint/query keys, TTL and a boun
 
 ## Safe logging and observability
 
-Structured logs use correlation/request IDs, environment, operation and sanitized status/duration. Redact authorization/cookies/passwords/tokens, email/phone, request bodies, media URLs and relationship biographies. Production crash reporting samples breadcrumbs without PII. Laravel Horizon/Telescope are access-controlled and Telescope is disabled or tightly gated in production.
+Structured logs use correlation/request IDs, environment, operation and sanitized status/duration. Redact authorization/cookies/passwords/tokens, email/phone, request bodies, media URLs and relationship biographies. Production crash reporting samples breadcrumbs without PII. `config/sentry.php` forces `send_default_pii=false` and reads DSN/environment/release/sample rates from the environment. Laravel Horizon/Telescope are access-controlled and Telescope is disabled or tightly gated in production.
 
 ## CI/CD quality gates
 
