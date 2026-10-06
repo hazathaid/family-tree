@@ -146,12 +146,26 @@ class _TreeScreenState extends ConsumerState<TreeScreen> {
       exportProgress = 0;
     });
     try {
-      final bytes = await ref.read(treeRepositoryProvider).export(
-          format, root!.uuid,
-          mode: mode,
-          depth: depth,
-          layout: layout,
-          paperSize: 'A4',
+      final repo = ref.read(treeRepositoryProvider);
+      var job = await repo.requestExport(root!.uuid,
+          format: format, mode: mode, depth: depth, layout: layout, paperSize: 'A4');
+      final deadline = DateTime.now().add(const Duration(seconds: 60));
+      while (!job.isCompleted &&
+          !job.isFailed &&
+          !cancellation.isCancelled &&
+          DateTime.now().isBefore(deadline)) {
+        await Future<void>.delayed(const Duration(milliseconds: 1500));
+        if (!mounted || cancellation.isCancelled) return;
+        job = await repo.exportStatus(job.uuid);
+      }
+      if (job.isFailed) {
+        throw const AppError(AppErrorType.server, 'Ekspor bagan gagal.');
+      }
+      if (!job.isCompleted) {
+        throw const AppError(
+            AppErrorType.timeout, 'Ekspor memakan waktu terlalu lama.');
+      }
+      final bytes = await repo.downloadExport(job.uuid,
           cancelToken: cancellation, onProgress: (received, total) {
         if (mounted && total > 0) {
           setState(() => exportProgress = received / total);

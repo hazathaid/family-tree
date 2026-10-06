@@ -658,3 +658,31 @@ class TwoFactorSetup {
       );
 }
 
+class TreeExportJob {
+  const TreeExportJob(
+      {required this.uuid,
+      required this.status,
+      required this.format,
+      this.downloadUrl,
+      this.error,
+      this.createdAt});
+  final String uuid;
+  final String status;
+  final String format;
+  final String? downloadUrl;
+  final String? error;
+  final DateTime? createdAt;
+
+  bool get isCompleted => status == 'completed';
+  bool get isFailed => status == 'failed';
+
+  factory TreeExportJob.fromJson(Map<String, dynamic> json) => TreeExportJob(
+        uuid: json['uuid'] as String,
+        status: json['status'] as String,
+        format: json['format'] as String,
+        downloadUrl: json['download_url'] as String?,
+        error: json['error'] as String?,
+        createdAt: DateTime.tryParse(json['created_at'] as String? ?? ''),
+      );
+}
+

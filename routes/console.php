@@ -12,6 +12,7 @@ Artisan::command('family-tree:about', function (): void {
 Schedule::job(new SendEventReminders)->hourly()->withoutOverlapping();
 Schedule::job(new SendBirthdayGreetings)->dailyAt('07:00')->withoutOverlapping();
 Schedule::command('refresh-tokens:prune')->dailyAt('03:00')->withoutOverlapping();
+Schedule::command('tree-exports:prune')->dailyAt('03:30')->withoutOverlapping();
 Schedule::command('backup:run --only-db')->dailyAt('01:00')->withoutOverlapping();
 Schedule::command('backup:clean')->dailyAt('02:00')->withoutOverlapping();
 Schedule::command('backup:monitor')->hourly()->withoutOverlapping();

@@ -682,6 +682,13 @@ Urutan eksekusi yang disarankan:
 - Endpoint profil: status/enable/confirm/disable/recovery-codes; Flutter menambah layar challenge dan seksi 2FA di Security.
 - Deliverable: `app/Services/TotpService.php`, `app/Services/TwoFactorService.php`, `app/Http/Controllers/Api/V1/TwoFactorController.php`, `tests/Feature/TwoFactorApiTest.php`, `tests/Feature/WebTwoFactorTest.php`, `mobile/lib/features/auth/two_factor_screen.dart`.
 
+## FT-BE-012 — Asynchronous Tree Export ✅ Complete (2026-09-30)
+
+- `POST /api/v1/tree/exports` mengantre ekspor PNG/PDF melalui job `GenerateTreeExport`; status dipantau via `GET /api/v1/tree/exports/{tree_export}` dan file diunduh lewat endpoint download terautentikasi.
+- File disimpan di disk privat `local`, kedaluwarsa 7 hari, dan dibersihkan oleh command terjadwal `tree-exports:prune`.
+- Endpoint sinkron lama tetap dipertahankan untuk kompatibilitas; Flutter memakai alur antrean dengan polling di layar tree.
+- Deliverable: `database/migrations/2026_09_30_000400_create_tree_exports_table.php`, `app/Services/TreeExportService.php`, `app/Jobs/GenerateTreeExport.php`, `app/Http/Controllers/Api/V1/TreeExportJobController.php`, `tests/Feature/TreeExportApiTest.php`.
+
 # Recommended Execution Order
 
 Urutan aman adalah:

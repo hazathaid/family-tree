@@ -120,7 +120,7 @@ Coverage is enforced, not just reported: `composer test:coverage` writes `covera
 - Two-factor authentication uses `TotpService` (RFC 6238 SHA-1, no external dependency) and `TwoFactorService`; the secret/recovery codes are held in encrypted user columns, and both API and web logins are challenged when enabled.
 - Firebase native configuration is absent and must remain environment-specific.
 - Existing prototype stores the token in memory and has ad-hoc navigation; it is not the target architecture.
-- Tree exports execute synchronously despite historical docs recommending queues; preserve actual API until an approved change.
+- Tree exports are available both synchronously (legacy) and through a queued `tree_exports` flow that renders in a job, stores the file privately, and is polled/downloaded by clients.
 
 ## Phase 9 release audit
 

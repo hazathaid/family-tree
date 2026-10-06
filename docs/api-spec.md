@@ -138,6 +138,11 @@ Islam, `†` for Christian/Catholic, and `Mendiang` otherwise.
 | GET `/tree/generate` | `member_uuid`; mode ancestor/descendant/full; depth 1–20; layout vertical/horizontal/radial/compact | Tree resource plus expansion metadata, boundary flags and per-node relationship-to-root |
 | GET `/tree/export/png` | root/mode/depth/layout/paper_size | `image/png` bytes with attachment disposition; 10/min |
 | GET `/tree/export/pdf` | same | `application/pdf` bytes with attachment disposition; 10/min |
+| POST `/tree/exports` | `member_uuid`, `format` png/pdf, optional mode/depth/layout/paper_size | `202` queued `TreeExport` resource; async render; 10/min |
+| GET `/tree/exports/{tree_export}` | none | export status (`pending`/`processing`/`completed`/`failed`) with `download_url` when completed |
+| GET `/tree/exports/{tree_export}/download` | none | authenticated binary attachment when completed; 10/min |
+
+Synchronous `/tree/export/png|pdf` remain for backward compatibility. The queued `/tree/exports` flow renders on the queue, stores the file on the private `local` disk, and is polled via `GET /tree/exports/{tree_export}` until `completed`; files expire after 7 days and are removed by the scheduled `tree-exports:prune`.
 
 Lazy expansion uses `replace_depth`: repeat the same root/mode/layout request with `next_depth`, then atomically replace the graph. Collapse repeats with `previous_depth`. Depth remains bounded at 20. Binary successes are bytes; errors remain safe JSON.
 

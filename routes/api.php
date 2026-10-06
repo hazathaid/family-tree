@@ -38,6 +38,7 @@ use App\Http\Controllers\Api\V1\SearchController;
 use App\Http\Controllers\Api\V1\SystemHealthController;
 use App\Http\Controllers\Api\V1\TimelineController;
 use App\Http\Controllers\Api\V1\TreeExportController;
+use App\Http\Controllers\Api\V1\TreeExportJobController;
 use App\Http\Controllers\Api\V1\TreeRelativeMemberController;
 use App\Http\Controllers\Api\V1\TwoFactorController;
 use Illuminate\Support\Facades\Route;
@@ -114,6 +115,9 @@ Route::prefix('v1')->name('api.')->middleware('throttle:api')->group(function ()
         Route::get('tree/generate', [FamilyTreeController::class, 'generate']);
         Route::get('tree/export/png', [TreeExportController::class, 'png'])->middleware('throttle:10,1');
         Route::get('tree/export/pdf', [TreeExportController::class, 'pdf'])->middleware('throttle:10,1');
+        Route::post('tree/exports', [TreeExportJobController::class, 'store'])->middleware('throttle:10,1');
+        Route::get('tree/exports/{tree_export}', [TreeExportJobController::class, 'show']);
+        Route::get('tree/exports/{tree_export}/download', [TreeExportJobController::class, 'download'])->middleware('throttle:10,1');
 
         Route::apiResource('article-categories', ArticleCategoryController::class);
         Route::post('articles/{article}/publish', [ArticleController::class, 'publish']);

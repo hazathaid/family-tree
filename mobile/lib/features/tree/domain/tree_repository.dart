@@ -16,4 +16,13 @@ abstract interface class TreeRepository {
       required String paperSize,
       CancelToken? cancelToken,
       ProgressCallback? onProgress});
+  Future<TreeExportJob> requestExport(String rootUuid,
+      {required String format,
+      required String mode,
+      required int depth,
+      required String layout,
+      required String paperSize});
+  Future<TreeExportJob> exportStatus(String uuid);
+  Future<Uint8List> downloadExport(String uuid,
+      {CancelToken? cancelToken, ProgressCallback? onProgress});
 }

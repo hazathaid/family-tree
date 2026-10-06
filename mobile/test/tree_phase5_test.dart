@@ -102,6 +102,19 @@ void main() {
     expect(projected, hasLength(TreeRenderPolicy.maxActiveNodes));
     expect(stopwatch.elapsed, lessThan(const Duration(seconds: 1)));
   });
+
+  test('tree export job parses the async status contract', () {
+    final job = TreeExportJob.fromJson({
+      'uuid': 'export-uuid',
+      'status': 'completed',
+      'format': 'png',
+      'download_url': 'https://api.test/api/v1/tree/exports/export-uuid/download',
+    });
+    expect(job.isCompleted, isTrue);
+    expect(job.isFailed, isFalse);
+    expect(job.format, 'png');
+    expect(job.downloadUrl, isNotNull);
+  });
 }
 
 class _Trees implements TreeRepository {
@@ -129,6 +142,21 @@ class _Trees implements TreeRepository {
           required String paperSize,
           CancelToken? cancelToken,
           ProgressCallback? onProgress}) async =>
+      Uint8List.fromList([1, 2, 3]);
+  @override
+  Future<TreeExportJob> requestExport(String rootUuid,
+          {required String format,
+          required String mode,
+          required int depth,
+          required String layout,
+          required String paperSize}) async =>
+      const TreeExportJob(uuid: 'export-uuid', status: 'pending', format: 'pdf');
+  @override
+  Future<TreeExportJob> exportStatus(String uuid) async =>
+      const TreeExportJob(uuid: 'export-uuid', status: 'completed', format: 'pdf');
+  @override
+  Future<Uint8List> downloadExport(String uuid,
+          {CancelToken? cancelToken, ProgressCallback? onProgress}) async =>
       Uint8List.fromList([1, 2, 3]);
 }
 

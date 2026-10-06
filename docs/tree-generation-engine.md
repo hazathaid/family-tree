@@ -60,7 +60,9 @@ FT-API-301 selects repeat-and-replace expansion. Responses include `strategy=rep
 
 ## Export
 
-Authenticated rate-limited endpoints provide PNG and PDF binary downloads. Inputs use the same root/mode/depth plus layout/paper-size options validated by `ExportTreeRequest`. Supported print sizes are A4, A3 and A2 where request/service validation allows. Response must set safe content type/disposition and return bytes, not the JSON envelope. Current PNG/PDF services render synchronously and are relatively simple; historical queued/headless-render recommendations are not the actual contract and require a future task.
+Authenticated rate-limited endpoints provide PNG and PDF binary downloads. Inputs use the same root/mode/depth plus layout/paper-size options validated by `ExportTreeRequest`. Supported print sizes are A4, A3 and A2 where request/service validation allows. Response must set safe content type/disposition and return bytes, not the JSON envelope.
+
+An asynchronous flow is also available through `POST /tree/exports`: the request is queued, the job renders with the same PNG/PDF services and stores the file on the private disk, and clients poll `GET /tree/exports/{tree_export}` until `completed` before downloading. Files expire after seven days and are pruned by the scheduled `tree-exports:prune` command. The synchronous endpoints remain for backward compatibility.
 
 ## Performance and safety boundaries
 
@@ -82,4 +84,4 @@ Tests cover each mode, depth boundaries, root isolation, parent/child/spouse gra
 
 - Broad graphs can still produce large bounded-depth responses; response-size profiling remains required.
 - Ambiguous paths may have a null relationship label and clients display a neutral fallback.
-- Export is synchronous and not production-grade high-resolution headless rendering.
+- Synchronous export still uses a simple renderer; the queued flow improves responsiveness for large trees but both remain non-headless, moderate-resolution rendering.

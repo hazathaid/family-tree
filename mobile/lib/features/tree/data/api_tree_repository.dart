@@ -48,4 +48,31 @@ class ApiTreeRepository implements TreeRepository {
           query: query(rootUuid, mode, depth, layout, paperSize),
           cancelToken: cancelToken,
           onReceiveProgress: onProgress);
+
+  @override
+  Future<TreeExportJob> requestExport(String rootUuid,
+          {required String format,
+          required String mode,
+          required int depth,
+          required String layout,
+          required String paperSize}) async =>
+      TreeExportJob.fromJson(await api.post('/tree/exports', data: {
+        'member_uuid': rootUuid,
+        'format': format,
+        'mode': mode,
+        'depth': depth,
+        'layout': layout,
+        'paper_size': paperSize,
+      }) as Map<String, dynamic>);
+
+  @override
+  Future<TreeExportJob> exportStatus(String uuid) async =>
+      TreeExportJob.fromJson(
+          await api.get('/tree/exports/$uuid') as Map<String, dynamic>);
+
+  @override
+  Future<Uint8List> downloadExport(String uuid,
+          {CancelToken? cancelToken, ProgressCallback? onProgress}) =>
+      api.download('/tree/exports/$uuid/download',
+          cancelToken: cancelToken, onReceiveProgress: onProgress);
 }

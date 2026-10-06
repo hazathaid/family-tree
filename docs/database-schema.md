@@ -23,6 +23,7 @@ Status: audited against all migrations present on 2026-07-22. Migrations are aut
 | `member_relationships` | uuid, family_id, source_member_id, target_member_id, relationship_type, dates, notes | base enum only; composite edge index; all graph FKs cascade; soft delete |
 | `member_relationship_cache` | uuid, family/source/target IDs, relationship_name, relationship_path, is_connected, expires_at | unique lookup triple; expiry and FK indexes; cascade; no soft delete |
 | `member_tree_cache` | uuid, family_id, member_id, mode, depth, tree_json, generated_at, expires_at | unique member+mode+depth; family+expiry index; cascade |
+| `tree_exports` | uuid, family/user/root_member IDs, mode, depth, layout, format, paper_size, status, path, error, completed_at, expires_at | family/time and user/status indexes; expires index; cascade FKs; `path` points to the private `local` disk |
 | `article_categories` | uuid, name, slug, description | globally unique name/slug; soft delete |
 | `articles` | uuid, family/author/category IDs, title, slug, excerpt, content, image, status, feature/publish fields | unique family+slug; family publication/feature indexes; family cascade, author/category restrict; soft delete |
 | `article_comments` | uuid, article_id, user_id, comment | article cascade, user restrict; soft delete |
