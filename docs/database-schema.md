@@ -45,7 +45,7 @@ Status: audited against all migrations present on 2026-07-22. Migrations are aut
 
 ## Framework and operations tables
 
-`password_reset_tokens`, `sessions`, `cache`, `cache_locks`, `jobs`, `job_batches`, `failed_jobs`, Spatie permission tables, and Telescope entry/tag/monitor tables follow vendor conventions. `personal_access_tokens` stores hashed Sanctum tokens and now has a unique public `uuid` used for safe device-session revoke; numeric IDs and token values are never returned. Other framework tables do not require UUID.
+`password_reset_tokens`, `sessions`, `cache`, `cache_locks`, `jobs`, `job_batches`, `failed_jobs`, Spatie permission tables, and Telescope entry/tag/monitor tables follow vendor conventions. `personal_access_tokens` stores hashed Sanctum tokens and now has a unique public `uuid` used for safe device-session revoke; numeric IDs and token values are never returned. `refresh_tokens` stores only a SHA-256 `token_hash` (no raw token), the owning user, the optional linked access token, device name, expiry, and revocation timestamp; tokens are single-use and rotated on every refresh. Other framework tables do not require UUID.
 
 ## Cache semantics
 

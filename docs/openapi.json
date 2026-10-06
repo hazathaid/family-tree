@@ -1781,6 +1781,30 @@
                 ]
             }
         },
+        "/api/v1/auth/refresh": {
+            "post": {
+                "operationId": "api.",
+                "tags": [
+                    "auth"
+                ],
+                "summary": "api.",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "Successful response"
+                    },
+                    "201": {
+                        "description": "Created"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "429": {
+                        "description": "Rate limited"
+                    }
+                }
+            }
+        },
         "/api/v1/auth/register": {
             "post": {
                 "operationId": "api.",

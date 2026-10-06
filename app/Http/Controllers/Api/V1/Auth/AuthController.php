@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Requests\Auth\RefreshTokenRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Resources\UserResource;
 use App\Services\AuthService;
@@ -39,6 +40,25 @@ class AuthController extends Controller
             'message' => 'Login successful',
             'data' => [
                 'token' => $payload['token'],
+                'refresh_token' => $payload['refresh_token'],
+                'user' => new UserResource($payload['user']),
+            ],
+        ]);
+    }
+
+    public function refresh(RefreshTokenRequest $request): JsonResponse
+    {
+        $payload = $this->authService->refresh(
+            $request->validated('refresh_token'),
+            $request->string('device_name', 'api')->toString(),
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Token refreshed',
+            'data' => [
+                'token' => $payload['token'],
+                'refresh_token' => $payload['refresh_token'],
                 'user' => new UserResource($payload['user']),
             ],
         ]);

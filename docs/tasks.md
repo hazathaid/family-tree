@@ -653,6 +653,14 @@ Urutan eksekusi yang disarankan:
 - Activity log `MEMBER_DOCUMENT_UPLOADED`/`MEMBER_DOCUMENT_DELETED`; menutup DB-001 dan paruh kedua BR-I03.
 - Deliverable: `database/migrations/2026_09_30_000100_create_member_documents_table.php`, `app/Services/MemberDocumentService.php`, `tests/Feature/MemberDocumentApiTest.php`, `docs/member-documents.md`.
 
+## FT-BE-009 — Refresh Token Rotation ✅ Complete (2026-09-30)
+
+- Access token Sanctum kini punya masa berlaku (`SANCTUM_EXPIRATION`, default 120 menit); login mengembalikan `token` + `refresh_token`.
+- `POST /api/v1/auth/refresh` merotasi refresh token (single-use): token lama dicabut, access token lama dihapus, dan pasangan baru diterbitkan.
+- Refresh token disimpan hanya sebagai hash SHA-256 dengan TTL (`SANCTUM_REFRESH_TOKEN_TTL`, default 30 hari); token yang dicabut/kedaluwarsa atau akun nonaktif menghasilkan 401. Logout mencabut refresh token terkait.
+- Klien Flutter menyimpan refresh token di secure storage dan mencoba satu kali refresh saat 401 sebelum re-login.
+- Deliverable: `database/migrations/2026_09_30_000200_create_refresh_tokens_table.php`, `app/Services/RefreshTokenService.php`, `tests/Feature/RefreshTokenApiTest.php`, `mobile/test/refresh_token_test.dart`.
+
 # Recommended Execution Order
 
 Urutan aman adalah:

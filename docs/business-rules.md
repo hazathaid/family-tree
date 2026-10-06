@@ -100,6 +100,7 @@ Sources: `NotificationService`, `NotifyFamilyOfUpdate`, `SendBirthdayGreetings`,
 - Critical mutations create activity and/or audit records through their services. Audit records are not user-editable/deletable.
 - Form Requests validate every mutation; policies/gates authorize; controllers return safe envelopes.
 - Rate limits include global API throttle plus stricter login, upload/export, comments/likes, RSVP, push and search limits declared in routes.
+- Mobile access tokens expire. Login issues a single-use refresh token that is stored only as a hash, rotated on every refresh, and revoked on logout or when its linked access token is deleted; using a revoked or expired refresh token returns 401.
 - Passwords/tokens/session payloads and internal exceptions are never returned or logged.
 
 ## Known rule/code discrepancies

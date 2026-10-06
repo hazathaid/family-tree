@@ -16,6 +16,7 @@ class ApiClient {
       Dio? dio,
       Future<void> Function()? onUnauthorized})
       : _dio = dio ?? Dio(),
+        _refreshDio = Dio(),
         _tokenStore = tokenStore ?? MemoryTokenStore(),
         _onUnauthorized = onUnauthorized {
     _dio.options = BaseOptions(
@@ -25,6 +26,13 @@ class ApiClient {
       sendTimeout: const Duration(seconds: 30),
       headers: const {'Accept': 'application/json'},
     );
+    _refreshDio.options = BaseOptions(
+      baseUrl: baseUrl,
+      connectTimeout: const Duration(seconds: 10),
+      receiveTimeout: const Duration(seconds: 30),
+      headers: const {'Accept': 'application/json'},
+    );
+    _refreshDio.httpClientAdapter = _dio.httpClientAdapter;
     _dio.interceptors
         .add(InterceptorsWrapper(onRequest: (options, handler) async {
       final token = await _tokenStore.read();
@@ -36,9 +44,11 @@ class ApiClient {
   }
 
   final Dio _dio;
+  final Dio _refreshDio;
   final TokenStore _tokenStore;
   final Future<void> Function()? _onUnauthorized;
   final Random _random = Random();
+  Future<bool>? _refreshInFlight;
 
   Future<dynamic> get(String path,
           {Map<String, dynamic>? query, CancelToken? cancelToken}) =>
@@ -89,13 +99,49 @@ class ApiClient {
   }
 
   Future<void> saveToken(String token) => _tokenStore.write(token);
+  Future<void> saveRefreshToken(String token) => _tokenStore.writeRefresh(token);
   Future<void> clearToken() => _tokenStore.clear();
   Future<bool> hasToken() async =>
       (await _tokenStore.read())?.isNotEmpty ?? false;
 
+  Future<bool> _refreshOnce() {
+    final inFlight = _refreshInFlight;
+    if (inFlight != null) return inFlight;
+    final future =
+        _performRefresh().whenComplete(() => _refreshInFlight = null);
+    _refreshInFlight = future;
+    return future;
+  }
+
+  Future<bool> _performRefresh() async {
+    final refresh = await _tokenStore.readRefresh();
+    if (refresh == null || refresh.isEmpty) return false;
+    try {
+      final response = await _refreshDio
+          .post<dynamic>('/auth/refresh', data: {'refresh_token': refresh});
+      final body = response.data;
+      if (body is Map<String, dynamic> && body['success'] == true) {
+        final data = body['data'];
+        if (data is Map<String, dynamic>) {
+          final token = data['token'];
+          final newRefresh = data['refresh_token'];
+          if (token is String && newRefresh is String) {
+            await _tokenStore.write(token);
+            await _tokenStore.writeRefresh(newRefresh);
+            return true;
+          }
+        }
+      }
+    } catch (_) {
+      // Refresh failed; fall through to normal unauthorized handling.
+    }
+    return false;
+  }
+
   Future<dynamic> _request(Future<Response<dynamic>> Function() request,
       {bool idempotent = false}) async {
     var attempt = 0;
+    var refreshed = false;
     while (true) {
       try {
         final response = await request();
@@ -109,6 +155,12 @@ class ApiClient {
         }
         return body['data'];
       } on DioException catch (error) {
+        if (error.response?.statusCode == 401 && !refreshed) {
+          refreshed = true;
+          if (await _refreshOnce()) {
+            continue;
+          }
+        }
         final mapped = await _mapDio(error);
         if (!idempotent ||
             attempt >= 2 ||

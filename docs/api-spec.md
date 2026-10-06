@@ -22,6 +22,8 @@ Created resources return 201; deletes commonly return 200 with `data:null`. Vali
 
 Authentication, authorization, missing resource, conflict/domain validation, throttle and server failures use 401, 403, 404, 409/422, 429 and 5xx respectively with the same safe error intent. Internal exception/class/trace/SQL must never appear. Clients must tolerate a missing `errors` object outside validation.
 
+Access tokens are Sanctum bearer tokens with a finite lifetime (`SANCTUM_EXPIRATION`, default 120 minutes). Login returns a single-use refresh token (TTL `SANCTUM_REFRESH_TOKEN_TTL`, default 30 days). `POST /auth/refresh` rotates both: the presented refresh token is revoked, the previous access token is deleted, and a new access/refresh pair is returned. Clients must retry once after a successful refresh and re-authenticate when refresh fails. Refresh tokens are stored hashed and are never returned after issuance.
+
 ## Pagination
 
 Laravel paginators serialized through Resource collections place the item list under `data.data` and paginator navigation/count fields alongside it (for example `current_page`, `last_page`, `per_page`, `total`, `links`, `first_page_url`, `last_page_url`, `next_page_url`, `prev_page_url`). Some bounded feeds use `page`/`limit` without a full total. Flutter must parse both documented shapes through a typed adapter and must not infer more pages from item count when explicit metadata exists. Default page size is generally 15; public `limit`/`per_page` is capped at 100 unless stated otherwise.
@@ -36,8 +38,9 @@ Legend: Public means no bearer token; all others require authentication and appl
 |---|---|---|
 | GET `/health` | none | service/dependency status; Public; 200 or 503 |
 | POST `/auth/register` | `name`, `email`, `password`, `password_confirmation`, optional phone | User resource; Public guest |
-| POST `/auth/login` | `email`, `password`, optional device name | `{user,token}`; Public guest; login throttle |
-| POST `/auth/logout` | none | revokes current token |
+| POST `/auth/login` | `email`, `password`, optional device name | `{user,token,refresh_token}`; Public guest; login throttle |
+| POST `/auth/refresh` | `refresh_token`, optional device name | `{user,token,refresh_token}`; rotates the refresh token and revokes the previous access token; Public; 30/min |
+| POST `/auth/logout` | none | revokes current token and its refresh token |
 | GET `/auth/me` | none | User resource |
 | POST `/auth/forgot-password` | `email` | neutral reset dispatch message; Public guest |
 | POST `/auth/reset-password` | `token`, `email`, password + confirmation | reset result; Public guest |

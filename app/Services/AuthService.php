@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\PersonalAccessToken;
 use App\Models\User;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use Illuminate\Auth\AuthenticationException;
@@ -9,6 +10,7 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Contracts\Auth\StatefulGuard;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
@@ -16,6 +18,7 @@ class AuthService
 {
     public function __construct(
         private readonly UserRepositoryInterface $users,
+        private readonly RefreshTokenService $refreshTokens,
     ) {}
 
     public function register(array $data): User
@@ -51,10 +54,40 @@ class AuthService
 
         $this->users->update($user, ['last_login_at' => now()]);
 
+        $accessToken = $user->createToken($deviceName);
+
         return [
-            'token' => $user->createToken($deviceName)->plainTextToken,
+            'token' => $accessToken->plainTextToken,
+            'refresh_token' => $this->refreshTokens->issue($user, $accessToken->accessToken->getKey(), $deviceName),
             'user' => $user->refresh(),
         ];
+    }
+
+    public function refresh(string $refreshToken, string $deviceName = 'api'): array
+    {
+        $record = $this->refreshTokens->findValid($refreshToken);
+        $user = $record->user;
+
+        if (! $user instanceof User || $user->status !== 'active') {
+            throw new AuthenticationException;
+        }
+
+        return DB::transaction(function () use ($record, $user, $deviceName): array {
+            $previousAccessTokenId = $record->access_token_id;
+            $this->refreshTokens->revoke($record);
+
+            if ($previousAccessTokenId !== null) {
+                PersonalAccessToken::query()->whereKey($previousAccessTokenId)->delete();
+            }
+
+            $accessToken = $user->createToken($deviceName);
+
+            return [
+                'token' => $accessToken->plainTextToken,
+                'refresh_token' => $this->refreshTokens->issue($user, $accessToken->accessToken->getKey(), $deviceName),
+                'user' => $user->refresh(),
+            ];
+        });
     }
 
     public function logout(User $user): void
@@ -63,6 +96,10 @@ class AuthService
 
         if ($token === null) {
             throw new AuthenticationException;
+        }
+
+        if ($token instanceof PersonalAccessToken) {
+            $this->refreshTokens->revokeForAccessToken($token->getKey());
         }
 
         $token->delete();

@@ -23,6 +23,10 @@ class ApiAuthRepository implements AuthRepository {
       'device_name': 'family-tree-mobile'
     }) as Map<String, dynamic>;
     await api.saveToken(data['token'] as String);
+    final refreshToken = data['refresh_token'];
+    if (refreshToken is String && refreshToken.isNotEmpty) {
+      await api.saveRefreshToken(refreshToken);
+    }
     return User.fromJson(data['user'] as Map<String, dynamic>);
   }
 

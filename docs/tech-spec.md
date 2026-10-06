@@ -48,7 +48,7 @@ Development, staging and production each require a distinct API base URL, applic
 - Connect timeout 10 s, receive/send timeout 30 s (uploads/downloads may use an explicit 120 s operation timeout).
 - Retry at most two times with jittered backoff only for idempotent requests and transient network/408/429/5xx responses; honor `Retry-After`. Never automatically retry non-idempotent mutations unless an idempotency contract exists.
 - Cancellation follows disposed screens/search replacement.
-- A 401 clears token and scoped cache, invalidates providers, and routes to login while retaining a safe intended deep link. Current API has no refresh-token endpoint; do not invent refresh semantics.
+- A 401 clears token and scoped cache, invalidates providers, and routes to login while retaining a safe intended deep link. Before clearing, the client attempts a single refresh using the stored refresh token (`POST /auth/refresh`); a successful refresh rotates both tokens and retries the original request once, and a failed refresh falls back to re-login.
 - 403, 404, 422 and 429 map to authorization, not-found, field-validation and rate-limit states; 5xx becomes a generic retryable message.
 - Pagination parsing preserves server metadata and never fetches all pages implicitly.
 
@@ -116,7 +116,7 @@ Coverage is enforced, not just reported: `composer test:coverage` writes `covera
 ## Current gaps
 
 - Phase 7 discovery, reports, and gamification parity is implemented. Phase 8 is closed as not applicable because administration remains intentionally web-only; Flutter has no super-admin navigation/screens and must not call `/api/v1/admin/*`.
-- No refresh-token API; expiry means re-login.
+- Access tokens now expire and are paired with single-use rotating refresh tokens; see the HTTP/session contract.
 - Firebase native configuration is absent and must remain environment-specific.
 - Existing prototype stores the token in memory and has ad-hoc navigation; it is not the target architecture.
 - Tree exports execute synchronously despite historical docs recommending queues; preserve actual API until an approved change.

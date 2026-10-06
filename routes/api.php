@@ -51,6 +51,7 @@ Route::prefix('v1')->name('api.')->middleware('throttle:api')->group(function ()
         Route::post('login', [AuthController::class, 'login'])->middleware(['guest:sanctum', 'throttle:login']);
         Route::post('forgot-password', [ForgotPasswordController::class, 'store'])->middleware('guest:sanctum');
         Route::post('reset-password', [ForgotPasswordController::class, 'reset'])->middleware('guest:sanctum');
+        Route::post('refresh', [AuthController::class, 'refresh'])->middleware('throttle:30,1');
 
         Route::middleware('auth:sanctum')->group(function (): void {
             Route::post('logout', [AuthController::class, 'logout']);
