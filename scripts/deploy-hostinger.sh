@@ -39,6 +39,11 @@ fi
 
 cd "$APP_DIR"
 
+# Resolve the Composer binary to an absolute path so it can be executed by
+# PHP_BIN explicitly. The default PHP CLI on shared hosting may be older than
+# the version required by composer.lock (platform check).
+COMPOSER_CMD="$(command -v "$COMPOSER_BIN" 2>/dev/null || printf '%s' "$COMPOSER_BIN")"
+
 log "Putting the application into maintenance mode"
 "$PHP_BIN" artisan down --retry=60 || true
 
@@ -46,7 +51,7 @@ log "Pulling latest $BRANCH"
 git pull --ff-only origin "$BRANCH"
 
 log "Installing production dependencies"
-"$COMPOSER_BIN" install \
+"$PHP_BIN" "$COMPOSER_CMD" install \
     --no-dev \
     --prefer-dist \
     --no-interaction \
