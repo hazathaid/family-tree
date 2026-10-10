@@ -8,7 +8,7 @@
         @endif
         <a class="navbar-brand family-brand text-wrap" href="{{ route('home') }}">
             <span class="family-brand-mark" aria-hidden="true">FT</span>
-            <span>Rumpun</span>
+            <span>Family Tree</span>
         </a>
         <nav class="ms-auto d-flex align-items-center gap-2" aria-label="Navigasi akun">
             @if ($variant === 'authenticated')
