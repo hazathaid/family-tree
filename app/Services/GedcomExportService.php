@@ -40,7 +40,7 @@ class GedcomExportService
 
         $lines = [
             '0 HEAD',
-            '1 SOUR Family Tree Platform Indonesia',
+            '1 SOUR Silsilahku',
             '1 GEDC',
             '2 VERS '.self::VERSION,
             '2 FORM LINEAGE-LINKED',

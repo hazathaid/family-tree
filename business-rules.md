@@ -1,6 +1,6 @@
 # business-rules.md
 
-Project: Family Tree Platform Indonesia
+Project: Silsilahku
 
 Version: 1.0
 

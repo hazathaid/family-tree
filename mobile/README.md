@@ -1,6 +1,6 @@
-# Family Tree Mobile
+# Silsilahku Mobile
 
-Flutter client untuk Family Tree Platform Indonesia. Laravel tetap menjadi sumber kebenaran untuk validasi, authorization, relationship calculation, tree generation, sanitasi, dan seluruh aturan domain.
+Flutter client untuk Silsilahku. Laravel tetap menjadi sumber kebenaran untuk validasi, authorization, relationship calculation, tree generation, sanitasi, dan seluruh aturan domain.
 
 ## Runtime
 

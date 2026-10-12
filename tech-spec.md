@@ -1,6 +1,6 @@
 # tech-spec.md
 
-Project: Family Tree Platform Indonesia
+Project: Silsilahku
 
 Version: 1.0
 
@@ -8,7 +8,7 @@ Version: 1.0
 
 # System Overview
 
-Family Tree Platform Indonesia adalah platform web dan mobile untuk:
+Silsilahku adalah platform web dan mobile untuk:
 
 * Manajemen silsilah keluarga
 * Relationship Engine

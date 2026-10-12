@@ -32,7 +32,7 @@ The export never computes or stores derived kinship. It maps only the five base 
 
 ```
 0 HEAD
-1 SOUR Family Tree Platform Indonesia
+1 SOUR Silsilahku
 1 GEDC
 2 VERS 5.5.1
 2 FORM LINEAGE-LINKED

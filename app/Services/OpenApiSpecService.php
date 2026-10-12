@@ -39,7 +39,7 @@ class OpenApiSpecService
         return [
             'openapi' => '3.1.0',
             'info' => [
-                'title' => 'Family Tree Platform Indonesia API',
+                'title' => 'Silsilahku API',
                 'version' => '1.0.0',
                 'description' => 'REST contract consumed by the web and Flutter clients. Authoritative field-level documentation lives in docs/api-spec.md.',
             ],

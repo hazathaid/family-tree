@@ -16,7 +16,7 @@ void main() {
       child: const FamilyTreeApp(),
     ));
     await tester.pumpAndSettle();
-    expect(find.text('Family Tree Indonesia'), findsOneWidget);
+    expect(find.text('Silsilahku'), findsOneWidget);
     expect(find.text('Masuk'), findsOneWidget);
   });
 }
@@ -25,5 +25,5 @@ class FamilyTreeAppTestLogin extends StatelessWidget {
   const FamilyTreeAppTestLogin({super.key});
   @override
   Widget build(BuildContext context) => const Scaffold(
-      body: Column(children: [Text('Family Tree Indonesia'), Text('Masuk')]));
+      body: Column(children: [Text('Silsilahku'), Text('Masuk')]));
 }

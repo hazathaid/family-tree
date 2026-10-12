@@ -1,8 +1,8 @@
-# PRD - Family Tree Platform Indonesia
+# PRD - Silsilahku
 
 Version: 1.0
 
-Project Name: Family Tree Platform Indonesia
+Project Name: Silsilahku
 
 Product Type:
 Web Application + Mobile Application
@@ -14,7 +14,7 @@ Indonesia
 
 # 1. Executive Summary
 
-Family Tree Platform Indonesia adalah platform digital untuk mengelola silsilah keluarga, mendokumentasikan sejarah keluarga, menyimpan foto keluarga lintas generasi, mengelola acara keluarga, menerbitkan artikel keluarga, dan menghasilkan bagan silsilah keluarga secara otomatis.
+Silsilahku adalah platform digital untuk mengelola silsilah keluarga, mendokumentasikan sejarah keluarga, menyimpan foto keluarga lintas generasi, mengelola acara keluarga, menerbitkan artikel keluarga, dan menghasilkan bagan silsilah keluarga secara otomatis.
 
 Platform ini tidak hanya berfungsi sebagai aplikasi silsilah keluarga tetapi juga sebagai pusat aktivitas keluarga digital agar pengguna terus aktif menggunakan platform.
 

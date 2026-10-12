@@ -2,7 +2,7 @@
 
 Version: 1.0
 
-Project: Family Tree Platform Indonesia
+Project: Silsilahku
 
 ---
 

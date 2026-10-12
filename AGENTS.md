@@ -1,10 +1,10 @@
 # AGENTS.md
 
-# Family Tree Platform Indonesia
+# Silsilahku
 
 ## Project Overview
 
-Family Tree Platform Indonesia adalah platform Web dan Mobile untuk:
+Silsilahku adalah platform Web dan Mobile untuk:
 
 * Manajemen silsilah keluarga
 * Dokumentasi sejarah keluarga

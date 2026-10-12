@@ -2,7 +2,7 @@
 @php
     $items = [
         ['label' => 'Dashboard', 'route' => 'dashboard', 'pattern' => 'dashboard'],
-        ['label' => 'Family Tree', 'route' => 'tree.index', 'pattern' => 'tree.*'],
+        ['label' => 'Silsilah', 'route' => 'tree.index', 'pattern' => 'tree.*'],
         ['label' => 'Anggota', 'route' => 'members.index', 'pattern' => 'members.*'],
         ['label' => 'Artikel', 'route' => 'articles.index', 'pattern' => 'articles.*'],
         ['label' => 'Foto', 'route' => 'photos.index', 'pattern' => 'photos.*'],

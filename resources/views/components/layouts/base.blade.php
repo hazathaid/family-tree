@@ -9,7 +9,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="{{ $description }}">
-    <title>{{ $title ? $title.' | ' : '' }}Family Tree Platform Indonesia</title>
+    <title>{{ $title ? $title.' | ' : '' }}Silsilahku</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="{{ $bodyClass }}">

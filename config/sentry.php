@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sentry configuration overrides for the Family Tree Platform.
+ * Sentry configuration overrides for Silsilahku.
  *
  * Only the security- and environment-relevant keys are declared here; the
  * remaining options fall back to the sentry-laravel package defaults via

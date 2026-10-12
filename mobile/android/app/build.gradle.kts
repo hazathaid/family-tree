@@ -32,17 +32,17 @@ android {
             dimension = "environment"
             applicationIdSuffix = ".dev"
             versionNameSuffix = "-dev"
-            resValue("string", "app_name", "Family Tree Dev")
+            resValue("string", "app_name", "Silsilahku Dev")
         }
         create("staging") {
             dimension = "environment"
             applicationIdSuffix = ".staging"
             versionNameSuffix = "-staging"
-            resValue("string", "app_name", "Family Tree Staging")
+            resValue("string", "app_name", "Silsilahku Staging")
         }
         create("production") {
             dimension = "environment"
-            resValue("string", "app_name", "Family Tree Indonesia")
+            resValue("string", "app_name", "Silsilahku")
         }
     }
 

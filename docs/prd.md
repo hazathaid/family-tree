@@ -5,7 +5,7 @@ Source of truth: source code through web Phase 17, migrations through `2026_07_2
 
 ## Product outcome
 
-Family Tree Platform Indonesia preserves family identity, history, media, events, and kinship in a family-isolated web and mobile product. Capability parity means a user can complete the same supported outcome on mobile and web; mobile navigation and layout may be native and must not copy Blade screens pixel-for-pixel. Laravel remains authoritative for validation, authorization, relationship calculation, tree generation, sanitization, and all domain rules.
+Silsilahku preserves family identity, history, media, events, and kinship in a family-isolated web and mobile product. Capability parity means a user can complete the same supported outcome on mobile and web; mobile navigation and layout may be native and must not copy Blade screens pixel-for-pixel. Laravel remains authoritative for validation, authorization, relationship calculation, tree generation, sanitization, and all domain rules.
 
 ## Personas and roles
 

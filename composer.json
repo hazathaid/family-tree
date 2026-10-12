@@ -1,7 +1,7 @@
 {
     "name": "family-tree/platform-indonesia",
     "type": "project",
-    "description": "Family Tree Platform Indonesia",
+    "description": "Silsilahku",
     "license": "proprietary",
     "require": {
         "php": "^8.3",

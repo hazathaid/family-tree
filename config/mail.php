@@ -26,6 +26,6 @@ return [
     ],
     'from' => [
         'address' => env('MAIL_FROM_ADDRESS', 'noreply@example.com'),
-        'name' => env('MAIL_FROM_NAME', 'Family Tree Platform Indonesia'),
+        'name' => env('MAIL_FROM_NAME', 'Silsilahku'),
     ],
 ];

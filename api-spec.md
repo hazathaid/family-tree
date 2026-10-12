@@ -1,6 +1,6 @@
 # API Specification
 
-Project: Family Tree Platform Indonesia
+Project: Silsilahku
 
 Version: 1.0
 

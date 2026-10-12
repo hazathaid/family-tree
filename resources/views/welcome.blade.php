@@ -1,4 +1,4 @@
-<x-layouts.public title="Family Tree Platform Indonesia">
+<x-layouts.public title="Silsilahku">
     <section class="welcome-hero" aria-labelledby="foundation-title">
         <div class="container position-relative">
             <div class="row align-items-center g-5">
