@@ -1,7 +1,10 @@
 # Design: Cross-Family Link
 
-Status: proposed / backlog (2026-10-13). Phase 1 (`XF-001`, data model + consent workflow +
-service + policy + audit) is implemented; later phases are not. No HTTP surface yet.
+Status: implemented web v1 (2026-10-13). Phase 1 (`XF-001`, data model + consent workflow +
+service + policy + audit), Phase 2 (`XF-002`, cross-family resolver), Phase 3 (`XF-003`,
+read-only redacted linked tree) and Phase 4 (`XF-004`, web surface) are implemented.
+Read-only across the link; there is no REST/mobile surface yet, and pre-marriage grants
+(Phase 5) remain backlog.
 
 ## Problem
 
@@ -245,15 +248,17 @@ Still open:
   - `XF-001` — `family_links` migration (incl. `children_home_family_id`) + model +
     `FamilyLinkService` + two-party approval + policy + audit logging. HTTP surface deferred
     to Phase 4.
-- **Phase 2 — Cross-family resolution**
-  - `XF-002` — `CrossFamilyRelationshipResolverService` (BFS across links) + relationship
-    isolation rule update + tests (`>=95%` engine coverage).
-- **Phase 3 — Multi-family tree**
-  - `XF-003` — `TreeGraphBuilderService` linked mode + bridge/child-home handling +
-    link-versioned cache + redaction.
-- **Phase 4 — Web surface**
-  - `XF-004` — read-only partner-tree pages, link request/approve/revoke UI, throttle +
-    noindex.
+- **Phase 2 — Cross-family resolution** ✅ Implemented (2026-10-13)
+  - `XF-002` — `CrossFamilyRelationshipResolverService` (BFS across links); the single-family
+    traversal/resolver services are left untouched for engine containment.
+- **Phase 3 — Linked tree + redaction** ✅ Implemented (2026-10-13)
+  - `XF-003` — `LinkedFamilyTreeService` reuses `TreePresentationService` and redacts living
+    members (anchor excepted); link lifecycle invalidates relationship/tree caches.
+- **Phase 4 — Web surface** ✅ Implemented (2026-10-13)
+  - `XF-004` — `/family-links` request/search/approve/revoke and read-only
+    `/family-links/{link}/partner-tree`, throttle `family-link` + `noindex`. The tree
+    "add spouse" modal links into this page. Requesters may only target members of families
+    they can access; approval still requires owner/admin of the linked family.
 - **Phase 5 — Pre-marriage view**
   - `PRV-001..004` — consented, time-bound read-only subset (see
     `pre-marriage-cross-family-view.md`).

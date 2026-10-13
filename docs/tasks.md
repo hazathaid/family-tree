@@ -748,24 +748,41 @@ dua pihak + redaksi anggota hidup, dan anak tinggal di satu `children_home_famil
   `database/factories/FamilyLinkFactory.php`, `tests/Unit/FamilyLinkServiceTest.php`,
   `tests/Feature/FamilyLinkPolicyTest.php`.
 
-## XF-002 — Cross-Family Relationship Resolver (Fase 2)
+## XF-002 — Cross-Family Relationship Resolver (Fase 2) ✅ Complete (2026-10-13)
 
-- `CrossFamilyRelationshipResolverService`: BFS lintas-keluarga melewati link aktif sebagai
-  edge `spouse`, label tetap dari `RelationshipResolverService::nameFromPath`.
-- Update aturan isolasi: cross-family denial menjadi "denial kecuali tertaut".
-- Deliverable: service + tests (coverage engine >=95%).
+- `CrossFamilyRelationshipResolverService`: BFS gabungan edge keluarga + link aktif sebagai
+  edge `spouse`; label tetap dari `RelationshipResolverService::nameFromPath`.
+- `RelationshipTraversalService`/`RelationshipResolverService` tidak diubah (engine
+  containment); resolusi lintas-keluarga hanya lewat service baru ini.
+- Deliverable: `app/Services/CrossFamilyRelationshipResolverService.php`,
+  `tests/Unit/CrossFamilyRelationshipResolverServiceTest.php`.
 
-## XF-003 — Tree Builder Multi-Keluarga + Redaksi (Fase 3)
+## XF-003 — Tree Multi-Keluarga + Redaksi (Fase 3) ✅ Complete (2026-10-13)
 
-- Mode linked pada `TreeGraphBuilderService` (bridge node + `children_home_family_id` +
-  boundary), cache berversi link, redaksi anggota hidup lintas-keluarga.
-- Deliverable: service + cache + tests.
+- `LinkedFamilyTreeService`: menyajikan silsilah keluarga tertaut baca-saja dengan memakai
+  ulang `TreePresentationService`, lalu meredaksi anggota hidup (placeholder "Anggota Hidup" +
+  PII/detail dihapus) kecuali anchor dan menandai node bridge.
+- Cache: graph dasar boleh memakai `member_tree_cache`, tetapi proyeksi merah selalu
+  diterapkan sebelum keluar; payload mentah tidak pernah diekspos ke pemirsa lintas link.
+- Commit: `app/Services/TreeCacheService`, `app/Services/RelationshipCacheService`,
+  `app/Services/LinkedFamilyTreeService.php`, `tests/Unit/LinkedFamilyTreeServiceTest.php`.
 
-## XF-004 — Cross-Family Link: Surface Web (Fase 4)
+## XF-004 — Cross-Family Link: Surface Web (Fase 4) ✅ Complete (2026-10-13)
 
-- Route/controller/view web read-only untuk silsilah pasangan, UI request/approve/revoke link,
-  throttle + `noindex`.
-- Deliverable: controllers, views, limiter, tests.
+- Route web read-only: `GET /family-links` (ajukan + cari pasangan), `POST /family-links`
+  (request), `POST /family-links/{link}/approve`, `POST /family-links/{link}/revoke`, dan
+  `GET /family-links/{link}/partner-tree` (silsilah pasangan baca-saja) dengan limiter
+  `family-link` + header `X-Robots-Tag: noindex, nofollow`.
+- Modal "Tambah pasangan" pada tree menautkan ke halaman tautan (prefill `member` dari node).
+- `FamilyLinkPolicy` menjadi authorization; pengaju owner/admin keluarga anggota dan hanya
+  dapat memilih target pada keluarga yang ia punya akses (mencegah probing), sedangkan
+  approve tetap wajib owner/admin keluarga tertaut.
+- Request/approve/revoke menginvalidasi cache relationship + tree kedua keluarga melalui
+  `FamilyLinkService`.
+- Deliverable: `app/Http/Controllers/Web/FamilyLinkController.php`,
+  `app/Http/Requests/Web/StoreFamilyLinkRequest.php`, `resources/views/family-links/index.blade.php`,
+  `resources/views/family-links/partner-tree.blade.php`, `resources/js/app.js`,
+  `tests/Feature/WebFamilyLinkTest.php`.
 
 ## XF-005 — Cross-Family Link: Dokumentasi dan Tests (Fase 6)
 

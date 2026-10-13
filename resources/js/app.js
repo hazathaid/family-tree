@@ -18,6 +18,8 @@ if (viewer && dataElement) {
     const detail = drawerElement.querySelector('[data-tree-detail]');
     const relativeModalElement = document.querySelector('#tree-relative-modal');
     const relativeForm = relativeModalElement?.querySelector('[data-tree-relative-form]');
+    const spouseHint = relativeModalElement?.querySelector('[data-tree-relative-spouse-hint]');
+    const readonly = viewer.dataset.readonly === 'true';
     const nodes = new Map(tree.nodes.map((node) => [node.uuid, node]));
     let scale = 1;
     let offsetX = 0;
@@ -46,6 +48,14 @@ if (viewer && dataElement) {
         relativeForm.querySelector('[data-tree-relative-relation]').value = relation;
         relativeModalElement.querySelector('#tree-relative-modal-title').textContent = `Tambah ${labels[relation]} untuk ${node.name}`;
         relativeModalElement.querySelector('[data-tree-relative-description]').textContent = `Anggota baru akan langsung dihubungkan sebagai ${labels[relation]} dari ${node.name}.`;
+        if (spouseHint) {
+            const isSpouse = relation === 'spouse';
+            spouseHint.classList.toggle('d-none', !isSpouse);
+            const link = spouseHint.querySelector('[data-tree-relative-link-hint]');
+            if (link && relativeModalElement.dataset.familyLinkUrlTemplate) {
+                link.href = relativeModalElement.dataset.familyLinkUrlTemplate.replace('__member__', encodeURIComponent(node.uuid));
+            }
+        }
         Offcanvas.getInstance(drawerElement)?.hide();
         Modal.getOrCreateInstance(relativeModalElement).show();
     };
@@ -69,7 +79,8 @@ if (viewer && dataElement) {
         button.innerHTML = `<span class="d-flex gap-2 align-items-center">${photo(node)}<span class="min-width-0"><strong class="d-block text-truncate">${memorialPrefix(node)}${escape(node.name)}</strong>${node.nickname ? `<span class="tree-nickname d-block text-body-secondary text-truncate">(${escape(node.nickname)})</span>` : ''}<small>${escape(node.birth_year ?? '?')}${node.is_alive ? '–sekarang' : `–${escape(node.death_year ?? '?')}`}</small>${node.relationship_label ? `<span class="tree-relationship d-block text-primary">${escape(node.relationship_label)}</span>` : ''}</span></span>`;
         button.addEventListener('click', () => {
             const relativeActions = node.can_add_relative ? `<div class="mt-3"><p class="small text-body-secondary mb-2">Tambah dari anggota ini</p><div class="d-flex flex-wrap gap-2"><button class="btn btn-outline-primary btn-sm" type="button" data-relative-action="parent">Tambah orang tua</button><button class="btn btn-outline-primary btn-sm" type="button" data-relative-action="spouse">Tambah pasangan</button><button class="btn btn-outline-primary btn-sm" type="button" data-relative-action="child">Tambah anak</button></div></div>` : '';
-            detail.innerHTML = `<div class="text-center mb-3">${photo(node)}<h3 class="h5 mt-2">${memorialPrefix(node)}${escape(node.name)}</h3><p class="text-primary">${escape(node.relationship_label ?? 'Hubungan belum dikenali')}</p></div><dl><dt>Pekerjaan</dt><dd>${escape(node.occupation || 'Belum diisi')}</dd><dt>Pendidikan</dt><dd>${escape(node.education || 'Belum diisi')}</dd><dt>Biografi</dt><dd>${escape(node.biography || 'Belum ada biografi.')}</dd></dl><a class="btn btn-primary" href="/members/${encodeURIComponent(node.uuid)}">Lihat profil lengkap</a>${relativeActions}`;
+            const profileLink = readonly ? '' : `<a class="btn btn-primary" href="/members/${encodeURIComponent(node.uuid)}">Lihat profil lengkap</a>`;
+            detail.innerHTML = `<div class="text-center mb-3">${photo(node)}<h3 class="h5 mt-2">${memorialPrefix(node)}${escape(node.name)}</h3><p class="text-primary">${escape(node.relationship_label ?? 'Hubungan belum dikenali')}</p></div><dl><dt>Pekerjaan</dt><dd>${escape(node.occupation || 'Belum diisi')}</dd><dt>Pendidikan</dt><dd>${escape(node.education || 'Belum diisi')}</dd><dt>Biografi</dt><dd>${escape(node.biography || 'Belum ada biografi.')}</dd></dl>${profileLink}${relativeActions}`;
             detail.querySelectorAll('[data-relative-action]').forEach((action) => action.addEventListener('click', () => openRelativeForm(node, action.dataset.relativeAction)));
             Offcanvas.getOrCreateInstance(drawerElement).show();
         });

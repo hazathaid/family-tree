@@ -67,6 +67,8 @@ Target relationship resolution is <500 ms for a family of up to 100,000 members.
 
 Unit/feature coverage must include Ayah, Ibu, Kakek, Nenek, Pakde, Bude, Om, Tante, Sepupu, Keponakan, Menantu, Mertua, Buyut and Cicit; self, spouse, sibling, disconnected, cross-family denial, duplicate parent, self-edge, cycle rejection, inverse spouse, cache hit/expiry/invalidation are also required. Relationship engine coverage target is >=95%.
 
+Cross-family isolation is "denial unless connected by an active `family_links` row". The single-family `RelationshipTraversalService`/`RelationshipResolverService` remain unchanged (engine containment); cross-family resolution is opt-in through `CrossFamilyRelationshipResolverService`, which BFS over family-scoped edges plus active links treated as `spouse` bridges and reuses `RelationshipResolverService::nameFromPath` for labels. Pending/revoked/expired links never connect. No derived relationship is persisted.
+
 ## Known alignment issues
 
 - GET `/api/v1/relationship-engine` accepts `source_member_uuid` and `target_member_uuid`; FT-MOB-305 aligns the Form Request, controller, feature tests and Flutter repository on this public contract.

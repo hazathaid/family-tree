@@ -29,6 +29,10 @@ interface FamilyMemberRepositoryInterface
      */
     public function allForFamily(Family $family): Collection;
 
+    public function candidateMembersForFamily(Family $family, int $limit = 500): Collection;
+
+    public function searchMembersInUserFamilies(User $user, Family $excludeFamily, string $term, int $limit = 25): Collection;
+
     /**
      * @return iterable<int, FamilyMember>
      */

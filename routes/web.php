@@ -6,6 +6,7 @@ use App\Http\Controllers\Web\AuthController;
 use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\EmailVerificationController;
 use App\Http\Controllers\Web\EventController;
+use App\Http\Controllers\Web\FamilyLinkController;
 use App\Http\Controllers\Web\FamilySettingsController;
 use App\Http\Controllers\Web\FamilyTreeController;
 use App\Http\Controllers\Web\MemberAccountInvitationController;
@@ -71,6 +72,11 @@ Route::middleware('auth')->group(function (): void {
             Route::get('/dashboard', DashboardController::class)->name('dashboard');
             Route::get('/tree', FamilyTreeController::class)->name('tree.index');
             Route::post('/tree/members/{member}/relatives', [TreeRelativeMemberController::class, 'store'])->name('tree.relatives.store');
+            Route::get('/family-links', [FamilyLinkController::class, 'index'])->name('family-links.index')->middleware('throttle:family-link');
+            Route::post('/family-links', [FamilyLinkController::class, 'store'])->name('family-links.store')->middleware('throttle:family-link');
+            Route::post('/family-links/{link}/approve', [FamilyLinkController::class, 'approve'])->name('family-links.approve')->middleware('throttle:family-link');
+            Route::post('/family-links/{link}/revoke', [FamilyLinkController::class, 'revoke'])->name('family-links.revoke')->middleware('throttle:family-link');
+            Route::get('/family-links/{link}/partner-tree', [FamilyLinkController::class, 'partnerTree'])->name('family-links.partner-tree')->middleware('throttle:family-link');
             Route::get('/search', SearchController::class)->middleware('throttle:60,1')->name('search.index');
             Route::get('/reports', ReportController::class)->name('reports.index');
 

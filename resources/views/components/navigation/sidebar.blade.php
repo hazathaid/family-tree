@@ -10,6 +10,7 @@
         ['label' => 'Timeline', 'route' => 'timeline.index', 'pattern' => 'timeline.*'],
         ['label' => 'Pencarian', 'route' => 'search.index', 'pattern' => 'search.*'],
         ['label' => 'Laporan', 'route' => 'reports.index', 'pattern' => 'reports.*'],
+        ['label' => 'Tautan Keluarga', 'route' => 'family-links.index', 'pattern' => 'family-links.*'],
         ['label' => 'Profil Saya', 'route' => 'profile.show', 'pattern' => 'profile.*'],
         ['label' => 'Pengaturan', 'route' => 'settings.index', 'pattern' => 'settings.*'],
     ];

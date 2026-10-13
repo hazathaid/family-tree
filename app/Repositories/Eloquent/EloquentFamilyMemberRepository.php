@@ -83,6 +83,30 @@ class EloquentFamilyMemberRepository implements FamilyMemberRepositoryInterface
             ->get();
     }
 
+    public function candidateMembersForFamily(Family $family, int $limit = 500): Collection
+    {
+        return FamilyMember::query()
+            ->where('family_id', $family->id)
+            ->orderBy('full_name')
+            ->limit($limit)
+            ->get();
+    }
+
+    public function searchMembersInUserFamilies(User $user, Family $excludeFamily, string $term, int $limit = 25): Collection
+    {
+        return FamilyMember::query()
+            ->with('family')
+            ->where('family_id', '!=', $excludeFamily->id)
+            ->whereHas('family.userRoles', fn (Builder $query) => $query->where('user_id', $user->id))
+            ->where(function (Builder $query) use ($term): void {
+                $query->where('full_name', 'like', '%'.$term.'%')
+                    ->orWhere('nickname', 'like', '%'.$term.'%');
+            })
+            ->orderBy('full_name')
+            ->limit($limit)
+            ->get();
+    }
+
     public function cursorForFamily(Family $family): iterable
     {
         foreach (FamilyMember::query()

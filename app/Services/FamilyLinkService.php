@@ -2,10 +2,12 @@
 
 namespace App\Services;
 
+use App\Models\Family;
 use App\Models\FamilyLink;
 use App\Models\FamilyMember;
 use App\Models\User;
 use App\Repositories\Contracts\FamilyLinkRepositoryInterface;
+use App\Repositories\Contracts\FamilyMemberRepositoryInterface;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -17,6 +19,9 @@ class FamilyLinkService
     public function __construct(
         private readonly FamilyLinkRepositoryInterface $links,
         private readonly ActivityLogService $activityLog,
+        private readonly FamilyMemberRepositoryInterface $members,
+        private readonly RelationshipCacheService $relationshipCache,
+        private readonly TreeCacheService $treeCache,
     ) {}
 
     public function request(User $actor, FamilyMember $member, FamilyMember $linkedMember): FamilyLink
@@ -47,6 +52,7 @@ class FamilyLinkService
             ]);
 
             $this->activityLog->familyLinkRequested($actor, $link);
+            $this->invalidateFamilies($member->family_id, $linkedMember->family_id);
 
             return $link;
         });
@@ -85,6 +91,7 @@ class FamilyLinkService
             ]);
 
             $this->activityLog->familyLinkApproved($actor, $updated);
+            $this->invalidateFamilies($updated->family_id, $updated->linked_family_id);
 
             return $updated;
         });
@@ -103,9 +110,30 @@ class FamilyLinkService
             ]);
 
             $this->activityLog->familyLinkRevoked($actor, $updated);
+            $this->invalidateFamilies($updated->family_id, $updated->linked_family_id);
 
             return $updated;
         });
+    }
+
+    public function find(string $uuid): ?FamilyLink
+    {
+        return $this->links->findByUuid($uuid);
+    }
+
+    public function linksForFamily(Family $family): Collection
+    {
+        return $this->links->linksForFamily($family->id);
+    }
+
+    public function candidateMembers(Family $family): Collection
+    {
+        return $this->members->candidateMembersForFamily($family);
+    }
+
+    public function searchLinkedCandidates(User $user, Family $activeFamily, string $term): Collection
+    {
+        return $this->members->searchMembersInUserFamilies($user, $activeFamily, $term);
     }
 
     public function expireDue(): int
@@ -121,5 +149,13 @@ class FamilyLinkService
     public function activeLinksForMember(FamilyMember $member): Collection
     {
         return $this->links->activeLinksForMember($member->id);
+    }
+
+    private function invalidateFamilies(int ...$familyIds): void
+    {
+        foreach (array_unique($familyIds) as $familyId) {
+            $this->relationshipCache->invalidateFamily($familyId);
+            $this->treeCache->invalidateFamily($familyId);
+        }
     }
 }

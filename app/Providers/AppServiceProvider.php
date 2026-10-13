@@ -146,6 +146,8 @@ class AppServiceProvider extends ServiceProvider
             ->by($request->user()?->getAuthIdentifier() ?: $request->ip()));
         RateLimiter::for('login', fn (Request $request): Limit => Limit::perMinute(5)
             ->by(strtolower((string) $request->input('email')).'|'.$request->ip()));
+        RateLimiter::for('family-link', fn (Request $request): Limit => Limit::perMinute(30)
+            ->by($request->user()?->getAuthIdentifier() ?: $request->ip()));
 
         Gate::define('administer', fn ($user): bool => $user->hasRole('super-admin'));
         Gate::policy(Family::class, FamilyPolicy::class);
