@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Family Tree - Alur Penggunaan</title>
+<style>
+  :root {
+    --green: #1B5E20;
+    --green-soft: #2E7D32;
+    --leaf: #66BB6A;
+    --mist: #E8F5E9;
+    --gold: #C9A227;
+    --ink: #1F2933;
+    --muted: #52606D;
+    --line: #D8E2DC;
+  }
+
+  @page {
+    size: A4;
+    margin: 16mm 15mm 18mm 15mm;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    color: var(--ink);
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 11.2pt;
+    line-height: 1.62;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  h1, h2, h3 { line-height: 1.25; margin: 0; }
+  p { margin: 0 0 10px; }
+  strong { color: var(--ink); }
+
+  /* ---------- COVER ---------- */
+  .cover {
+    height: 262mm;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 26mm 6mm 10mm;
+  }
+  .cover-top { }
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 800;
+    font-size: 17pt;
+    letter-spacing: .5px;
+    color: var(--green);
+  }
+  .brand-mark {
+    width: 34px; height: 34px;
+    border-radius: 9px;
+    background: var(--green);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 15pt;
+    font-weight: 800;
+  }
+  .cover h1 {
+    font-size: 40pt;
+    letter-spacing: -0.5px;
+    margin-top: 34mm;
+  }
+  .cover .kicker {
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    font-size: 10pt;
+    font-weight: 700;
+    color: var(--gold);
+    margin-bottom: 12px;
+  }
+  .cover .lead {
+    font-size: 14pt;
+    color: var(--muted);
+    max-width: 130mm;
+    margin-top: 14px;
+  }
+  .cover-line {
+    width: 72px; height: 5px;
+    background: var(--gold);
+    border-radius: 4px;
+    margin: 22px 0;
+  }
+  .cover-foot {
+    color: var(--muted);
+    font-size: 9.5pt;
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid var(--line);
+    padding-top: 10px;
+  }
+
+  /* ---------- LAYOUT ---------- */
+  .page { padding-top: 4mm; }
+  .break { page-break-before: always; }
+
+  h2 {
+    font-size: 19pt;
+    color: var(--green);
+    margin: 0 0 4px;
+  }
+  .section-no {
+    display: inline-block;
+    font-size: 10pt;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .section-sub {
+    color: var(--muted);
+    font-size: 11.5pt;
+    margin: 6px 0 18px;
+    max-width: 165mm;
+  }
+  .rule { height: 1px; background: var(--line); margin: 0 0 18px; }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .card {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 14px 16px;
+    background: #fff;
+  }
+  .card.mist { background: var(--mist); border-color: #C8E6C9; }
+  .card h3 {
+    font-size: 12.5pt;
+    color: var(--green);
+    margin-bottom: 6px;
+  }
+  .card p { margin: 0; color: var(--muted); font-size: 10.5pt; }
+
+  .note {
+    background: var(--mist);
+    border-left: 4px solid var(--green);
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin: 16px 0;
+    font-size: 10.8pt;
+  }
+
+  /* ---------- STEPS ---------- */
+  .steps { display: flex; flex-direction: column; gap: 11px; margin-top: 6px; }
+  .step {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px 16px;
+    background: #fff;
+    page-break-inside: avoid;
+  }
+  .step-no {
+    flex: 0 0 auto;
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: var(--green);
+    color: #fff;
+    font-weight: 800;
+    font-size: 13pt;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .step-body h3 { font-size: 12pt; margin-bottom: 2px; }
+  .step-body p { margin: 0; color: var(--muted); font-size: 10.5pt; }
+  .step-body .hint {
+    display: inline-block;
+    margin-top: 5px;
+    font-size: 9.5pt;
+    color: var(--green-soft);
+    font-weight: 600;
+  }
+
+  /* ---------- TABLE ---------- */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10.3pt;
+    margin-top: 4px;
+  }
+  th, td {
+    text-align: left;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--line);
+  }
+  thead th {
+    background: var(--green);
+    color: #fff;
+    font-size: 9.8pt;
+    letter-spacing: .3px;
+  }
+  tbody tr:nth-child(even) { background: #F7FBF8; }
+  td.c, th.c { text-align: center; }
+  .yes { color: var(--green-soft); font-weight: 700; }
+  .no { color: #9AA5B1; }
+
+  /* ---------- FLOW ---------- */
+  .diagram {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin: 8px 0 4px;
+    background: #fff;
+    page-break-inside: avoid;
+  }
+  .caption {
+    font-size: 9.3pt;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 10px;
+    font-style: italic;
+  }
+
+  .phase { display: flex; align-items: center; gap: 12px; }
+  .phase + .phase { margin-top: 10px; }
+  .phase-label {
+    flex: 0 0 84px;
+    font-size: 8.6pt;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .6px;
+    color: var(--gold);
+    line-height: 1.25;
+  }
+  .phase-label small {
+    display: block;
+    color: var(--muted);
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+    font-size: 8.2pt;
+    margin-top: 2px;
+  }
+  .track {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .pill {
+    flex: 1;
+    border: 1.6px solid var(--green);
+    background: #fff;
+    border-radius: 10px;
+    padding: 8px 8px;
+    font-size: 9.2pt;
+    font-weight: 600;
+    color: var(--green);
+    text-align: center;
+    line-height: 1.28;
+  }
+  .pill.wide { flex: 1.3; }
+  .pill.soft { background: var(--mist); border-color: var(--green-soft); }
+  .pill.gold { border-color: var(--gold); color: #8a6d12; background: #FFFDF3; }
+  .arrow { flex: 0 0 auto; color: var(--leaf); font-weight: 800; font-size: 12pt; }
+  .join { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 8px 0; }
+  .join span {
+    color: var(--leaf);
+    font-weight: 800;
+    font-size: 14pt;
+  }
+  .join em {
+    font-size: 8.6pt;
+    color: var(--muted);
+    font-style: normal;
+  }
+  .loop-note {
+    text-align: center;
+    font-size: 8.8pt;
+    color: var(--green-soft);
+    font-weight: 600;
+    margin-top: 8px;
+  }
+  .loop-note::before { content: "\21BA  "; }
+
+  .story {
+    border: 1px solid var(--line);
+    border-left: 5px solid var(--gold);
+    border-radius: 10px;
+    padding: 16px 18px;
+    background: #FFFDF5;
+  }
+  .story p:last-child { margin-bottom: 0; }
+
+  ul.clean { margin: 0; padding-left: 18px; }
+  ul.clean li { margin-bottom: 6px; color: var(--muted); }
+  ul.clean li strong { color: var(--ink); }
+
+  .footer-note {
+    margin-top: 22px;
+    border-top: 1px solid var(--line);
+    padding-top: 10px;
+    font-size: 9pt;
+    color: var(--muted);
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+  <!-- ================= COVER ================= -->
+  <section class="cover">
+    <div class="cover-top">
+      <div class="brand"><span class="brand-mark">FT</span> Family Tree</div>
+      <h1>Alur Penggunaan<br>Aplikasi</h1>
+      <div class="cover-line"></div>
+      <p class="lead">Bagaimana sebuah keluarga membangun, menghidupkan, dan merawat silsilahnya di Family Tree &mdash; dijelaskan sederhana untuk siapa saja.</p>
+    </div>
+    <div class="cover-foot">
+      <span>Dokumen Penjelasan Produk</span>
+      <span>Untuk Kalangan Umum &amp; Investor</span>
+    </div>
+  </section>
+
+  <!-- ================= 1. APA ITU ================= -->
+  <section class="page break">
+    <span class="section-no">Bagian 1</span>
+    <h2>Apa Itu Family Tree?</h2>
+    <p class="section-sub">Family Tree adalah rumah digital untuk keluarga besar Indonesia: tempat menyimpan silsilah, cerita, foto, dan kenangan agar tidak hilang dimakan waktu.</p>
+    <div class="rule"></div>
+
+    <p>Bayangkan sebuah album keluarga yang bisa dibuka semua kerabat, tersusun rapi seperti pohon, dan terus diisi bersama dari mana saja. Itulah Family Tree.</p>
+
+    <div class="two-col" style="margin-top:16px;">
+      <div class="card mist">
+        <h3>Akun Pengguna</h3>
+        <p>Orang yang bisa masuk ke aplikasi. Satu orang boleh punya lebih dari satu keluarga.</p>
+      </div>
+      <div class="card mist">
+        <h3>Anggota Silsilah</h3>
+        <p>Orang yang tercatat di pohon keluarga &mdash; termasuk yang belum punya akun atau sudah wafat.</p>
+      </div>
+    </div>
+
+    <div class="note">
+      Dua hal ini dipisahkan dengan sengaja. Artinya, satu orang bisa mendokumentasikan kakek nenek yang sudah tiada, maupun kerabat yang belum sempat memasang aplikasi. Arsip keluarga tetap lengkap tanpa harus menunggu semua orang ikut bergabung.
+    </div>
+
+    <h3 style="color:var(--green); margin-top:22px;">Pohon yang tumbuh sendiri</h3>
+    <p>Pengguna hanya perlu memasukkan lima hubungan dasar: <strong>ayah</strong>, <strong>ibu</strong>, <strong>anak</strong>, <strong>suami</strong>, dan <strong>istri</strong>. Dari lima hal sederhana itu, Family Tree otomatis mengenali kakek, nenek, paman, bibi, sepupu, keponakan, mertua, menantu, dan seterusnya &mdash; tanpa diisi manual.</p>
+  </section>
+
+  <!-- ================= 2. ALUR BESAR ================= -->
+  <section class="page break">
+    <span class="section-no">Bagian 2</span>
+    <h2>Alur Besarnya</h2>
+    <p class="section-sub">Perjalanan pengguna dari pertama kali mengenal Family Tree hingga arsip keluarga terus tumbuh lintas generasi.</p>
+    <div class="rule"></div>
+
+    <div class="diagram">
+      <div class="phase">
+        <div class="phase-label">Fase 1<small>Mulai</small></div>
+        <div class="track">
+          <div class="pill">Menemukan Family Tree</div>
+          <div class="arrow">&rarr;</div>
+          <div class="pill">Daftar / Masuk</div>
+          <div class="arrow">&rarr;</div>
+          <div class="pill gold">Punya akses keluarga?</div>
+        </div>
+      </div>
+      <div class="join"><span>&darr;</span><em>belum punya &middot; sudah punya</em></div>
+      <div class="phase">
+        <div class="phase-label">Fase 2<small>Bangun</small></div>
+        <div class="track">
+          <div class="pill">Buat / pilih keluarga</div>
+          <div class="arrow">&rarr;</div>
+          <div class="pill">Dashboard keluarga</div>
+          <div class="arrow">&rarr;</div>
+          <div class="pill">Tambah anggota &amp; relasi</div>
+          <div class="arrow">&rarr;</div>
+          <div class="pill soft">Pohon terbentuk</div>
+        </div>
+      </div>
+      <div class="join"><span>&darr;</span></div>
+      <div class="phase">
+        <div class="phase-label">Fase 3<small>Rawat</small></div>
+        <div class="track">
+          <div class="pill">Undang kerabat</div>
+          <div class="arrow">&rarr;</div>
+          <div class="pill">Isi foto, cerita, acara</div>
+          <div class="arrow">&rarr;</div>
+          <div class="pill">Timeline &amp; notifikasi</div>
+          <div class="arrow">&rarr;</div>
+          <div class="pill soft">Arsip hidup turun-temurun</div>
+        </div>
+      </div>
+      <div class="loop-note">Setiap undangan dan kenangan baru membuat arsip terus tumbuh</div>
+      <div class="caption">Gambar 1. Alur utama pengguna Family Tree dalam tiga fase: mulai, membangun, lalu merawat arsip keluarga.</div>
+    </div>
+  </section>
+
+  <!-- ================= 3. LANGKAH ================= -->
+  <section class="page break">
+    <span class="section-no">Bagian 3</span>
+    <h2>Tujuh Langkah Sederhana</h2>
+    <p class="section-sub">Yang dilakukan keluarga langkah demi langkah, tanpa perlu memahami istilah teknis apa pun.</p>
+    <div class="rule"></div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-no">1</div>
+        <div class="step-body">
+          <h3>Daftar</h3>
+          <p>Cukup dengan nama, email, dan kata sandi. Lalu verifikasi lewat email.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-no">2</div>
+        <div class="step-body">
+          <h3>Buat Ruang Keluarga</h3>
+          <p>Beri nama keluarga, kota asal, dan deskripsi singkat. Pembuat otomatis menjadi <strong>Owner</strong>.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-no">3</div>
+        <div class="step-body">
+          <h3>Tambah Anggota</h3>
+          <p>Masukkan nama, tanggal lahir atau wafat, kota, pekerjaan, biografi, dan foto profil.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-no">4</div>
+        <div class="step-body">
+          <h3>Hubungkan Keluarga</h3>
+          <p>Tautkan ayah, ibu, anak, suami, atau istri. Hubungan lain muncul otomatis.</p>
+          <span class="hint">Pohon mulai terbentuk seketika</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-no">5</div>
+        <div class="step-body">
+          <h3>Undang Kerabat</h3>
+          <p>Kirim undangan agar anggota lain ikut melengkapi data dan kenangan keluarga.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-no">6</div>
+        <div class="step-body">
+          <h3>Isi Kenangan</h3>
+          <p>Unggah foto, tulis artikel sejarah, buat acara seperti reuni atau arisan.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-no">7</div>
+        <div class="step-body">
+          <h3>Tetap Terhubung</h3>
+          <p>Notifikasi ulang tahun dan acara, timeline aktivitas, serta pengingat menjaga keluarga tetap aktif.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 4. PERAN ================= -->
+  <section class="page break">
+    <span class="section-no">Bagian 4</span>
+    <h2>Siapa Boleh Melakukan Apa</h2>
+    <p class="section-sub">Setiap orang punya peran. Perannya berlaku per keluarga, bukan menyeluruh di platform.</p>
+    <div class="rule"></div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Kegiatan</th>
+          <th class="c">Member</th>
+          <th class="c">Admin</th>
+          <th class="c">Owner</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Melihat silsilah dan pohon keluarga</td><td class="c yes">Ya</td><td class="c yes">Ya</td><td class="c yes">Ya</td></tr>
+        <tr><td>Mengubah profil sendiri</td><td class="c yes">Ya</td><td class="c yes">Ya</td><td class="c yes">Ya</td></tr>
+        <tr><td>Menambah anggota dan hubungan</td><td class="c">Terbatas</td><td class="c yes">Ya</td><td class="c yes">Ya</td></tr>
+        <tr><td>Mengelola artikel, foto, dan acara</td><td class="c">Terbatas</td><td class="c yes">Ya</td><td class="c yes">Ya</td></tr>
+        <tr><td>Mengatur identitas keluarga</td><td class="c no">Tidak</td><td class="c">Sesuai izin</td><td class="c yes">Ya</td></tr>
+        <tr><td>Mengatur peran anggota</td><td class="c no">Tidak</td><td class="c">Sesuai izin</td><td class="c yes">Ya</td></tr>
+      </tbody>
+    </table>
+
+    <div class="note">
+      Satu orang bisa punya peran berbeda di keluarga berbeda. Misalnya menjadi <strong>Owner</strong> di Keluarga Santoso, <strong>Admin</strong> di Keluarga Wijaya, dan <strong>Member</strong> di keluarga lain &mdash; semuanya dengan satu akun.
+    </div>
+
+    <h3 style="color:var(--green); margin-top:20px;">Mesin pertumbuhan keluarga</h3>
+    <div class="diagram">
+      <div class="phase">
+        <div class="phase-label">Siklus<small>tumbuh</small></div>
+        <div class="track">
+          <div class="pill">Satu orang buat keluarga</div>
+          <div class="arrow">&rarr;</div>
+          <div class="pill">Tambah anggota</div>
+          <div class="arrow">&rarr;</div>
+          <div class="pill">Undang kerabat</div>
+          <div class="arrow">&rarr;</div>
+          <div class="pill">Kerabat isi data &amp; kenangan</div>
+          <div class="arrow">&rarr;</div>
+          <div class="pill soft">Arsip makin bernilai</div>
+        </div>
+      </div>
+      <div class="loop-note">Arsip yang bernilai membuat makin banyak kerabat bergabung, lalu kembali mengundang</div>
+      <div class="caption">Gambar 2. Semakin banyak kerabat berkontribusi, semakin bernilai arsip keluarga, dan undangan menjadi saluran pertumbuhan organik.</div>
+    </div>
+  </section>
+
+  <!-- ================= 5. CONTOH ================= -->
+  <section class="page break">
+    <span class="section-no">Bagian 5</span>
+    <h2>Contoh Nyata</h2>
+    <p class="section-sub">Bagaimana hal ini terasa bagi keluarga biasa.</p>
+    <div class="rule"></div>
+
+    <div class="story">
+      <p><strong>Keluarga Santoso.</strong> Pak Budi membuka Family Tree dari ponselnya. Ia membuat ruang untuk Keluarga Santoso dan menjadi Owner.</p>
+      <p>Malam itu juga ia memasukkan data kedua orang tuanya, lalu menambahkan empat anak beserta pasangannya. Setelah ia menghubungkan ayah, ibu, dan anak, pohon keluarga langsung tersusun &mdash; lengkap dengan sebutan sepupu dan keponakan yang muncul sendiri.</p>
+      <p>Beberapa hari kemudian ia mengundang saudara-saudaranya lewat pesan. Satu per satu mulai mengunggah foto lama, menulis kisah kakek yang merantau, dan menambahkan jadwal reuni keluarga.</p>
+      <p>Setahun kemudian, apa yang dulu hanya tersimpan di ingatan dan album berdebu kini menjadi arsip keluarga yang utuh dan bisa dibuka cucu mereka kapan saja.</p>
+    </div>
+
+    <div class="two-col" style="margin-top:18px;">
+      <div class="card">
+        <h3>Sebelum Family Tree</h3>
+        <p>Nama dan cerita tersebar di percakapan, foto fisik, dan ingatan orang tertua. Lama-lama hilang.</p>
+      </div>
+      <div class="card mist">
+        <h3>Setelah Family Tree</h3>
+        <p>Satu arsip keluarga yang rapi, dapat diisi bersama, dan tetap hidup dari generasi ke generasi.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 6. MANFAAT ================= -->
+  <section class="page break">
+    <span class="section-no">Bagian 6</span>
+    <h2>Mengapa Ini Penting</h2>
+    <p class="section-sub">Nilai yang dirasakan keluarga, sekaligus alasan produk ini bertumbuh.</p>
+    <div class="rule"></div>
+
+    <ul class="clean">
+      <li><strong>Mudah untuk siapa saja.</strong> Cukup lima hubungan dasar; sisanya dihitung otomatis oleh sistem.</li>
+      <li><strong>Khusus keluarga Indonesia.</strong> Istilah kekerabatan lokal dipahami secara alami.</li>
+      <li><strong>Lebih dari sekadar diagram.</strong> Silsilah terhubung dengan foto, artikel, acara, dan timeline.</li>
+      <li><strong>Aman dan privat.</strong> Data tiap keluarga terpisah dan hanya diakses oleh anggotanya.</li>
+      <li><strong>Siap berkembang.</strong> Dirancang untuk menampung lebih dari 100.000 anggota dalam satu keluarga.</li>
+      <li><strong>Tumbuh secara organik.</strong> Setiap undangan kerabat menghadirkan pengguna baru sekaligus memperkaya arsip.</li>
+    </ul>
+
+    <div class="note" style="margin-top:22px;">
+      <strong>Intinya:</strong> Family Tree bukan sekadar alat menggambar silsilah. Ia adalah cara keluarga menjaga nama, hubungan, dan cerita lintas generasi &mdash; semakin banyak yang ikut merawat, semakin besar nilainya.
+    </div>
+
+    <div class="footer-note">
+      Family Tree &middot; Dokumen Penjelasan Produk untuk Kalangan Umum &amp; Investor
+    </div>
+  </section>
+
+</body>
+</html>

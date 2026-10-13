@@ -53,6 +53,12 @@ class ActivityLog extends Model
 
     public const MEMBERS_IMPORTED = 'MEMBERS_IMPORTED';
 
+    public const FAMILY_LINK_REQUESTED = 'FAMILY_LINK_REQUESTED';
+
+    public const FAMILY_LINK_APPROVED = 'FAMILY_LINK_APPROVED';
+
+    public const FAMILY_LINK_REVOKED = 'FAMILY_LINK_REVOKED';
+
     public const FILTERS = [
         'members' => [
             self::MEMBER_CREATED,
@@ -71,6 +77,11 @@ class ActivityLog extends Model
         'articles' => [self::ARTICLE_CREATED],
         'photos' => [self::PHOTO_UPLOADED],
         'events' => [self::EVENT_CREATED],
+        'links' => [
+            self::FAMILY_LINK_REQUESTED,
+            self::FAMILY_LINK_APPROVED,
+            self::FAMILY_LINK_REVOKED,
+        ],
     ];
 
     protected $fillable = ['uuid', 'family_id', 'user_id', 'activity_type', 'payload'];

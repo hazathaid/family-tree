@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\ActivityLog;
 use App\Models\Article;
 use App\Models\Event;
+use App\Models\FamilyLink;
 use App\Models\FamilyMember;
 use App\Models\MemberDocument;
 use App\Models\MemberPhoto;
@@ -115,9 +116,34 @@ class ActivityLogService
         return $this->record($event->family_id, $user, ActivityLog::EVENT_CREATED, ['subject_uuid' => $event->uuid, 'title' => $event->title]);
     }
 
+    public function familyLinkRequested(User $user, FamilyLink $link): ActivityLog
+    {
+        return $this->record($link->family_id, $user, ActivityLog::FAMILY_LINK_REQUESTED, $this->familyLinkPayload($link));
+    }
+
+    public function familyLinkApproved(User $user, FamilyLink $link): ActivityLog
+    {
+        return $this->record($link->family_id, $user, ActivityLog::FAMILY_LINK_APPROVED, $this->familyLinkPayload($link));
+    }
+
+    public function familyLinkRevoked(User $user, FamilyLink $link): ActivityLog
+    {
+        return $this->record($link->family_id, $user, ActivityLog::FAMILY_LINK_REVOKED, $this->familyLinkPayload($link));
+    }
+
     public function record(int $familyId, ?User $user, string $type, array $payload): ActivityLog
     {
         return $this->activities->create(['family_id' => $familyId, 'user_id' => $user?->id, 'activity_type' => $type, 'payload' => $payload]);
+    }
+
+    private function familyLinkPayload(FamilyLink $link): array
+    {
+        return [
+            'subject_uuid' => $link->uuid,
+            'member_uuid' => $link->member?->uuid,
+            'linked_member_uuid' => $link->linkedMember?->uuid,
+            'status' => $link->status,
+        ];
     }
 
     private function memberPayload(FamilyMember $member): array

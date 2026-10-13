@@ -1,0 +1,41 @@
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-hostinger
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to Hostinger (SSH)
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - name: Run deploy script over SSH
+        uses: appleboy/ssh-action@v1
+        env:
+          APP_DIR: ${{ secrets.APP_DIR }}
+          PUBLIC_HTML: ${{ secrets.PUBLIC_HTML }}
+          BRANCH: main
+          PHP_BIN: ${{ secrets.PHP_BIN }}
+          COMPOSER_BIN: ${{ secrets.COMPOSER_BIN }}
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          port: ${{ secrets.SSH_PORT }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: APP_DIR,PUBLIC_HTML,BRANCH,PHP_BIN,COMPOSER_BIN
+          script_stop: true
+          script: |
+            set -euo pipefail
+            cd "$APP_DIR"
+            bash scripts/deploy-hostinger.sh

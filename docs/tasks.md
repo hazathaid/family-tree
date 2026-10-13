@@ -709,3 +709,89 @@ atau:
 ```text
 Implement FT-MOB-001 only
 ```
+
+# Backlog — Belum Diprioritaskan
+
+Ide-ide berikut sudah didesain tetapi belum disetujui untuk implementasi. Lihat dokumen
+desain di `docs/design/` untuk konteks lengkap. Jangan implementasikan sebelum ada instruksi
+eksplisit.
+
+Keputusan terkunci (2026-10-13): satu record kanonik per orang (tanpa duplikasi), satu link
+pernikahan + BFS, **read-only lintas link** (v1), cakupan seluruh keluarga dengan persetujuan
+dua pihak + redaksi anggota hidup, dan anak tinggal di satu `children_home_family_id`.
+
+## PAT-001 — Dokumentasi Pola Keanggotaan Keluarga
+
+- Dokumentasikan pola resmi menangani pasangan/menantu: "satu keluarga gabungan" vs
+  "multi-keluarga mandiri", beserta batasannya.
+- Deliverable: `docs/design/family-membership-patterns.md`.
+
+## XF-001 — Cross-Family Link: Data Model dan Persetujuan (Fase 1) ✅ Complete (2026-10-13)
+
+- Tabel `family_links` (termasuk `children_home_family_id`, `status`, approver, `expires_at`,
+  `revoked_at`) + model `FamilyLink` + factory.
+- `FamilyLinkRepositoryInterface`/`EloquentFamilyLinkRepository`: create/update, find by
+  uuid/for-update, open-link lookup, active link between members, active links per member,
+  links per family, dan `expireDue`.
+- `FamilyLinkService`: `request` (menolak anggota satu keluarga atau yang sudah punya tautan
+  terbuka; mencatat `approved_by_family`), `approve` (pihak kedua, menolak tautan non-pending
+  dan menandai kedaluwarsa), `revoke` (idempoten), `expireDue`, dan query aktif.
+- `FamilyLinkPolicy`: request (owner/admin keluarga anggota), approve (owner/admin keluarga
+  tertaut), revoke (owner/admin salah satu keluarga), view (anggota salah satu keluarga).
+- Activity log `FAMILY_LINK_REQUESTED`/`FAMILY_LINK_APPROVED`/`FAMILY_LINK_REVOKED` dan
+  audit otomatis via `AuditObserver` (observe `FamilyLink`).
+- Read-only lintas link; tidak ada mutasi anggota lintas keluarga.
+- Scope Fase 1 sengaja tanpa HTTP surface (route/controller/view/API) — itu **XF-004**.
+- Deliverable: `database/migrations/2026_10_13_000000_create_family_links_table.php`,
+  `app/Models/FamilyLink.php`, `app/Services/FamilyLinkService.php`,
+  `app/Policies/FamilyLinkPolicy.php`, `app/Repositories/{Contracts,Eloquent}/...FamilyLink...`,
+  `database/factories/FamilyLinkFactory.php`, `tests/Unit/FamilyLinkServiceTest.php`,
+  `tests/Feature/FamilyLinkPolicyTest.php`.
+
+## XF-002 — Cross-Family Relationship Resolver (Fase 2)
+
+- `CrossFamilyRelationshipResolverService`: BFS lintas-keluarga melewati link aktif sebagai
+  edge `spouse`, label tetap dari `RelationshipResolverService::nameFromPath`.
+- Update aturan isolasi: cross-family denial menjadi "denial kecuali tertaut".
+- Deliverable: service + tests (coverage engine >=95%).
+
+## XF-003 — Tree Builder Multi-Keluarga + Redaksi (Fase 3)
+
+- Mode linked pada `TreeGraphBuilderService` (bridge node + `children_home_family_id` +
+  boundary), cache berversi link, redaksi anggota hidup lintas-keluarga.
+- Deliverable: service + cache + tests.
+
+## XF-004 — Cross-Family Link: Surface Web (Fase 4)
+
+- Route/controller/view web read-only untuk silsilah pasangan, UI request/approve/revoke link,
+  throttle + `noindex`.
+- Deliverable: controllers, views, limiter, tests.
+
+## XF-005 — Cross-Family Link: Dokumentasi dan Tests (Fase 6)
+
+- Update `prd`, `business-rules`, `database-schema`, `api-spec`, `tasks`; tests isolasi,
+  consent, dan redaksi.
+- Deliverable: docs, tests.
+
+## PRV-001 — Family View Grants (Fase 5)
+
+- Tabel `family_view_grants` + model + `FamilyViewGrantService` + guard otorisasi
+  (consent-based, berbatas waktu, bisa dicabut).
+- Deliverable: migrasi, model, service, guard, tests.
+
+## PRV-002 — Scoped Family View Service (Fase 5)
+
+- `ScopedFamilyViewService`: redaksi anggota hidup + relasi relatif ke anchor (pasangan).
+- Deliverable: service + unit/feature tests.
+
+## PRV-003 — Pre-Marriage View Web Surface (Fase 5)
+
+- Route publik-terbatas (wajib login): accept grant, overview, tree read-only; throttle
+  `family-view` + `noindex`.
+- Deliverable: controller, view, limiter, tests.
+
+## PRV-004 — Pre-Marriage View Dokumentasi dan Tests (Fase 5)
+
+- Update `prd`, `business-rules`, `database-schema`, `tasks`; feature/unit tests
+  (coverage >=80%; isolasi dan redaksi).
+- Deliverable: docs, tests.
