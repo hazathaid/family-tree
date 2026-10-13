@@ -12,6 +12,8 @@
 # All variables are optional except APP_DIR when the default path does not match.
 #
 #   APP_DIR      Absolute path to the Laravel app directory (contains artisan).
+#                Defaults to the parent of this script (the repo root), so the
+#                script can be run from any working directory.
 #   PUBLIC_HTML  Absolute path to public_html; when set, built assets are copied there.
 #   PHP_BIN      PHP 8.3 CLI binary (default: /opt/alt/php83/usr/bin/php).
 #   COMPOSER_BIN Composer binary (default: composer2).
@@ -23,7 +25,8 @@
 
 set -euo pipefail
 
-APP_DIR="${APP_DIR:-$PWD}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+APP_DIR="${APP_DIR:-$(dirname "$SCRIPT_DIR")}"
 PHP_BIN="${PHP_BIN:-/opt/alt/php83/usr/bin/php}"
 COMPOSER_BIN="${COMPOSER_BIN:-composer2}"
 BRANCH="${BRANCH:-main}"
