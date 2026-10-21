@@ -6,7 +6,7 @@
     @if(session('status'))<x-alert variant="success">{{ session('status') }}</x-alert>@endif
 
     <ul class="nav nav-tabs mb-4" role="tablist">
-        @foreach (['profile' => 'Profil', 'branches' => 'Cabang', 'access' => 'Anggota & Peran', 'privacy' => 'Privasi', 'notifications' => 'Notifikasi'] as $id => $label)
+        @foreach (['profile' => 'Profil', 'branches' => 'Cabang', 'access' => 'Anggota & Peran', 'guests' => 'Akses Tamu', 'privacy' => 'Privasi', 'notifications' => 'Notifikasi'] as $id => $label)
             <li class="nav-item" role="presentation"><button class="nav-link {{ $loop->first ? 'active' : '' }}" data-bs-toggle="tab" data-bs-target="#{{ $id }}" type="button" role="tab">{{ $label }}</button></li>
         @endforeach
     </ul>
@@ -47,6 +47,59 @@
             </div>
         </section>
 
+        <section class="tab-pane fade" id="guests" role="tabpanel">
+            @can('update', $family)
+                <div class="row g-4">
+                    <div class="col-lg-4">
+                        <x-card title="Beri akses baca-saja">
+                            <p class="text-body-secondary">Akses diberikan per anggota acuan (pasangan), berlaku sementara, dan dapat dicabut. Anggota hidup selain acuan akan disamarkan.</p>
+                            <form method="POST" action="{{ route('settings.family-view-grants.store') }}" class="vstack gap-3">
+                                @csrf
+                                <x-form.select name="anchor_member_uuid" label="Anggota acuan (pasangan)" :options="$anchorOptions->pluck('full_name', 'uuid')->all()" />
+                                <x-form.input name="email" type="email" label="Email penerima akses" required />
+                                <x-form.select name="expires_in_days" label="Berlaku (hari)" :options="[7 => '7 hari', 30 => '30 hari', 90 => '90 hari']" :selected="30" />
+                                <x-button type="submit">Beri akses</x-button>
+                            </form>
+                        </x-card>
+                    </div>
+                    <div class="col-lg-8">
+                        <x-card title="Daftar akses tamu">
+                            <div class="table-responsive">
+                                <table class="table align-middle">
+                                    <thead><tr><th scope="col">Acuan</th><th scope="col">Email</th><th scope="col">Status</th><th scope="col">Berlaku sampai</th><th scope="col">Aksi</th></tr></thead>
+                                    <tbody>
+                                        @forelse($familyViewGrants as $grant)
+                                            @php($variant = match($grant->status()) { 'active' => 'success', 'expired' => 'secondary', default => 'danger' })
+                                            <tr>
+                                                <td>{{ $grant->anchorMember?->full_name ?? '—' }}</td>
+                                                <td>{{ $grant->invited_email }}</td>
+                                                <td><x-badge :variant="$variant">{{ ucfirst($grant->status()) }}</x-badge></td>
+                                                <td>{{ $grant->expires_at->translatedFormat('d M Y H:i') }}</td>
+                                                <td>
+                                                    @if($grant->isActive())
+                                                        <form method="POST" action="{{ route('settings.family-view-grants.revoke', $grant) }}" onsubmit="return confirm('Cabut akses baca-saja ini?')">
+                                                            @csrf @method('DELETE')
+                                                            <input type="hidden" name="confirm" value="1">
+                                                            <button class="btn btn-sm btn-outline-danger" type="submit">Cabut</button>
+                                                        </form>
+                                                    @else
+                                                        <span class="text-body-secondary small">—</span>
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr><td colspan="5"><x-empty-state title="Belum ada akses tamu" message="Akses baca-saja untuk calon besan atau pasangan akan tampil di sini." /></td></tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </x-card>
+                    </div>
+                </div>
+            @else
+                <x-card title="Akses tamu"><p class="mb-0 text-body-secondary">Hanya owner atau admin keluarga yang dapat mengelola akses baca-saja.</p></x-card>
+            @endcan
+        </section>
         <section class="tab-pane fade" id="privacy" role="tabpanel"><x-card title="Privasi keluarga"><p class="mb-2">Data keluarga hanya dapat dilihat oleh pengguna yang memiliki peran aktif pada keluarga ini.</p><p class="text-secondary mb-0">Perubahan profil, cabang, dan anggota dilindungi policy Owner/Admin. Penghapusan selalu membutuhkan konfirmasi.</p></x-card></section>
         <section class="tab-pane fade" id="notifications" role="tabpanel"><x-card title="Notifikasi keluarga"><p class="mb-2">Notifikasi keluarga dikirim kepada pengguna sesuai akun dan event yang relevan.</p><p class="text-secondary mb-0">Preferensi notifikasi pribadi akan dikelola dari halaman profil pengguna.</p></x-card></section>
     </div>

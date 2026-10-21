@@ -59,6 +59,14 @@ class ActivityLog extends Model
 
     public const FAMILY_LINK_REVOKED = 'FAMILY_LINK_REVOKED';
 
+    public const FAMILY_VIEW_GRANT_CREATED = 'FAMILY_VIEW_GRANT_CREATED';
+
+    public const FAMILY_VIEW_GRANT_ACCEPTED = 'FAMILY_VIEW_GRANT_ACCEPTED';
+
+    public const FAMILY_VIEW_GRANT_REVOKED = 'FAMILY_VIEW_GRANT_REVOKED';
+
+    public const FAMILY_VIEW_ACCESSED = 'FAMILY_VIEW_ACCESSED';
+
     public const FILTERS = [
         'members' => [
             self::MEMBER_CREATED,
@@ -81,6 +89,12 @@ class ActivityLog extends Model
             self::FAMILY_LINK_REQUESTED,
             self::FAMILY_LINK_APPROVED,
             self::FAMILY_LINK_REVOKED,
+        ],
+        'family_views' => [
+            self::FAMILY_VIEW_GRANT_CREATED,
+            self::FAMILY_VIEW_GRANT_ACCEPTED,
+            self::FAMILY_VIEW_GRANT_REVOKED,
+            self::FAMILY_VIEW_ACCESSED,
         ],
     ];
 

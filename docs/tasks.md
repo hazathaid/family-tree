@@ -810,25 +810,30 @@ dua pihak + redaksi anggota hidup, dan anak tinggal di satu `children_home_famil
   `mobile/lib/features/family/domain/family_link_*`, `mobile/lib/features/family/presentation/family_links_screen.dart`,
   `tests/Feature/FamilyLinkApiTest.php`, `mobile/test/family_link_phase_test.dart`.
 
-## PRV-001 — Family View Grants (Fase 5)
+## PRV-001 — Family View Grants (Fase 5) ✅ Complete (2026-10-21)
 
-- Tabel `family_view_grants` + model + `FamilyViewGrantService` + guard otorisasi
+- Tabel `family_view_grants` + model + repository + `FamilyViewGrantService` + guard otorisasi
   (consent-based, berbatas waktu, bisa dicabut).
-- Deliverable: migrasi, model, service, guard, tests.
+- Deliverable: migrasi, model, factory, repository, service, guard, activity/audit logging,
+  tests (`tests/Unit/FamilyViewGrantServiceTest.php`).
 
-## PRV-002 — Scoped Family View Service (Fase 5)
+## PRV-002 — Scoped Family View Service (Fase 5) ✅ Complete (2026-10-21)
 
 - `ScopedFamilyViewService`: redaksi anggota hidup + relasi relatif ke anchor (pasangan).
-- Deliverable: service + unit/feature tests.
+- Anchor (pasangan) tetap terlihat; anggota hidup lain menjadi “Anggota Hidup”, label
+  hubungan menjadi “Kerabat”, dan PII/foto/ID internal tidak diekspos.
+- Deliverable: service + `tests/Unit/ScopedFamilyViewServiceTest.php`.
 
-## PRV-003 — Pre-Marriage View Web Surface (Fase 5)
+## PRV-003 — Pre-Marriage View Web Surface (Fase 5) ✅ Complete (2026-10-21)
 
-- Route publik-terbatas (wajib login): accept grant, overview, tree read-only; throttle
-  `family-view` + `noindex`.
-- Deliverable: controller, view, limiter, tests.
+- Route wajib login: `GET /family-view/accept/{token}`, `GET /family-view/{family}`,
+  `GET /family-view/{family}/tree`, plus issue/revoke dari tab “Akses Tamu” di pengaturan
+  keluarga. Throttle `family-view` (30/menit) dan header `X-Robots-Tag: noindex, nofollow`.
+- Deliverable: `Web/FamilyViewGrantController`, `Web/ScopedFamilyViewController`, Blade views,
+  limiter, form requests, feature tests (`tests/Feature/WebFamilyViewTest.php`).
 
-## PRV-004 — Pre-Marriage View Dokumentasi dan Tests (Fase 5)
+## PRV-004 — Pre-Marriage View Dokumentasi dan Tests (Fase 5) ✅ Complete (2026-10-21)
 
-- Update `prd`, `business-rules`, `database-schema`, `tasks`; feature/unit tests
-  (coverage >=80%; isolasi dan redaksi).
+- Update `prd`, `business-rules`, `database-schema`, `tasks`, dan design doc; unit/feature
+  tests mencakup isolasi, consent, expiry/revocation, dan redaksi.
 - Deliverable: docs, tests.

@@ -7,6 +7,7 @@ use App\Models\Article;
 use App\Models\Event;
 use App\Models\FamilyLink;
 use App\Models\FamilyMember;
+use App\Models\FamilyViewGrant;
 use App\Models\MemberDocument;
 use App\Models\MemberPhoto;
 use App\Models\User;
@@ -131,9 +132,39 @@ class ActivityLogService
         return $this->record($link->family_id, $user, ActivityLog::FAMILY_LINK_REVOKED, $this->familyLinkPayload($link));
     }
 
+    public function familyViewGrantCreated(User $user, FamilyViewGrant $grant): ActivityLog
+    {
+        return $this->record($grant->family_id, $user, ActivityLog::FAMILY_VIEW_GRANT_CREATED, $this->familyViewGrantPayload($grant));
+    }
+
+    public function familyViewGrantAccepted(User $user, FamilyViewGrant $grant): ActivityLog
+    {
+        return $this->record($grant->family_id, $user, ActivityLog::FAMILY_VIEW_GRANT_ACCEPTED, $this->familyViewGrantPayload($grant));
+    }
+
+    public function familyViewGrantRevoked(User $user, FamilyViewGrant $grant): ActivityLog
+    {
+        return $this->record($grant->family_id, $user, ActivityLog::FAMILY_VIEW_GRANT_REVOKED, $this->familyViewGrantPayload($grant));
+    }
+
+    public function familyViewAccessed(User $user, FamilyViewGrant $grant): ActivityLog
+    {
+        return $this->record($grant->family_id, $user, ActivityLog::FAMILY_VIEW_ACCESSED, $this->familyViewGrantPayload($grant));
+    }
+
     public function record(int $familyId, ?User $user, string $type, array $payload): ActivityLog
     {
         return $this->activities->create(['family_id' => $familyId, 'user_id' => $user?->id, 'activity_type' => $type, 'payload' => $payload]);
+    }
+
+    private function familyViewGrantPayload(FamilyViewGrant $grant): array
+    {
+        return [
+            'subject_uuid' => $grant->uuid,
+            'anchor_member_uuid' => $grant->anchorMember?->uuid,
+            'grantee_user_uuid' => $grant->grantee?->uuid,
+            'expires_at' => $grant->expires_at?->toISOString(),
+        ];
     }
 
     private function familyLinkPayload(FamilyLink $link): array

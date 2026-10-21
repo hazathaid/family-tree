@@ -104,6 +104,15 @@ Sources: `NotificationService`, `NotifyFamilyOfUpdate`, `SendBirthdayGreetings`,
 - Living members of the linked family are redacted server-side (anonymous placeholder, PII and photo suppressed) except the anchor member; clients must render the redacted payload verbatim.
 - Request, approve, and revoke are rate-limited (`family-link`, 30/min) and recorded in `activity_logs` plus `audit_logs`; cross-family surfaces must never be public or indexed.
 
+## Pre-marriage cross-family view
+
+- A `family_view_grants` record grants one authenticated user read-only access to one family through one anchor member (the partner). It is not family membership and never grants mutation rights.
+- Only owner/admin of the target family may issue or revoke a grant; the grantee accepts by matching the invited email or by being the pre-linked registered user.
+- Grants are time-bound (1–90 days, default 30) and revocable. Expired, revoked, and non-matching grants return `403` without family data.
+- Living members other than the anchor are redacted server-side into “Anggota Hidup”; names, nicknames, birth data, biography, photos, contact data, and internal IDs are suppressed. Relationship labels are computed relative to the anchor and set to “Kerabat” for redacted nodes.
+- The view is read-only, excludes documents/media/export, uses the `family-view` limiter (30/min), and sets `X-Robots-Tag: noindex, nofollow`. Creation, acceptance, revocation, and access are recorded in `activity_logs` plus audit logs.
+- Crossing families without a grant remains denied; a grant is a contained exception, not a global relaxation.
+
 ## Logging and security
 
 - Critical mutations create activity and/or audit records through their services. Audit records are not user-editable/deletable.

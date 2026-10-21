@@ -11,6 +11,7 @@ use App\Models\FamilyBranch;
 use App\Models\FamilyLink;
 use App\Models\FamilyMember;
 use App\Models\FamilyUserRole;
+use App\Models\FamilyViewGrant;
 use App\Models\MemberDocument;
 use App\Models\MemberPhoto;
 use App\Models\MemberRelationship;
@@ -45,6 +46,7 @@ use App\Repositories\Contracts\FamilyLinkRepositoryInterface;
 use App\Repositories\Contracts\FamilyMemberRepositoryInterface;
 use App\Repositories\Contracts\FamilyRepositoryInterface;
 use App\Repositories\Contracts\FamilyUserRoleRepositoryInterface;
+use App\Repositories\Contracts\FamilyViewGrantRepositoryInterface;
 use App\Repositories\Contracts\GamificationRepositoryInterface;
 use App\Repositories\Contracts\MemberAccountInvitationRepositoryInterface;
 use App\Repositories\Contracts\MemberDocumentRepositoryInterface;
@@ -73,6 +75,7 @@ use App\Repositories\Eloquent\EloquentFamilyLinkRepository;
 use App\Repositories\Eloquent\EloquentFamilyMemberRepository;
 use App\Repositories\Eloquent\EloquentFamilyRepository;
 use App\Repositories\Eloquent\EloquentFamilyUserRoleRepository;
+use App\Repositories\Eloquent\EloquentFamilyViewGrantRepository;
 use App\Repositories\Eloquent\EloquentGamificationRepository;
 use App\Repositories\Eloquent\EloquentMemberAccountInvitationRepository;
 use App\Repositories\Eloquent\EloquentMemberDocumentRepository;
@@ -112,6 +115,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(FamilyBranchRepositoryInterface::class, EloquentFamilyBranchRepository::class);
         $this->app->bind(FamilyDashboardRepositoryInterface::class, EloquentFamilyDashboardRepository::class);
         $this->app->bind(FamilyLinkRepositoryInterface::class, EloquentFamilyLinkRepository::class);
+        $this->app->bind(FamilyViewGrantRepositoryInterface::class, EloquentFamilyViewGrantRepository::class);
         $this->app->bind(FamilyMemberRepositoryInterface::class, EloquentFamilyMemberRepository::class);
         $this->app->bind(RelationshipRepositoryInterface::class, EloquentRelationshipRepository::class);
         $this->app->bind(SearchRepositoryInterface::class, EloquentSearchRepository::class);
@@ -148,6 +152,8 @@ class AppServiceProvider extends ServiceProvider
             ->by(strtolower((string) $request->input('email')).'|'.$request->ip()));
         RateLimiter::for('family-link', fn (Request $request): Limit => Limit::perMinute(30)
             ->by($request->user()?->getAuthIdentifier() ?: $request->ip()));
+        RateLimiter::for('family-view', fn (Request $request): Limit => Limit::perMinute(30)
+            ->by($request->user()?->getAuthIdentifier() ?: $request->ip()));
 
         Gate::define('administer', fn ($user): bool => $user->hasRole('super-admin'));
         Gate::policy(Family::class, FamilyPolicy::class);
@@ -167,6 +173,7 @@ class AppServiceProvider extends ServiceProvider
         Family::observe(AuditObserver::class);
         FamilyBranch::observe(AuditObserver::class);
         FamilyLink::observe(AuditObserver::class);
+        FamilyViewGrant::observe(AuditObserver::class);
         FamilyMember::observe(AuditObserver::class);
         FamilyUserRole::observe(AuditObserver::class);
         MemberRelationship::observe(AuditObserver::class);

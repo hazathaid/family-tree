@@ -37,7 +37,8 @@ Family records and login accounts are distinct: a `family_member` may have no `u
 5. Browse ancestor, descendant and full trees; select root/depth/layout and export PNG/PDF.
 6. Create and engage with articles, albums/photos, events/RSVP, timeline and notifications.
 7. View reports, gamification and leaderboards appropriate to the active family.
-8. Let a super-admin moderate users/content and inspect/export audit logs on web.
+8. View a partner's family read-only through a consent-based, time-bound grant before marriage, with living members redacted.
+9. Let a super-admin moderate users/content and inspect/export audit logs on web.
 
 ## Functional scope and task traceability
 
@@ -55,6 +56,7 @@ Family records and login accounts are distinct: a `family_member` may have no `u
 | Timeline, notification and push | FT-MOB-801–803 |
 | Search and reports | FT-API-401; FT-MOB-901–903 |
 | Gamification | FT-MOB-1001–1002 |
+| Pre-marriage cross-family consent view | PRV-001–004 |
 | Security, observability, accessibility, performance and release | Phase 11 tasks in `docs/tasks.md` |
 
 ## Web and mobile boundaries

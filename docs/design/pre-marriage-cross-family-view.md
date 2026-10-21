@@ -1,6 +1,8 @@
 # Design: Pre-Marriage Cross-Family Consent View
 
-Status: proposed / backlog (2026-10-13). Not implemented. No migrations or code exist yet.
+Status: implemented web v1 (2026-10-21). `PRV-001` through `PRV-004` are complete: grants,
+redacted scoped view, web surface, tests, and documentation. API/mobile parity remains a
+separate later task.
 
 ## Problem
 
@@ -91,8 +93,10 @@ grant activates. If the grantee already has an account, the grant is created dir
 | Route | Purpose |
 |---|---|
 | `GET /family-view/accept/{token}` | Authenticated acceptance of a grant |
-| `GET /family-view/{family:slug}` | Redacted overview |
-| `GET /family-view/{family:slug}/tree` | Read-only tree (no edit/add controls) |
+| `GET /family-view/{family}` | Redacted overview (family UUID binding) |
+| `GET /family-view/{family}/tree` | Read-only tree (no edit/add controls) |
+| `POST /settings/family-view-grants` | Owner/admin issues a grant from family settings |
+| `DELETE /settings/family-view-grants/{grant}` | Owner/admin revokes a grant |
 
 - Thin controllers: `Web/FamilyViewGrantController`, `Web/ScopedFamilyViewController`.
 - Middleware: dedicated `throttle:family-view` limiter and `X-Robots-Tag: noindex`.
@@ -109,8 +113,10 @@ grant activates. If the grantee already has an account, the grant is created dir
 ## Caching
 
 - Do **not** serve the grantee from `member_tree_cache` directly (it holds full PII).
-- Cache the redacted view under a key scoped by family + grant scope, invalidated on member/
-  relationship mutation, grant revoke, and family visibility change.
+- v1 builds the redacted projection on demand after the grant guard passes. This deliberately
+  avoids reusing raw cached trees; a scoped cache keyed by grant + depth/layout can be added
+  later once member/relationship invalidation is wired to it. Expiry and revocation are still
+  checked on every request before any data is built.
 
 ## Compatibility with the future cross-family link
 
@@ -121,18 +127,22 @@ grant activates. If the grantee already has an account, the grant is created dir
 
 ## Open questions
 
-1. Is the anchor member (the partner) shown unredacted, or subject to the living-redaction
-   rule?
-2. Who may issue a grant: owner/admin only, or the anchor member as well?
-3. Default grant duration (e.g. 30 / 90 days).
-4. May a grantee hold grants to two families (to align with the future cross-family link)?
+1. The anchor member (the partner) is shown unredacted; all other living members are
+   anonymous placeholders.
+2. Only owner/admin of the target family may issue or revoke a grant. The anchor does not
+   need an account.
+3. Default duration is 30 days, configurable 1–90 days per grant. Expiry is enforced on every
+   read; no scheduled mutation is required.
+4. A grantee may hold grants to multiple families. Creating a new grant for the same
+   family + email/user revokes the previous open grant so consent is never duplicated.
 
 ## Proposed tasks (backlog)
 
-- `PRV-001` — `family_view_grants` migration + model + `FamilyViewGrantService` + guard.
-- `PRV-002` — `ScopedFamilyViewService` (redaction + anchor-relative relationships).
-- `PRV-003` — web routes/controller/views + throttle/noindex.
-- `PRV-004` — documentation (`prd`, `business-rules`, `database-schema`, `tasks`) + tests
+- `PRV-001` ✅ `family_view_grants` migration + model + repository + `FamilyViewGrantService`
+  + guard.
+- `PRV-002` ✅ `ScopedFamilyViewService` (redaction + anchor-relative relationships).
+- `PRV-003` ✅ web routes/controller/views + throttle/noindex.
+- `PRV-004` ✅ documentation (`prd`, `business-rules`, `database-schema`, `tasks`) + tests
   (`>=80%` coverage; isolation and redaction cases).
 
 ## Related documents

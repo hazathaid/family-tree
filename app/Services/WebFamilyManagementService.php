@@ -4,10 +4,12 @@ namespace App\Services;
 
 use App\Models\Family;
 use App\Models\FamilyMember;
+use App\Models\FamilyViewGrant;
 use App\Models\User;
 use App\Repositories\Contracts\FamilyBranchRepositoryInterface;
 use App\Repositories\Contracts\FamilyMemberRepositoryInterface;
 use App\Repositories\Contracts\FamilyUserRoleRepositoryInterface;
+use App\Repositories\Contracts\FamilyViewGrantRepositoryInterface;
 use App\Repositories\Contracts\RelationshipRepositoryInterface;
 use Illuminate\Support\Collection;
 
@@ -19,6 +21,7 @@ class WebFamilyManagementService
         private readonly FamilyUserRoleRepositoryInterface $roles,
         private readonly RelationshipRepositoryInterface $relationships,
         private readonly RelationshipResolverService $relationshipResolver,
+        private readonly FamilyViewGrantRepositoryInterface $viewGrants,
     ) {}
 
     public function settings(Family $family): array
@@ -26,6 +29,17 @@ class WebFamilyManagementService
         return [
             'branches' => $this->branches->paginateForFamily($family, 10),
             'memberships' => $this->roles->activeForFamily($family),
+        ];
+    }
+
+    /**
+     * @return array{familyViewGrants: Collection<int, FamilyViewGrant>, anchorOptions: Collection<int, FamilyMember>}
+     */
+    public function familyViewContext(Family $family): array
+    {
+        return [
+            'familyViewGrants' => $this->viewGrants->listForFamily($family->id),
+            'anchorOptions' => $this->members->candidateMembersForFamily($family),
         ];
     }
 

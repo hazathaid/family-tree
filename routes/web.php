@@ -9,6 +9,7 @@ use App\Http\Controllers\Web\EventController;
 use App\Http\Controllers\Web\FamilyLinkController;
 use App\Http\Controllers\Web\FamilySettingsController;
 use App\Http\Controllers\Web\FamilyTreeController;
+use App\Http\Controllers\Web\FamilyViewGrantController;
 use App\Http\Controllers\Web\MemberAccountInvitationController;
 use App\Http\Controllers\Web\MemberController;
 use App\Http\Controllers\Web\OnboardingController;
@@ -16,6 +17,7 @@ use App\Http\Controllers\Web\PasswordController;
 use App\Http\Controllers\Web\PhotoController;
 use App\Http\Controllers\Web\ProfileController;
 use App\Http\Controllers\Web\ReportController;
+use App\Http\Controllers\Web\ScopedFamilyViewController;
 use App\Http\Controllers\Web\SearchController;
 use App\Http\Controllers\Web\TimelineController;
 use App\Http\Controllers\Web\TreeRelativeMemberController;
@@ -44,6 +46,11 @@ Route::middleware('guest')->group(function (): void {
 
 Route::middleware('auth')->group(function (): void {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::get('/family-view/accept/{token}', [FamilyViewGrantController::class, 'accept'])->middleware('throttle:family-view')->name('family-view.accept');
+    Route::middleware('throttle:family-view')->group(function (): void {
+        Route::get('/family-view/{family}', [ScopedFamilyViewController::class, 'overview'])->name('family-view.show');
+        Route::get('/family-view/{family}/tree', [ScopedFamilyViewController::class, 'tree'])->name('family-view.tree');
+    });
     Route::get('/email/verify', [EmailVerificationController::class, 'notice'])->name('verification.notice');
     Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])->middleware('signed')->name('verification.verify');
     Route::post('/email/verification-notification', [EmailVerificationController::class, 'send'])->middleware('throttle:6,1')->name('verification.send');
@@ -87,6 +94,8 @@ Route::middleware('auth')->group(function (): void {
             Route::put('/settings/branches/{branch}', [FamilySettingsController::class, 'updateBranch'])->name('settings.branches.update');
             Route::delete('/settings/branches/{branch}', [FamilySettingsController::class, 'destroyBranch'])->name('settings.branches.destroy');
             Route::post('/settings/members', [FamilySettingsController::class, 'invite'])->name('settings.members.invite');
+            Route::post('/settings/family-view-grants', [FamilyViewGrantController::class, 'store'])->name('settings.family-view-grants.store');
+            Route::delete('/settings/family-view-grants/{grant}', [FamilyViewGrantController::class, 'revoke'])->name('settings.family-view-grants.revoke');
             Route::patch('/settings/members/{membership}', [FamilySettingsController::class, 'assignRole'])->name('settings.members.role');
             Route::delete('/settings/members/{membership}', [FamilySettingsController::class, 'removeRole'])->name('settings.members.destroy');
 

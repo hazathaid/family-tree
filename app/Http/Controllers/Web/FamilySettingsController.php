@@ -43,7 +43,13 @@ class FamilySettingsController extends Controller
         $family = $this->activeFamily($request);
         Gate::authorize('view', $family);
 
-        return view('settings.index', ['family' => $family, ...$this->presentation->settings($family)]);
+        $data = $this->presentation->settings($family);
+
+        if (Gate::allows('update', $family)) {
+            $data += $this->presentation->familyViewContext($family);
+        }
+
+        return view('settings.index', ['family' => $family, ...$data]);
     }
 
     public function update(SaveFamilySettingsRequest $request): RedirectResponse
