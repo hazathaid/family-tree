@@ -95,6 +95,15 @@ Sources: `NotificationService`, `NotifyFamilyOfUpdate`, `SendBirthdayGreetings`,
 - Search/report filters and pagination execute server-side. Results are limited to families the actor may access.
 - Reports expose aggregates/authorized activity, not private data from another family.
 
+## Cross-family links
+
+- Two independent families may be connected only through a `family_links` record with `link_type = marriage`; member records are never duplicated or moved.
+- Only the owner/admin of the initiating family may request a link, and only the owner/admin of the linked family may approve it. Either side may revoke at any time.
+- A link is read-only across families. The linked family may view tree structure and derived relationship labels, never mutate members, documents, biographies, or media.
+- Pending, revoked, and expired links grant no access. Partner-tree reads require `status = active` and membership of one of the two families.
+- Living members of the linked family are redacted server-side (anonymous placeholder, PII and photo suppressed) except the anchor member; clients must render the redacted payload verbatim.
+- Request, approve, and revoke are rate-limited (`family-link`, 30/min) and recorded in `activity_logs` plus `audit_logs`; cross-family surfaces must never be public or indexed.
+
 ## Logging and security
 
 - Critical mutations create activity and/or audit records through their services. Audit records are not user-editable/deletable.

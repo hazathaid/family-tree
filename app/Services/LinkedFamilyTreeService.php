@@ -56,6 +56,8 @@ class LinkedFamilyTreeService
         $tree['cached'] = $tree['cached'] ?? false;
         $tree['redacted'] = true;
         $tree['read_only'] = true;
+        $tree['anchor_member_uuid'] = $anchorUuid;
+        $tree['bridge_member_uuid'] = $bridgeUuid;
 
         return $tree;
     }

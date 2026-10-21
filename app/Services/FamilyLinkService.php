@@ -131,9 +131,9 @@ class FamilyLinkService
         return $this->members->candidateMembersForFamily($family);
     }
 
-    public function searchLinkedCandidates(User $user, Family $activeFamily, string $term): Collection
+    public function searchLinkedCandidates(User $user, Family $activeFamily, string $term, int $limit = 25): Collection
     {
-        return $this->members->searchMembersInUserFamilies($user, $activeFamily, $term);
+        return $this->members->searchMembersInUserFamilies($user, $activeFamily, $term, $limit);
     }
 
     public function expireDue(): int

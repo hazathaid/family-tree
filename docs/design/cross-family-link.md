@@ -1,10 +1,10 @@
 # Design: Cross-Family Link
 
-Status: implemented web v1 (2026-10-13). Phase 1 (`XF-001`, data model + consent workflow +
-service + policy + audit), Phase 2 (`XF-002`, cross-family resolver), Phase 3 (`XF-003`,
-read-only redacted linked tree) and Phase 4 (`XF-004`, web surface) are implemented.
-Read-only across the link; there is no REST/mobile surface yet, and pre-marriage grants
-(Phase 5) remain backlog.
+Status: implemented web and mobile v1 (2026-10-21). Phase 1 (`XF-001`, data model + consent
+workflow + service + policy + audit), Phase 2 (`XF-002`, cross-family resolver), Phase 3
+(`XF-003`, read-only redacted linked tree), Phase 4 (`XF-004`, web surface), Phase 6
+(`XF-005`, documentation/tests) and the REST/mobile surface (`XF-006`) are implemented.
+Read-only across the link; pre-marriage grants (Phase 5) remain backlog.
 
 ## Problem
 
@@ -262,9 +262,14 @@ Still open:
 - **Phase 5 — Pre-marriage view**
   - `PRV-001..004` — consented, time-bound read-only subset (see
     `pre-marriage-cross-family-view.md`).
-- **Phase 6 — Documentation and tests**
+- **Phase 6 — Documentation and tests** ✅ Implemented (2026-10-21)
   - `XF-005` — updates to `prd`, `business-rules`, `database-schema`, `api-spec`, `tasks`;
     isolation, consent, redaction tests.
+- **Phase 7 — REST API and mobile parity** ✅ Implemented (2026-10-21)
+  - `XF-006` — `/api/v1/families/{family}/family-links` list/candidates/request, link
+    approve/revoke, and `/api/v1/family-links/{link}/partner-tree`; Flutter `FamilyLinksScreen`
+    and read-only partner-tree screen reuse the same server redaction. Mobile never computes
+    kinship or cross-family access locally.
 
 ## Related documents
 

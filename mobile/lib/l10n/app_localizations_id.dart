@@ -1433,4 +1433,104 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get confirm => 'Konfirmasi';
+
+  @override
+  String get familyLinksMenu => 'Tautan keluarga';
+
+  @override
+  String get familyLinksTitle => 'Tautan Keluarga';
+
+  @override
+  String get familyLinksIntro =>
+      'Tautkan pasangan yang datanya berada di keluarga lain tanpa menduplikasi anggota. Tautan aktif bersifat baca-saja dan memerlukan persetujuan kedua keluarga.';
+
+  @override
+  String get familyLinksList => 'Daftar tautan keluarga';
+
+  @override
+  String get familyLinksEmpty => 'Belum ada tautan keluarga';
+
+  @override
+  String get familyLinkRequestTitle => 'Ajukan tautan pasangan';
+
+  @override
+  String get familyLinkRequestHint =>
+      'Pilih anggota keluarga Anda, lalu cari pasangannya di keluarga lain yang dapat Anda akses.';
+
+  @override
+  String get familyLinkLocalMember => 'Anggota keluarga Anda';
+
+  @override
+  String get familyLinkSearchHint => 'Cari nama pasangan di keluarga lain';
+
+  @override
+  String get familyLinkSearchAction => 'Cari pasangan';
+
+  @override
+  String get familyLinkSearchMin => 'Masukkan minimal 2 karakter.';
+
+  @override
+  String get familyLinkNoCandidates =>
+      'Tidak ada anggota yang cocok di keluarga lain yang dapat Anda akses.';
+
+  @override
+  String get familyLinkMemberRequired =>
+      'Pilih anggota keluarga Anda terlebih dahulu.';
+
+  @override
+  String familyLinkFamilyLabel(String name) {
+    return 'Keluarga: $name';
+  }
+
+  @override
+  String get familyLinkRequested => 'Permintaan tautan dikirim';
+
+  @override
+  String get familyLinkApproved => 'Tautan keluarga disetujui';
+
+  @override
+  String get familyLinkRevoked => 'Tautan keluarga dicabut';
+
+  @override
+  String get familyLinkApprove => 'Setujui';
+
+  @override
+  String get familyLinkRevoke => 'Cabut';
+
+  @override
+  String get familyLinkRevokeConfirmTitle => 'Cabut tautan keluarga?';
+
+  @override
+  String get familyLinkRevokeConfirmBody =>
+      'Akses baca-saja ke keluarga tertaut akan dihentikan.';
+
+  @override
+  String get familyLinkViewTree => 'Lihat silsilah pasangan';
+
+  @override
+  String get familyLinkStatusPending => 'Menunggu persetujuan';
+
+  @override
+  String get familyLinkStatusActive => 'Aktif';
+
+  @override
+  String get familyLinkStatusRevoked => 'Dicabut';
+
+  @override
+  String get familyLinkStatusExpired => 'Kedaluwarsa';
+
+  @override
+  String get familyLinkPartnerTreeTitle => 'Silsilah pasangan';
+
+  @override
+  String familyLinkPartnerTreeTitleFor(String family) {
+    return 'Silsilah $family';
+  }
+
+  @override
+  String get familyLinkReadOnly => 'Baca-saja';
+
+  @override
+  String get familyLinkReadOnlyNotice =>
+      'Anggota hidup disamarkan. Data tidak dapat diubah dari sini.';
 }

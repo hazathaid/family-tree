@@ -2749,6 +2749,186 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'Konfirmasi'**
   String get confirm;
+
+  /// No description provided for @familyLinksMenu.
+  ///
+  /// In id, this message translates to:
+  /// **'Tautan keluarga'**
+  String get familyLinksMenu;
+
+  /// No description provided for @familyLinksTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'Tautan Keluarga'**
+  String get familyLinksTitle;
+
+  /// No description provided for @familyLinksIntro.
+  ///
+  /// In id, this message translates to:
+  /// **'Tautkan pasangan yang datanya berada di keluarga lain tanpa menduplikasi anggota. Tautan aktif bersifat baca-saja dan memerlukan persetujuan kedua keluarga.'**
+  String get familyLinksIntro;
+
+  /// No description provided for @familyLinksList.
+  ///
+  /// In id, this message translates to:
+  /// **'Daftar tautan keluarga'**
+  String get familyLinksList;
+
+  /// No description provided for @familyLinksEmpty.
+  ///
+  /// In id, this message translates to:
+  /// **'Belum ada tautan keluarga'**
+  String get familyLinksEmpty;
+
+  /// No description provided for @familyLinkRequestTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'Ajukan tautan pasangan'**
+  String get familyLinkRequestTitle;
+
+  /// No description provided for @familyLinkRequestHint.
+  ///
+  /// In id, this message translates to:
+  /// **'Pilih anggota keluarga Anda, lalu cari pasangannya di keluarga lain yang dapat Anda akses.'**
+  String get familyLinkRequestHint;
+
+  /// No description provided for @familyLinkLocalMember.
+  ///
+  /// In id, this message translates to:
+  /// **'Anggota keluarga Anda'**
+  String get familyLinkLocalMember;
+
+  /// No description provided for @familyLinkSearchHint.
+  ///
+  /// In id, this message translates to:
+  /// **'Cari nama pasangan di keluarga lain'**
+  String get familyLinkSearchHint;
+
+  /// No description provided for @familyLinkSearchAction.
+  ///
+  /// In id, this message translates to:
+  /// **'Cari pasangan'**
+  String get familyLinkSearchAction;
+
+  /// No description provided for @familyLinkSearchMin.
+  ///
+  /// In id, this message translates to:
+  /// **'Masukkan minimal 2 karakter.'**
+  String get familyLinkSearchMin;
+
+  /// No description provided for @familyLinkNoCandidates.
+  ///
+  /// In id, this message translates to:
+  /// **'Tidak ada anggota yang cocok di keluarga lain yang dapat Anda akses.'**
+  String get familyLinkNoCandidates;
+
+  /// No description provided for @familyLinkMemberRequired.
+  ///
+  /// In id, this message translates to:
+  /// **'Pilih anggota keluarga Anda terlebih dahulu.'**
+  String get familyLinkMemberRequired;
+
+  /// No description provided for @familyLinkFamilyLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'Keluarga: {name}'**
+  String familyLinkFamilyLabel(String name);
+
+  /// No description provided for @familyLinkRequested.
+  ///
+  /// In id, this message translates to:
+  /// **'Permintaan tautan dikirim'**
+  String get familyLinkRequested;
+
+  /// No description provided for @familyLinkApproved.
+  ///
+  /// In id, this message translates to:
+  /// **'Tautan keluarga disetujui'**
+  String get familyLinkApproved;
+
+  /// No description provided for @familyLinkRevoked.
+  ///
+  /// In id, this message translates to:
+  /// **'Tautan keluarga dicabut'**
+  String get familyLinkRevoked;
+
+  /// No description provided for @familyLinkApprove.
+  ///
+  /// In id, this message translates to:
+  /// **'Setujui'**
+  String get familyLinkApprove;
+
+  /// No description provided for @familyLinkRevoke.
+  ///
+  /// In id, this message translates to:
+  /// **'Cabut'**
+  String get familyLinkRevoke;
+
+  /// No description provided for @familyLinkRevokeConfirmTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'Cabut tautan keluarga?'**
+  String get familyLinkRevokeConfirmTitle;
+
+  /// No description provided for @familyLinkRevokeConfirmBody.
+  ///
+  /// In id, this message translates to:
+  /// **'Akses baca-saja ke keluarga tertaut akan dihentikan.'**
+  String get familyLinkRevokeConfirmBody;
+
+  /// No description provided for @familyLinkViewTree.
+  ///
+  /// In id, this message translates to:
+  /// **'Lihat silsilah pasangan'**
+  String get familyLinkViewTree;
+
+  /// No description provided for @familyLinkStatusPending.
+  ///
+  /// In id, this message translates to:
+  /// **'Menunggu persetujuan'**
+  String get familyLinkStatusPending;
+
+  /// No description provided for @familyLinkStatusActive.
+  ///
+  /// In id, this message translates to:
+  /// **'Aktif'**
+  String get familyLinkStatusActive;
+
+  /// No description provided for @familyLinkStatusRevoked.
+  ///
+  /// In id, this message translates to:
+  /// **'Dicabut'**
+  String get familyLinkStatusRevoked;
+
+  /// No description provided for @familyLinkStatusExpired.
+  ///
+  /// In id, this message translates to:
+  /// **'Kedaluwarsa'**
+  String get familyLinkStatusExpired;
+
+  /// No description provided for @familyLinkPartnerTreeTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'Silsilah pasangan'**
+  String get familyLinkPartnerTreeTitle;
+
+  /// No description provided for @familyLinkPartnerTreeTitleFor.
+  ///
+  /// In id, this message translates to:
+  /// **'Silsilah {family}'**
+  String familyLinkPartnerTreeTitleFor(String family);
+
+  /// No description provided for @familyLinkReadOnly.
+  ///
+  /// In id, this message translates to:
+  /// **'Baca-saja'**
+  String get familyLinkReadOnly;
+
+  /// No description provided for @familyLinkReadOnlyNotice.
+  ///
+  /// In id, this message translates to:
+  /// **'Anggota hidup disamarkan. Data tidak dapat diubah dari sini.'**
+  String get familyLinkReadOnlyNotice;
 }
 
 class _AppLocalizationsDelegate

@@ -82,7 +82,7 @@ Web remains the reference implementation for Phase 17 capability and retains the
 
 ## Success metrics
 
-Product: monthly/daily active users, activated families, members documented, content/event/photo contributions, tree views/exports, and 30-day retention. Reliability: crash-free sessions >=99.5%, API success rate >=99.9% excluding expected 4xx, p95 targets above, and zero confirmed cross-family data exposure. Parity completion: 100% of approved member-facing web capabilities mapped to a mobile flow or an explicitly tracked API gap, with release quality gates green.
+Product: monthly/daily active users, activated families, members documented, content/event/photo contributions, tree views/exports, and 30-day retention. Reliability: crash-free sessions >=99.5%, API success rate >=99.9% excluding expected 4xx, p95 targets above, and zero confirmed cross-family data exposure outside an approved `family_links` record. Parity completion: 100% of approved member-facing web capabilities mapped to a mobile flow or an explicitly tracked API gap, with release quality gates green.
 
 ## Open product decisions
 

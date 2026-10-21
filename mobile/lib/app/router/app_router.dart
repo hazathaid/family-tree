@@ -11,6 +11,7 @@ import '../../features/auth/two_factor_screen.dart';
 import '../../features/account/presentation/account_screen.dart';
 import '../../features/family/presentation/family_onboarding_screen.dart';
 import '../../features/family/presentation/family_management_screen.dart';
+import '../../features/family/presentation/family_links_screen.dart';
 import '../../features/dashboard/dashboard_screen.dart';
 import '../../features/diagnostics/presentation/diagnostics_screen.dart';
 import '../../features/notifications/notifications_screen.dart';
@@ -102,6 +103,14 @@ GoRouter createAppRouter(
         GoRoute(
             path: '/family/manage',
             builder: (_, __) => const FamilyManagementScreen()),
+        GoRoute(
+            path: '/family-links',
+            builder: (_, __) => const FamilyLinksScreen()),
+        GoRoute(
+            path: '/family-links/:uuid/tree',
+            builder: (_, state) => FamilyLinkTreeScreen(
+                linkUuid: state.pathParameters['uuid']!,
+                familyName: state.extra as String?)),
         GoRoute(
             path: '/members',
             builder: (_, __) => const MemberDirectoryScreen()),
@@ -295,6 +304,13 @@ class _MoreScreen extends StatelessWidget {
                 title: Text(l10n.familySettings),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => context.go('/family/manage'))),
+        Card(
+            child: ListTile(
+                minTileHeight: 56,
+                leading: const Icon(Icons.link),
+                title: Text(l10n.familyLinksMenu),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.go('/family-links'))),
         Card(
             child: ListTile(
                 minTileHeight: 56,

@@ -24,7 +24,7 @@ class EloquentFamilyLinkRepository implements FamilyLinkRepositoryInterface
     public function findByUuid(string $uuid): ?FamilyLink
     {
         $link = FamilyLink::query()
-            ->with(['family', 'linkedFamily', 'member', 'linkedMember'])
+            ->with(['family', 'linkedFamily', 'member', 'linkedMember', 'childrenHomeFamily'])
             ->where('uuid', $uuid)
             ->first();
 
@@ -74,7 +74,7 @@ class EloquentFamilyLinkRepository implements FamilyLinkRepositoryInterface
     {
         return FamilyLink::query()
             ->where(fn ($query) => $query->where('family_id', $familyId)->orWhere('linked_family_id', $familyId))
-            ->with(['family', 'linkedFamily', 'member', 'linkedMember'])
+            ->with(['family', 'linkedFamily', 'member', 'linkedMember', 'childrenHomeFamily'])
             ->latest('id')
             ->get();
     }

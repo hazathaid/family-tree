@@ -9,6 +9,8 @@ import 'models.dart';
 import 'repositories.dart';
 import 'storage/scoped_cache.dart';
 import '../features/account/data/api_account_repository.dart';
+import '../features/family/data/api_family_link_repository.dart';
+import '../features/family/domain/family_link_repository.dart';
 import '../features/members/data/api_member_repository.dart';
 import '../features/members/domain/member_repository.dart';
 import '../features/tree/data/api_tree_repository.dart';
@@ -26,8 +28,8 @@ final sessionControllerProvider =
     Provider<SessionController>((ref) => throw UnimplementedError());
 final scopedCacheProvider =
     Provider<ScopedCache>((ref) => throw UnimplementedError());
-final crashReporterProvider = Provider<CrashReporter>(
-    (ref) => const NoopCrashReporter());
+final crashReporterProvider =
+    Provider<CrashReporter>((ref) => const NoopCrashReporter());
 final crashReportingServiceProvider = Provider<CrashReportingService>((ref) {
   final enabled = ref.watch(crashReportingConsentProvider);
   return CrashReportingService(
@@ -40,6 +42,8 @@ final authRepositoryProvider =
     Provider((ref) => ApiAuthRepository(ref.watch(apiClientProvider)));
 final familyRepositoryProvider =
     Provider((ref) => ApiFamilyRepository(ref.watch(apiClientProvider)));
+final familyLinkRepositoryProvider = Provider<FamilyLinkRepository>(
+    (ref) => ApiFamilyLinkRepository(ref.watch(apiClientProvider)));
 final notificationRepositoryProvider =
     Provider((ref) => ApiNotificationRepository(ref.watch(apiClientProvider)));
 final accountRepositoryProvider =

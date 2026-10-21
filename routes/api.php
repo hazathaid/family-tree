@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\V1\FamilyController;
 use App\Http\Controllers\Api\V1\FamilyDashboardController;
 use App\Http\Controllers\Api\V1\FamilyExportController;
 use App\Http\Controllers\Api\V1\FamilyImportController;
+use App\Http\Controllers\Api\V1\FamilyLinkController;
 use App\Http\Controllers\Api\V1\FamilyMemberController;
 use App\Http\Controllers\Api\V1\FamilyRoleController;
 use App\Http\Controllers\Api\V1\FamilyTreeController;
@@ -95,6 +96,13 @@ Route::prefix('v1')->name('api.')->middleware('throttle:api')->group(function ()
 
         Route::apiResource('families.branches', FamilyBranchController::class);
         Route::get('families/{family}/dashboard', [FamilyDashboardController::class, 'show']);
+        Route::get('families/{family}/family-links', [FamilyLinkController::class, 'index'])->middleware('throttle:family-link');
+        Route::get('families/{family}/family-links/candidates', [FamilyLinkController::class, 'candidates'])->middleware('throttle:family-link');
+        Route::post('families/{family}/family-links', [FamilyLinkController::class, 'store'])->middleware('throttle:family-link');
+        Route::get('family-links/{link}', [FamilyLinkController::class, 'show'])->middleware('throttle:family-link');
+        Route::post('family-links/{link}/approve', [FamilyLinkController::class, 'approve'])->middleware('throttle:family-link');
+        Route::post('family-links/{link}/revoke', [FamilyLinkController::class, 'revoke'])->middleware('throttle:family-link');
+        Route::get('family-links/{link}/partner-tree', [FamilyLinkController::class, 'partnerTree'])->middleware('throttle:family-link');
         Route::post('families/{family}/members/import', [MemberBulkController::class, 'import'])->middleware('throttle:10,1');
         Route::get('families/{family}/members/export', [MemberBulkController::class, 'export'])->middleware('throttle:10,1');
         Route::get('families/{family}/members/duplicates', [MemberMergeController::class, 'duplicates'])->middleware('throttle:30,1');

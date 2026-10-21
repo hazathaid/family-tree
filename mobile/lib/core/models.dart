@@ -454,7 +454,9 @@ class TreeNode {
       this.canAddRelative = false,
       this.relationshipToRoot,
       this.memorialPrefix = '',
-      this.photoUrl});
+      this.photoUrl,
+      this.isBridge = false,
+      this.isRedacted = false});
 
   final String uuid;
   final String name;
@@ -469,6 +471,8 @@ class TreeNode {
   final String? relationshipToRoot;
   final String memorialPrefix;
   final String? photoUrl;
+  final bool isBridge;
+  final bool isRedacted;
 
   String get displayName => '$memorialPrefix$name';
 
@@ -488,6 +492,8 @@ class TreeNode {
       relationshipToRoot: json['relationship_to_root'] as String?,
       memorialPrefix: json['memorial_prefix'] as String? ?? '',
       photoUrl: json['profile_photo_url'] as String?,
+      isBridge: json['is_bridge'] as bool? ?? false,
+      isRedacted: json['is_redacted'] as bool? ?? false,
     );
   }
 }
@@ -521,7 +527,11 @@ class FamilyTree {
       required this.viewportHeight,
       required this.canExpand,
       required this.canCollapse,
-      required this.cached});
+      required this.cached,
+      this.readOnly = false,
+      this.redacted = false,
+      this.anchorMemberUuid,
+      this.bridgeMemberUuid});
 
   final String rootUuid;
   final String mode;
@@ -534,6 +544,10 @@ class FamilyTree {
   final bool canExpand;
   final bool canCollapse;
   final bool cached;
+  final bool readOnly;
+  final bool redacted;
+  final String? anchorMemberUuid;
+  final String? bridgeMemberUuid;
 
   factory FamilyTree.fromJson(Map<String, dynamic> json) {
     final viewport = json['viewport'] as Map<String, dynamic>? ?? const {};
@@ -553,7 +567,11 @@ class FamilyTree {
         viewportHeight: (viewport['height'] as num? ?? 720).toDouble(),
         canExpand: expansion['can_expand'] as bool? ?? false,
         canCollapse: expansion['can_collapse'] as bool? ?? false,
-        cached: json['cached'] as bool? ?? false);
+        cached: json['cached'] as bool? ?? false,
+        readOnly: json['read_only'] as bool? ?? false,
+        redacted: json['redacted'] as bool? ?? false,
+        anchorMemberUuid: json['anchor_member_uuid'] as String?,
+        bridgeMemberUuid: json['bridge_member_uuid'] as String?);
   }
 }
 
@@ -592,8 +610,7 @@ class MemberDocument {
       originalName: json['original_name'] as String?,
       mimeType: json['mime_type'] as String?,
       size: json['size'] as int?,
-      documentDate:
-          DateTime.tryParse(json['document_date'] as String? ?? ''),
+      documentDate: DateTime.tryParse(json['document_date'] as String? ?? ''),
       notes: json['notes'] as String?,
       downloadUrl: json['download_url'] as String?,
       uploadedByName: uploader?['name'] as String?,
@@ -602,7 +619,8 @@ class MemberDocument {
   }
 }
 
-class DuplicateCandidate {  const DuplicateCandidate(
+class DuplicateCandidate {
+  const DuplicateCandidate(
       {required this.primary,
       required this.duplicate,
       required this.confidence,
@@ -685,4 +703,3 @@ class TreeExportJob {
         createdAt: DateTime.tryParse(json['created_at'] as String? ?? ''),
       );
 }
-

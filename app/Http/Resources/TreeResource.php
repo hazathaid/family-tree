@@ -12,7 +12,7 @@ class TreeResource extends JsonResource
     {
         $tree = $this->resource;
         $tree['nodes'] = array_map(function (array $node): array {
-            $node['profile_photo_url'] = $node['profile_photo'] ? Storage::url($node['profile_photo']) : null;
+            $node['profile_photo_url'] = ($node['profile_photo'] ?? null) ? Storage::url($node['profile_photo']) : ($node['profile_photo_url'] ?? null);
             unset($node['id'], $node['profile_photo']);
 
             return $node;

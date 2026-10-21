@@ -1433,4 +1433,104 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get confirm => 'Confirm';
+
+  @override
+  String get familyLinksMenu => 'Family links';
+
+  @override
+  String get familyLinksTitle => 'Family Links';
+
+  @override
+  String get familyLinksIntro =>
+      'Link a spouse whose record lives in another family without duplicating members. Active links are read-only and require approval from both families.';
+
+  @override
+  String get familyLinksList => 'Family link list';
+
+  @override
+  String get familyLinksEmpty => 'No family links yet';
+
+  @override
+  String get familyLinkRequestTitle => 'Request a spouse link';
+
+  @override
+  String get familyLinkRequestHint =>
+      'Select a member of your family, then search for their spouse in another family you can access.';
+
+  @override
+  String get familyLinkLocalMember => 'Your family member';
+
+  @override
+  String get familyLinkSearchHint => 'Search for a spouse in another family';
+
+  @override
+  String get familyLinkSearchAction => 'Search spouse';
+
+  @override
+  String get familyLinkSearchMin => 'Enter at least 2 characters.';
+
+  @override
+  String get familyLinkNoCandidates =>
+      'No matching members in the other families you can access.';
+
+  @override
+  String get familyLinkMemberRequired =>
+      'Select one of your family members first.';
+
+  @override
+  String familyLinkFamilyLabel(String name) {
+    return 'Family: $name';
+  }
+
+  @override
+  String get familyLinkRequested => 'Link request sent';
+
+  @override
+  String get familyLinkApproved => 'Family link approved';
+
+  @override
+  String get familyLinkRevoked => 'Family link revoked';
+
+  @override
+  String get familyLinkApprove => 'Approve';
+
+  @override
+  String get familyLinkRevoke => 'Revoke';
+
+  @override
+  String get familyLinkRevokeConfirmTitle => 'Revoke this family link?';
+
+  @override
+  String get familyLinkRevokeConfirmBody =>
+      'Read-only access to the linked family will stop.';
+
+  @override
+  String get familyLinkViewTree => 'View spouse\'s tree';
+
+  @override
+  String get familyLinkStatusPending => 'Pending approval';
+
+  @override
+  String get familyLinkStatusActive => 'Active';
+
+  @override
+  String get familyLinkStatusRevoked => 'Revoked';
+
+  @override
+  String get familyLinkStatusExpired => 'Expired';
+
+  @override
+  String get familyLinkPartnerTreeTitle => 'Spouse\'s tree';
+
+  @override
+  String familyLinkPartnerTreeTitleFor(String family) {
+    return '$family tree';
+  }
+
+  @override
+  String get familyLinkReadOnly => 'Read-only';
+
+  @override
+  String get familyLinkReadOnlyNotice =>
+      'Living members are masked. Data cannot be changed from here.';
 }

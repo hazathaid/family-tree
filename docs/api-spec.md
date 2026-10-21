@@ -146,6 +146,22 @@ Synchronous `/tree/export/png|pdf` remain for backward compatibility. The queued
 
 Lazy expansion uses `replace_depth`: repeat the same root/mode/layout request with `next_depth`, then atomically replace the graph. Collapse repeats with `previous_depth`. Depth remains bounded at 20. Binary successes are bytes; errors remain safe JSON.
 
+### Cross-family links
+
+A `family_links` record connects one member of family A to one member of family B after two-party owner/admin consent. Access is read-only across the link; member records are never duplicated or mutated. All endpoints below use the `family-link` limiter (30/min) and return the standard envelope.
+
+| Method/path | Request / query | Response / authorization |
+|---|---|---|
+| GET `/families/{family}/family-links` | none | list of links involving the family; any family role |
+| GET `/families/{family}/family-links/candidates` | required `search` (2–100 chars), optional `limit` 1–50 | bounded member matches in other families the caller can access; owner/admin of the route family |
+| POST `/families/{family}/family-links` | `member_uuid` (must belong to route family), `linked_member_uuid` (different family, caller must have access to that family) | created `pending` link with `approved_by_family`; owner/admin of the route family |
+| GET `/family-links/{link}` | none | link detail; member of either family |
+| POST `/family-links/{link}/approve` | none | `active` link with `approved_by_linked_family`; owner/admin of the linked family only |
+| POST `/family-links/{link}/revoke` | none | `revoked` link; owner/admin of either family; idempotent |
+| GET `/family-links/{link}/partner-tree` | optional `family_uuid` (one of the two families), `mode` ancestor/descendant/full, `depth` 1–20, `layout` vertical/horizontal/radial/compact | read-only tree resource of the opposite family anchored at the remote member, with `read_only:true`, `redacted:true`, `anchor_member_uuid`, `bridge_member_uuid`, and `X-Robots-Tag: noindex, nofollow`; active links only, member of the viewed family |
+
+Link resources expose only `uuid`, `link_type`, `status`, family/member UUID + display names, optional children-home family, timestamps, and server-computed `can_approve`/`can_revoke`. Living members in a partner tree are replaced with an anonymous placeholder unless they are the anchor; biographies, nicknames, birth years, photos, and internal IDs are suppressed. Pending, revoked, and expired links return `404` for partner-tree reads. There is no cross-family create/update/delete endpoint.
+
 ### Articles
 
 | Method/path | Request / filters | Response |
@@ -224,7 +240,7 @@ Authentication is necessary but insufficient: every model action calls its polic
 
 ## Rate limiting
 
-All v1 endpoints use `throttle:api`. Additional route limits are: login named limiter; tree PNG/PDF and article image 10/min; comments and RSVP 30/min; likes 60/min; push registration 20/min; search 60/min. Clients honor 429 and `Retry-After` and do not spin retries.
+All v1 endpoints use `throttle:api`. Additional route limits are: login named limiter; cross-family link endpoints 30/min (`family-link`); tree PNG/PDF and article image 10/min; comments and RSVP 30/min; likes 60/min; push registration 20/min; search 60/min. Clients honor 429 and `Retry-After` and do not spin retries.
 
 ## REST gaps against Phase 17 web
 
@@ -238,6 +254,7 @@ All v1 endpoints use `throttle:api`. Additional route limits are: login named li
 | API-G06 | Rich mobile dashboard content exceeds current summary (activity/birthdays/events/notification/facts/recent members contract) | Closed by FT-API-201 (2026-07-22) |
 | API-G07 | No explicit active-family REST selection is needed for stateless mobile, but onboarding create/select semantics must be defined client-side from memberships | FT-MOB-103; add API only if server state is approved |
 | API-G08 | Web article upload route name differs but REST capability exists; no gap. Web-only super-admin console is intentionally excluded. | Documented decision |
+| API-G09 | Cross-family marriage links were web-only (request, approve, revoke, read-only partner tree) | Closed by XF-006 (2026-10-21): REST endpoints plus Flutter family-links screens; see Cross-family links |
 
 Historical phase API documents remain implementation history. This file is the sole Flutter contract; when routes/requests/resources change, update this file and tests in the same task.
 

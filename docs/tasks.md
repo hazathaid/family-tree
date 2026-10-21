@@ -784,11 +784,31 @@ dua pihak + redaksi anggota hidup, dan anak tinggal di satu `children_home_famil
   `resources/views/family-links/partner-tree.blade.php`, `resources/js/app.js`,
   `tests/Feature/WebFamilyLinkTest.php`.
 
-## XF-005 — Cross-Family Link: Dokumentasi dan Tests (Fase 6)
+## XF-005 — Cross-Family Link: Dokumentasi dan Tests (Fase 6) ✅ Complete (2026-10-21)
 
 - Update `prd`, `business-rules`, `database-schema`, `api-spec`, `tasks`; tests isolasi,
   consent, dan redaksi.
-- Deliverable: docs, tests.
+- Deliverable: docs, tests (`tests/Feature/FamilyLinkApiTest.php`).
+- Isolasi lintas keluarga diuji lewat daftar/kandidat/detail/partner-tree; consent diuji lewat
+  owner/admin kedua pihak; redaksi diuji lewat placeholder anggota hidup dan penyembunyian PII.
+
+## XF-006 — Cross-Family Link: REST API dan Mobile Parity (Fase 7) ✅ Complete (2026-10-21)
+
+- REST: `GET/POST /api/v1/families/{family}/family-links`,
+  `GET /api/v1/families/{family}/family-links/candidates`,
+  `GET /api/v1/family-links/{link}`, `POST /api/v1/family-links/{link}/approve`,
+  `POST /api/v1/family-links/{link}/revoke`,
+  `GET /api/v1/family-links/{link}/partner-tree`.
+- Semua endpoint memakai limiter `family-link` (30/menit); resource hanya mengekspos UUID,
+  nama tampilan, status, dan flag aksi server-side. Tidak ada mutasi lintas keluarga.
+- Partner tree memakai `LinkedFamilyTreeService` sehingga redaksi anggota hidup, `read_only`,
+  `redacted`, `anchor_member_uuid`, dan `bridge_member_uuid` konsisten dengan web.
+- Mobile: `FamilyLinksScreen` (daftar, ajukan, setujui, cabut) dan `FamilyLinkTreeScreen`
+  (baca-saja, redaksi server, daftar aksesibel). Tidak ada perhitungan relasi di Dart.
+- Deliverable: `app/Http/Controllers/Api/V1/FamilyLinkController.php`,
+  `app/Http/Requests/FamilyLink/*`, `app/Http/Resources/FamilyLink*`,
+  `mobile/lib/features/family/domain/family_link_*`, `mobile/lib/features/family/presentation/family_links_screen.dart`,
+  `tests/Feature/FamilyLinkApiTest.php`, `mobile/test/family_link_phase_test.dart`.
 
 ## PRV-001 — Family View Grants (Fase 5)
 
