@@ -479,6 +479,7 @@
   "categoryMedical": "Medical",
   "categoryUnspecified": "No category",
   "documentDated": "Date: {date}",
+  "@documentDated": {"placeholders": {"date": {"type": "String"}}},
 
   "duplicatesTitle": "Duplicate candidates",
   "duplicatesTooltip": "Find duplicates",
@@ -487,6 +488,7 @@
   "mergeDialogTitle": "Merge members",
   "mergeKeepHint": "Choose which record to keep:",
   "keepMember": "Keep {name}",
+  "@keepMember": {"placeholders": {"name": {"type": "String"}}},
   "mergedSuccessfully": "Members merged",
   "confidenceHigh": "High confidence",
   "confidenceMedium": "Medium confidence",

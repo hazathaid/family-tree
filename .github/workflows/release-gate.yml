@@ -1,0 +1,98 @@
+name: Release gate
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-gate-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  backend-release:
+    name: Backend release gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, dom, xml, sqlite3, pdo_sqlite
+          coverage: xdebug
+          tools: composer:v2
+      - run: mkdir -p bootstrap/cache storage/framework/{cache,sessions,views}
+      - run: composer install --no-interaction --prefer-dist --no-progress
+      - run: cp .env.testing .env
+      - run: php artisan key:generate --ansi
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci && npm run build
+      - name: Pint
+        run: composer pint --test
+      - name: PHPStan
+        run: composer analyse
+      - name: Tests with coverage
+        run: composer test:coverage
+      - name: Coverage gate (80% global, 95% engine)
+        run: composer test:coverage:enforce
+
+  mobile-release:
+    name: Mobile release gate (Android)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.44.0
+          cache: true
+      - name: Install dependencies
+        working-directory: mobile
+        run: flutter pub get
+      - name: Analyze
+        working-directory: mobile
+        run: flutter analyze
+      - name: Test with coverage
+        working-directory: mobile
+        run: flutter test --coverage
+      - name: Coverage gate (release target 80%)
+        run: python3 scripts/check-flutter-coverage.py --lcov mobile/coverage/lcov.info --min 80 --exclude-prefix lib/l10n/
+      - name: Build Android release bundle (unsigned)
+        working-directory: mobile
+        run: |
+          flutter build appbundle --release --flavor production \
+            --dart-define=APP_FLAVOR=production \
+            --dart-define=API_BASE_URL=https://api.familytree.id/api/v1
+      - name: Upload Android bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-release-bundle
+          path: mobile/build/app/outputs/bundle/productionRelease/app-production-release.aab
+          if-no-files-found: error
+
+  ios-release:
+    name: Mobile release gate (iOS unsigned)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.44.0
+          cache: true
+      - name: Install dependencies
+        working-directory: mobile
+        run: flutter pub get
+      - name: Build iOS release (no codesign)
+        working-directory: mobile
+        run: |
+          flutter build ios --release --no-codesign \
+            --dart-define=APP_FLAVOR=production \
+            --dart-define=API_BASE_URL=https://api.familytree.id/api/v1

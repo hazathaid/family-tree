@@ -125,6 +125,13 @@ jobs:
         working-directory: mobile
         run: flutter analyze
 
-      - name: Test
+      - name: Test with coverage
         working-directory: mobile
-        run: flutter test
+        run: flutter test --coverage
+
+      - name: Upload mobile coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-coverage
+          path: mobile/coverage/lcov.info
+          if-no-files-found: error

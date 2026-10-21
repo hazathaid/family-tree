@@ -6,7 +6,7 @@ Flutter client untuk Silsilahku. Laravel tetap menjadi sumber kebenaran untuk va
 
 - Flutter 3.44 / Dart 3.12 atau versi compatible dengan `pubspec.lock`.
 - Android minimum API 23, application ID production `id.familytree.family_tree_mobile`.
-- iOS minimum 13, bundle ID production `id.familytree.familyTreeMobile`.
+- iOS minimum 15, bundle ID production `id.familytree.familyTreeMobile`.
 - Ponsel memakai portrait; iPad tetap mendukung adaptive orientation/layout.
 - Secret/token disimpan di OS secure storage. Hive hanya berisi cache read-only non-sensitif dan dibersihkan pada logout/account switch.
 
@@ -45,6 +45,8 @@ flutter analyze
 flutter test
 flutter build apk --debug --flavor development --dart-define=APP_FLAVOR=development --dart-define=API_BASE_URL=http://10.0.2.2:8000/api/v1
 flutter build ios --simulator --debug --no-codesign --dart-define=APP_FLAVOR=development --dart-define=API_BASE_URL=http://127.0.0.1:8000/api/v1
+flutter test --coverage
+cd .. && python3 scripts/check-flutter-coverage.py --lcov mobile/coverage/lcov.info --min 80 --exclude-prefix lib/l10n/
 ```
 
 Checklist produksi dan matriks parity berada di `docs/mobile-phase-9.md`. Build distribusi wajib memakai signing/Firebase yang diinjeksi CI, domain association yang sudah dipublikasikan, dan verifikasi perangkat nyata; file rahasia tersebut tidak boleh ditambahkan ke repository.

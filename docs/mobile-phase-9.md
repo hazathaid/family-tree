@@ -1,8 +1,16 @@
 # Mobile Phase 9 — Quality, Security, and Release
 
-Status: implementation audit completed 2026-07-22. Repository-verifiable backend and web gates pass. Flutter SDK, production credentials, store consoles, and physical devices are not available in this environment; the affected release gates remain explicitly open.
+Status: repository-side release gates strengthened 2026-10-21. Backend/web gates pass, and
+unsigned Android/iOS release builds are reproducible through `.github/workflows/release-gate.yml`.
+Phase 9 is **not complete** because four gates still require work outside this repository:
 
-## FT-MOB-801 — Automated test matrix
+1. Flutter line coverage is 24.37% (target 80%). Backend coverage gate already enforces 80%/95%.
+2. Mobile profiling and screen-reader/accessibility audits need real Android/iOS devices.
+3. Production signing, Firebase files, AASA/assetlinks, store metadata, and privacy URLs need
+   external credentials and consoles.
+4. End-to-end role/device acceptance (FT-MOB-807) has not been executed.
+
+## FT-MOB-801 — Automated test matrix 🟡 Coverage target open
 
 | Capability | Flutter coverage | Laravel contract/negative coverage |
 |---|---|---|
@@ -10,29 +18,56 @@ Status: implementation audit completed 2026-07-22. Repository-verifiable backend
 | Family switch/settings/roles/branches | `models_test.dart`, `design_system_test.dart` | `FamilyApiTest`, `FamilyDashboardApiTest`, `FamilyRoleApiTest`, `FamilyBranchApiTest` |
 | Member CRUD and relationships | `member_phase4_test.dart`, `models_test.dart` | `FamilyMemberApiTest`, `RelationshipApiTest`, relationship unit/performance tests |
 | Tree and export | `tree_phase5_test.dart`, `models_test.dart` | `FamilyTreeApiTest`, tree service/layout/performance tests |
+| Cross-family link and pre-marriage view | `family_link_phase_test.dart` | `FamilyLinkApiTest`, `FamilyViewGrantServiceTest`, `ScopedFamilyViewServiceTest`, `WebFamilyViewTest` |
 | Article/photo/event/timeline/notification | `content_phase6_test.dart` | article, photo, event, timeline, and notification API tests |
 | Search/reports/gamification | `discovery_phase7_test.dart` | search, report, and gamification API tests |
-| Release/security configuration | `phase9_release_security_test.dart` | `ProductionReadinessTest` and family-isolation assertions across feature tests |
+| Release/security configuration | `phase9_release_security_test.dart`, `phase9_release_gate_test.dart`, `l10n_parity_test.dart` | `ProductionReadinessTest` and family-isolation assertions |
 
-The full Laravel suite passes with 267 tests and 1,180 assertions. Measured via Xdebug: Global line coverage is 87.79% (target >=80%), and relationship/tree engine aggregate coverage is 98.09% (target >=95%). The Flutter suite passes with 29 tests (including crash reporting and full localization coverage).
+Current measurements (2026-10-21):
 
-## FT-MOB-802 — Security and privacy audit
+| Suite | Result |
+|---|---|
+| Laravel | 383 tests, 1,634 assertions, passing |
+| Flutter | 48 tests, passing |
+| Flutter line coverage | 24.37% (1,359/5,577, generated l10n excluded) — **below 80%** |
+| Backend coverage | Last Xdebug measurement 87.79% global / 98.09% engine (CI re-runs the gate) |
 
-- Bearer tokens use `flutter_secure_storage`; Hive is bounded to non-sensitive read models and `SessionController.endSession` clears token and all cache.
-- Production `API_BASE_URL` rejects HTTP. Android release additionally denies clear text and trusts system roots only; no certificate-bypass callback exists in Dart or native code.
-- API errors are mapped to safe Indonesian messages. Request bodies, authorization headers, media bodies, and tokens are not logged.
-- Deep links are limited to router-owned paths and still pass session/family guards. Article rendering strips executable/style markup and does not execute a WebView.
-- Upload type/size checks remain advisory on mobile and authoritative in Laravel. Platform permissions contain purpose strings.
-- Android notification previews use private lock-screen visibility. No Firebase service credential or signing key is tracked; the regression test scans common credential markers.
-- Laravel negative tests cover outsider/cross-family access throughout family, member, relationship, tree, content, report, and administration APIs.
+The release gate command is now available and intentionally fails until the Flutter target is met:
 
-Open item: iOS cannot universally prohibit screenshots; sensitive values are not rendered after logout and app-switcher masking must be verified/implemented with a product-approved UX if required. Physical-device deep-link and notification privacy verification remains part of FT-MOB-805/806.
+```bash
+cd mobile
+flutter test --coverage
+cd ..
+python3 scripts/check-flutter-coverage.py \
+  --lcov mobile/coverage/lcov.info --min 80 --exclude-prefix lib/l10n/
+```
 
-## FT-MOB-803 — Performance and reliability
+## FT-MOB-802 — Security and privacy audit 🟡 Device verification pending
 
-Server lists remain paginated and bounded, tree rendering caps active widgets at 250, API retry is limited to idempotent requests, and upload/download operations expose cancellation/progress. The crash reporting architecture (`CrashReportingService`, `CrashReporter`, `NoopCrashReporter`) is delivered with opt-in consent gating, recursive PII scrubbing, and overridable providers (`core/crash/crash_reporting.dart`, `test/crash_reporting_test.dart`). Production Sentry integration requires injecting the environment DSN and runtime dependency upon approval.
+Repository-verifiable controls pass:
 
-Measured on the test container:
+- Bearer tokens use `flutter_secure_storage`; cache clearing on logout/account switch is tested.
+- Production `API_BASE_URL` rejects HTTP; Android release denies cleartext and trusts system
+  roots only; iOS has no arbitrary-load exception.
+- Errors are mapped to safe Indonesian messages; credentials/tokens/media are not logged.
+- Deep links are router-owned and still pass session/family guards.
+- Uploads are advisory on mobile and authoritative in Laravel (type/size validation).
+- Android notification previews use private lock-screen visibility.
+- No signing key, Firebase service credential, or private key is tracked; the credential scan
+  in `phase9_release_security_test.dart` covers common markers.
+- Laravel negative tests cover outsider/cross-family access, including the new family-link and
+  family-view surfaces.
+
+Remaining: physical-device deep-link/notification privacy verification, and an approved
+app-switcher masking UX if the product requires screenshot protection on sensitive screens.
+
+## FT-MOB-803 — Performance and reliability 🟡 Mobile profiling pending
+
+Server lists are paginated and bounded, tree rendering caps active widgets at 250, API retry is
+limited to idempotent requests, and uploads/downloads expose cancellation/progress. Crash
+reporting remains opt-in with PII scrubbing and an overridable no-op reporter.
+
+Recorded backend thresholds:
 
 | Fixture | Result | Target |
 |---|---:|---:|
@@ -41,56 +76,97 @@ Measured on the test container:
 | Relationship, 100,000 members, cold/cached | 17.60 / 0.18 ms | <500 ms cached |
 | Web tree, 100-node fixture | Passed automated threshold | <5 s |
 
-Startup, dashboard paint, scrolling jank, image memory, upload reliability, and tree rendering must be profiled in Flutter profile mode on representative Android/iOS hardware. FT-MOB-803 remains open until those measurements and consented crash reporting are delivered.
+Remaining: Flutter profile-mode startup, dashboard paint, scrolling jank, image memory, upload
+reliability, and tree rendering on representative Android/iOS hardware. A real Sentry DSN must
+be injected at release time only after product approval.
 
-## FT-MOB-804 — Accessibility and localization
+## FT-MOB-804 — Accessibility and localization 🟡 Device audit pending
 
-The implementation supports adaptive phone/tablet layouts, 200% text scaling, 48dp primary controls, semantic async states, labelled icon actions, semantic report rows, and a non-canvas tree list. Bahasa Indonesia is the current primary UI language.
+Implemented: adaptive phone/tablet layouts, 200% text scaling, 48dp primary controls, semantic
+async states, labelled icon actions, semantic report rows, non-canvas tree lists, and full ARB
+migration (id/en) across presentation screens. `l10n_parity_test.dart` now enforces identical
+keys and placeholder metadata; both locales resolve every key.
 
-Localization completion (2026-08-20 / FT-MOB-804B): the ARB pipeline is fully migrated across all mobile presentation screens (auth, dashboard, members, tree, content, discovery, family management/onboarding, notifications, account, diagnostics, router). Both `lib/l10n/app_id.arb` and `app_en.arb` contain 388 synchronized keys. `test/l10n_test.dart` and all screen widget tests pass.
+Remaining: complete screen-reader, external-keyboard, contrast, reduced-motion, and focus-order
+audit on physical devices.
 
-Remaining: a complete screen-reader, external-keyboard, contrast, reduced-motion, and focus-order physical device audit has not been executed. FT-MOB-804 remains open for physical device verification.
+## FT-MOB-805 — Android release readiness 🟡 External gates pending
 
-## FT-MOB-805 — Android release readiness
+Repository-ready: production flavor/application ID, fixed versioning, release clear-text
+denial, system certificate policy, verified app links (`familytree.id`), custom scheme,
+notification permission/channel, camera permission, icon/splash placeholders, and an unsigned
+release bundle built in CI and locally.
 
-Repository-ready: production flavor/application ID, release clear-text denial, system certificate policy, app/custom links, notification permission/channel, camera permission, icon/splash placeholders, and semantic version/build number.
+External gates: inject production signing and `google-services.json`, publish
+`/.well-known/assetlinks.json`, provide final artwork/store metadata/privacy URL, then verify
+signed install, upgrade, background push, and deep links on real devices.
 
-External gates: inject production signing and `google-services.json`, publish `/.well-known/assetlinks.json`, provide final artwork/store metadata/privacy URL, then verify signed release install, upgrade, push, background handling, and deep links on real devices. FT-MOB-805 remains open.
+## FT-MOB-806 — iOS release readiness 🟡 External gates pending
 
-## FT-MOB-806 — iOS release readiness
+Repository-ready: bundle IDs per flavor, deployment target **iOS 15.0** (raised from 13.0 for
+current Xcode toolchains), versioning, APNs/associated-domain entitlements, purpose strings,
+privacy manifest, URL scheme, portrait phone/iPad orientations, and a successful unsigned
+release build.
 
-Repository-ready: production bundle ID/versioning, iOS 13 target, APNs and associated-domain entitlements, purpose strings, privacy manifest, icons/splash placeholders, and release configuration.
+External gates: set Apple team/provisioning, inject production Firebase plist, publish the AASA
+file, confirm App Store privacy answers/metadata/artwork, archive through Xcode, then verify
+install, upgrade, APNs/background push, universal links, and permission prompts on real devices.
 
-External gates: set Apple team/provisioning, inject production Firebase plist, publish the AASA file, confirm App Store privacy answers/metadata/artwork, archive through Xcode, then verify install, upgrade, APNs/background push, universal links, and permission prompts on real devices. FT-MOB-806 remains open.
-
-## FT-MOB-807 — parity acceptance matrix
+## FT-MOB-807 — Parity acceptance matrix 🟡 Device/role acceptance pending
 
 | Web capability in mobile scope | Flutter destination | REST contract | Automated evidence | Limitation |
 |---|---|---|---|---|
 | Auth/onboarding/account | auth flow, family selector, Account | `/auth/*`, `/profile/*`, `/families` | auth/account tests | Device deep links pending |
 | Dashboard/family administration | `/`, `/family/manage` | family dashboard/assets/roles/branches | dashboard/family tests | None known |
 | Members/relationships | `/members`, `/relationships`, `/relationship-resolver` | members, base relationships, resolver | Phase 4 + backend tests | None known |
-| Family tree/export | `/tree` | generate, PNG, PDF | Phase 5 + backend tests | Device share/storage pending |
+| Family tree/export | `/tree` | generate, PNG/PDF jobs | Phase 5 + backend tests | Device share/storage pending |
+| Cross-family link | `/family-links`, `/family-links/:uuid/tree` | family-link request/approve/revoke/partner-tree | `family_link_phase_test`, `FamilyLinkApiTest` | Device partner-tree share pending |
+| Pre-marriage consent view | Web-only by design | web routes, no REST/mobile task yet | `WebFamilyViewTest`, scoped-view unit tests | Mobile parity intentionally deferred |
 | Articles/photos/events | `/articles`, `/photos`, `/events` | content/media/event endpoints | Phase 6 + backend tests | Camera permission device test pending |
 | Timeline/notifications | `/activity`, `/account/notifications` | timeline/notifications/push devices | Phase 6 + backend tests | Production push pending |
 | Search/reports/gamification | `/search`, `/reports`, `/gamification` | search/report/gamification endpoints | Phase 7 + backend tests | None known |
 | Super-admin | Web-only | `/admin/*` | administration tests | Intentionally out of scope |
 
-Code and API mapping show no known in-scope web capability without a Flutter route and approved REST contract. End-to-end role/device acceptance is still required, so Phase 9 and parity are not marked complete.
+No known in-scope web capability lacks a Flutter route/approved REST contract, except the
+pre-marriage view which is explicitly web-first. End-to-end role/device acceptance is still
+required, so Phase 9 and parity remain open.
 
-## Reproducible quality gates
+## Reproducible release gates
+
+Pull-request CI:
 
 ```bash
-composer test
-composer analyse
-composer pint
-npm run build
-cd mobile && flutter analyze
-cd mobile && flutter test --coverage
-cd mobile && flutter build appbundle --release --flavor production \
-  --dart-define=APP_FLAVOR=production --dart-define=API_BASE_URL=https://api.familytree.id/api/v1
-cd mobile && flutter build ipa --release \
-  --dart-define=APP_FLAVOR=production --dart-define=API_BASE_URL=https://api.familytree.id/api/v1
+composer test && composer analyse && composer pint --test && npm run build
+cd mobile && flutter analyze && flutter test --coverage
 ```
 
-Do not commit signing files, Firebase configuration, API credentials, provisioning profiles, or store private keys.
+Manual/tag release workflow (`.github/workflows/release-gate.yml`):
+
+```bash
+# Backend: Pint, PHPStan, tests, 80% global + 95% engine coverage gate.
+composer test:coverage && composer test:coverage:enforce
+
+# Mobile: analysis, tests, 80% Flutter coverage gate, unsigned release builds.
+python3 scripts/check-flutter-coverage.py \
+  --lcov mobile/coverage/lcov.info --min 80 --exclude-prefix lib/l10n/
+cd mobile
+flutter build appbundle --release --flavor production \
+  --dart-define=APP_FLAVOR=production \
+  --dart-define=API_BASE_URL=https://api.familytree.id/api/v1
+flutter build ios --release --no-codesign \
+  --dart-define=APP_FLAVOR=production \
+  --dart-define=API_BASE_URL=https://api.familytree.id/api/v1
+```
+
+Do not commit signing files, Firebase configuration, API credentials, provisioning profiles, or
+store private keys.
+
+## Release completion checklist (external)
+
+- [ ] Flutter coverage >=80% and release-gate workflow green.
+- [ ] Real-device Android/iOS install, upgrade, deep link, push, and permission tests.
+- [ ] Accessibility/screen-reader and profile-mode performance sign-off.
+- [ ] Production signing/provisioning + Firebase files injected by CI secrets.
+- [ ] `assetlinks.json` and AASA published for `familytree.id`.
+- [ ] Store listings, screenshots, privacy policy URL, and data-safety answers approved.
+- [ ] Owner/admin/member/outsider role acceptance recorded in the parity matrix.
