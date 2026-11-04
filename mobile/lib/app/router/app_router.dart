@@ -202,7 +202,8 @@ GoRouter createAppRouter(
                 EventDetailScreen(uuid: state.pathParameters['uuid']!)),
         GoRoute(
             path: '/notifications/:uuid',
-            builder: (_, __) => const NotificationsScreen()),
+            builder: (_, __) =>
+                const Scaffold(body: NotificationsScreen())),
         GoRoute(
             path: '/members/:uuid',
             builder: (_, state) =>

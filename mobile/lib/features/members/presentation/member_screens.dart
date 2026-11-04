@@ -563,7 +563,10 @@ class _MemberFormScreenState extends ConsumerState<MemberFormScreen> {
                         ],
                         onChanged: (v) => setState(() => religion = v)),
                     DropdownButtonFormField<String?>(
-                        initialValue: branch,
+                        initialValue:
+                            branches.any((item) => item.uuid == branch)
+                                ? branch
+                                : null,
                         decoration: InputDecoration(labelText: l10n.branch),
                         items: [
                           DropdownMenuItem(
@@ -629,7 +632,9 @@ class _RelationshipManagementScreenState
   Future<PageData<MemberRelationship>> load() => ref
       .read(memberRepositoryProvider)
       .relationships(ref.read(currentFamilyProvider)!.uuid);
-  void refresh() => setState(() => future = load());
+  void refresh() => setState(() {
+        future = load();
+      });
   @override
   Widget build(BuildContext context) {
     final canManage = ref.watch(currentFamilyProvider)?.canManage ?? false;

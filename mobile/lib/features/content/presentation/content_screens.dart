@@ -862,7 +862,11 @@ class _PhotoDetailState extends ConsumerState<PhotoDetailScreen> {
               icon: const Icon(Icons.delete_outline))
         ]),
         body: ListView(padding: const EdgeInsets.all(16), children: [
-          Image.network(p.url, semanticLabel: p.caption ?? l10n.familyPhoto),
+          Image.network(p.url,
+              semanticLabel: p.caption ?? l10n.familyPhoto,
+              errorBuilder: (_, __, ___) => const ColoredBox(
+                  color: Colors.black12,
+                  child: Icon(Icons.broken_image_outlined))),
           if (p.caption != null)
             Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12),

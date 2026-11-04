@@ -108,7 +108,7 @@ class _TreeScreenState extends ConsumerState<TreeScreen> {
 
   void centerRoot() {
     final current = tree;
-    if (current == null || !mounted) return;
+    if (current == null || current.nodes.isEmpty || !mounted) return;
     final node = current.nodes
         .firstWhere((item) => item.isRoot, orElse: () => current.nodes.first);
     focus(node);

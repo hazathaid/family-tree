@@ -166,7 +166,9 @@ class _BranchesState extends ConsumerState<_Branches> {
   late Future<List<FamilyBranch>> future = load();
   Future<List<FamilyBranch>> load() =>
       ref.read(familyRepositoryProvider).branches(widget.family.uuid);
-  void refresh() => setState(() => future = load());
+  void refresh() => setState(() {
+        future = load();
+      });
   Future<void> edit([FamilyBranch? branch]) async {
     final l10n = AppLocalizations.of(context);
     final name = TextEditingController(text: branch?.name),
@@ -297,7 +299,9 @@ class _AccessState extends ConsumerState<_Access> {
   late Future<List<FamilyMembership>> future = load();
   Future<List<FamilyMembership>> load() =>
       ref.read(familyRepositoryProvider).memberships(widget.family.uuid);
-  void refresh() => setState(() => future = load());
+  void refresh() => setState(() {
+        future = load();
+      });
   Future<void> invite() async {
     final l10n = AppLocalizations.of(context);
     final email = TextEditingController();

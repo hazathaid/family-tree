@@ -9,6 +9,10 @@ import 'models.dart';
 import 'repositories.dart';
 import 'storage/scoped_cache.dart';
 import '../features/account/data/api_account_repository.dart';
+import '../features/account/domain/account_repository.dart';
+import '../features/auth/domain/auth_repository.dart';
+import '../features/family/domain/family_repository.dart';
+import '../features/notifications/domain/notification_repository.dart';
 import '../features/family/data/api_family_link_repository.dart';
 import '../features/family/domain/family_link_repository.dart';
 import '../features/members/data/api_member_repository.dart';
@@ -38,16 +42,16 @@ final crashReportingServiceProvider = Provider<CrashReportingService>((ref) {
   );
 });
 final crashReportingConsentProvider = StateProvider<bool>((ref) => false);
-final authRepositoryProvider =
-    Provider((ref) => ApiAuthRepository(ref.watch(apiClientProvider)));
-final familyRepositoryProvider =
-    Provider((ref) => ApiFamilyRepository(ref.watch(apiClientProvider)));
+final authRepositoryProvider = Provider<AuthRepository>(
+    (ref) => ApiAuthRepository(ref.watch(apiClientProvider)));
+final familyRepositoryProvider = Provider<FamilyRepository>(
+    (ref) => ApiFamilyRepository(ref.watch(apiClientProvider)));
 final familyLinkRepositoryProvider = Provider<FamilyLinkRepository>(
     (ref) => ApiFamilyLinkRepository(ref.watch(apiClientProvider)));
-final notificationRepositoryProvider =
-    Provider((ref) => ApiNotificationRepository(ref.watch(apiClientProvider)));
-final accountRepositoryProvider =
-    Provider((ref) => ApiAccountRepository(ref.watch(apiClientProvider)));
+final notificationRepositoryProvider = Provider<NotificationRepository>(
+    (ref) => ApiNotificationRepository(ref.watch(apiClientProvider)));
+final accountRepositoryProvider = Provider<AccountRepository>(
+    (ref) => ApiAccountRepository(ref.watch(apiClientProvider)));
 final memberRepositoryProvider = Provider<MemberRepository>(
     (ref) => ApiMemberRepository(ref.watch(apiClientProvider)));
 final treeRepositoryProvider = Provider<TreeRepository>(
