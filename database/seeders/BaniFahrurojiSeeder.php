@@ -87,7 +87,6 @@ Syaqiyya Kahayasa Putri Agustina
 Zhafira Khanza Humaira Agustina
 Ayesha Dhafia Rumaiza Agustina
 Devi Firdaus Fauzi
-Rani Apriyanti
 Muhammad Zaid Nur Fauzi
 Muhammad Thariq Al Fauzi
 Siti Hanifah Muslimah Fauzi
@@ -167,7 +166,7 @@ NAMES;
         "Aqila Tamamah Sya'diyatuddaraini", 'Hj. Neneng Haerani', 'Rina Yuniawati',
         'Denti Sofiatul Jannah', 'Syaqiyya Kahayasa Putri Agustina',
         'Zhafira Khanza Humaira Agustina', 'Ayesha Dhafia Rumaiza Agustina',
-        'Rani Apriyanti', 'Siti Hanifah Muslimah Fauzi', 'Pipih Sopiah',
+        'Siti Hanifah Muslimah Fauzi', 'Pipih Sopiah',
         'Aida Sri Yulistiani', 'Amelia Nur Fauza', 'Ineu Herlinawati',
         'Hilma Nadia Yulian', 'Naqysha Nursyifa Anindya', 'Hj. Iin Haniyati',
         'Shafa Nur Athiyyah Zahra', 'Dina Kamalasari', 'Nabila Humaira Azzahra',
@@ -182,7 +181,7 @@ NAMES;
     /**
      * Each entry is [father, mother, children].
      *
-     * @var list<array{string, string, list<string>}>
+     * @var list<array{string, string|null, list<string>}>
      */
     private const FAMILIES = [
         ['KH. Fahrurozi Bin Ama KH Sididiq', 'Nyi HJ. E. Khodijah Binti Aheh', [
@@ -220,7 +219,7 @@ NAMES;
             'Syaqiyya Kahayasa Putri Agustina', 'Zhafira Khanza Humaira Agustina',
             'Ayesha Dhafia Rumaiza Agustina',
         ]],
-        ['Devi Firdaus Fauzi', 'Rani Apriyanti', [
+        ['Devi Firdaus Fauzi', null, [
             'Muhammad Zaid Nur Fauzi', 'Muhammad Thariq Al Fauzi', 'Siti Hanifah Muslimah Fauzi',
         ]],
         ['R. Wachyu Yulianto', 'Pipih Sopiah', [
@@ -328,12 +327,17 @@ NAMES;
             }
 
             foreach (self::FAMILIES as [$father, $mother, $children]) {
-                $this->relationship($family, $members[$father], $members[$mother], MemberRelationship::TYPE_HUSBAND);
-                $this->relationship($family, $members[$mother], $members[$father], MemberRelationship::TYPE_WIFE);
+                if ($mother !== null) {
+                    $this->relationship($family, $members[$father], $members[$mother], MemberRelationship::TYPE_HUSBAND);
+                    $this->relationship($family, $members[$mother], $members[$father], MemberRelationship::TYPE_WIFE);
+                }
 
                 foreach ($children as $child) {
                     $this->relationship($family, $members[$father], $members[$child], MemberRelationship::TYPE_FATHER);
-                    $this->relationship($family, $members[$mother], $members[$child], MemberRelationship::TYPE_MOTHER);
+
+                    if ($mother !== null) {
+                        $this->relationship($family, $members[$mother], $members[$child], MemberRelationship::TYPE_MOTHER);
+                    }
                 }
             }
         });
@@ -363,7 +367,11 @@ NAMES;
                     continue;
                 }
 
-                foreach ([$father, $mother, ...$children] as $relative) {
+                $relatives = $mother === null
+                    ? [$father, ...$children]
+                    : [$father, $mother, ...$children];
+
+                foreach ($relatives as $relative) {
                     if (isset($members[$relative])) {
                         continue;
                     }

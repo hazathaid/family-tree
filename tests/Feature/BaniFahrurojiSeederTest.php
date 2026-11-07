@@ -30,7 +30,13 @@ class BaniFahrurojiSeederTest extends TestCase
 
         $family = Family::query()->where('slug', 'bani-fahruroji')->firstOrFail();
 
-        $this->assertSame(122, FamilyMember::query()->where('family_id', $family->id)->count());
+        $this->assertSame(121, FamilyMember::query()->where('family_id', $family->id)->count());
+        $this->assertFalse(
+            FamilyMember::query()
+                ->where('family_id', $family->id)
+                ->where('full_name', 'Rani Apriyanti')
+                ->exists(),
+        );
         $this->assertSame(5, FamilyBranch::query()->where('family_id', $family->id)->count());
         $this->assertSame(
             1,
@@ -41,11 +47,11 @@ class BaniFahrurojiSeederTest extends TestCase
                 ->count(),
         );
         $this->assertSame(
-            234,
+            229,
             MemberRelationship::query()->where('family_id', $family->id)->count(),
         );
         $this->assertSame(
-            234,
+            229,
             MemberRelationship::query()
                 ->where('family_id', $family->id)
                 ->distinct('uuid')

@@ -114,6 +114,19 @@ return [
             'death_place' => null,
             'biography' => '',
         ],
+        // Anggota keluarga kedua yang menikah dengan anggota keluarga partner.
+        [
+            'key' => 'rani_apriyanti',
+            'full_name' => 'Rani Apriyanti',
+            'nickname' => 'rani',
+            'gender' => 'female',
+            'birth_date' => '',
+            'birth_place' => 'Sukabumi',
+            'is_alive' => true,
+            'death_date' => null,
+            'death_place' => null,
+            'biography' => '',
+        ],
         // Tambahkan anggota lain (saudara, anak, dst) sesuai kebutuhan.
     ],
 
@@ -141,10 +154,10 @@ return [
     // children_home_family : second | partner  (anak tinggal di keluarga mana)
     // ---------------------------------------------------------------------
     'link' => [
-        'family_member_key' => '',
+        'family_member_key' => 'rani_apriyanti',
         'partner_member' => [
-            'family_slug' => '',
-            'full_name' => '',
+            'family_slug' => 'bani-fahruroji',
+            'full_name' => 'Devi Firdaus Fauzi',
         ],
         'status' => 'active',
         'children_home_family' => 'partner',
