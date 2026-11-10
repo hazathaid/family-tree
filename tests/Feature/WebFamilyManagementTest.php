@@ -154,6 +154,38 @@ class WebFamilyManagementTest extends TestCase
             ->assertSeeText('Saya untuk Anda');
     }
 
+    public function test_basic_relationship_labels_are_from_member_perspective(): void
+    {
+        [$user, $family] = $this->userWithFamily(FamilyUserRole::ROLE_OWNER);
+
+        $mother = $this->member($family, 'Ibu Khodijah', 'female', '1950-01-01', $user);
+        $husband = $this->member($family, 'Ayah Fahrurozi', 'male', '1948-01-01', $user);
+        $son = $this->member($family, 'Didin Muhyiddin', 'male', '1975-01-01', $user);
+        $daughter = $this->member($family, 'Pipih Sopiah', 'female', '1978-01-01', $user);
+
+        $this->relationship($mother, $son, MemberRelationship::TYPE_MOTHER);
+        $this->relationship($mother, $daughter, MemberRelationship::TYPE_MOTHER);
+        $this->relationship($husband, $mother, MemberRelationship::TYPE_HUSBAND);
+        $this->relationship($mother, $husband, MemberRelationship::TYPE_WIFE);
+
+        $response = $this->active($user, $family)->get(route('members.show', $mother))->assertOk();
+        $relationships = $response->viewData('relationships');
+        $labels = $relationships->keyBy(fn (array $row): string => $row['member']->full_name)
+            ->map(fn (array $row): string => $row['label']);
+
+        $this->assertCount(3, $relationships);
+        $this->assertSame('Husband', $labels['Ayah Fahrurozi']);
+        $this->assertSame('Child', $labels['Didin Muhyiddin']);
+        $this->assertSame('Child', $labels['Pipih Sopiah']);
+
+        $childResponse = $this->active($user, $family)->get(route('members.show', $son))->assertOk();
+        $childLabels = $childResponse->viewData('relationships')
+            ->keyBy(fn (array $row): string => $row['member']->full_name)
+            ->map(fn (array $row): string => $row['label']);
+
+        $this->assertSame('Mother', $childLabels['Ibu Khodijah']);
+    }
+
     private function member(Family $family, string $name, string $gender, string $birthDate, User $user): FamilyMember
     {
         return FamilyMember::factory()->create([
