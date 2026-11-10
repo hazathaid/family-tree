@@ -154,36 +154,53 @@ class WebFamilyManagementTest extends TestCase
             ->assertSeeText('Saya untuk Anda');
     }
 
-    public function test_basic_relationship_labels_are_from_member_perspective(): void
+    public function test_basic_relationship_labels_include_derived_close_family(): void
     {
         [$user, $family] = $this->userWithFamily(FamilyUserRole::ROLE_OWNER);
 
+        $grandFather = $this->member($family, 'Kakek Ahmad', 'male', '1920-01-01', $user);
+        $grandMother = $this->member($family, 'Nenek Aminah', 'female', '1922-01-01', $user);
         $mother = $this->member($family, 'Ibu Khodijah', 'female', '1950-01-01', $user);
         $husband = $this->member($family, 'Ayah Fahrurozi', 'male', '1948-01-01', $user);
+        $brother = $this->member($family, 'Paman Umar', 'male', '1953-01-01', $user);
         $son = $this->member($family, 'Didin Muhyiddin', 'male', '1975-01-01', $user);
         $daughter = $this->member($family, 'Pipih Sopiah', 'female', '1978-01-01', $user);
+        $daughterInLaw = $this->member($family, 'Istri Didin', 'female', '1977-01-01', $user);
+        $grandChild = $this->member($family, 'Cucu Didin', 'female', '2005-01-01', $user);
 
+        $this->relationship($grandFather, $mother, MemberRelationship::TYPE_FATHER);
+        $this->relationship($grandMother, $mother, MemberRelationship::TYPE_MOTHER);
+        $this->relationship($grandFather, $brother, MemberRelationship::TYPE_FATHER);
+        $this->relationship($grandMother, $brother, MemberRelationship::TYPE_MOTHER);
+        $this->relationship($husband, $mother, MemberRelationship::TYPE_HUSBAND);
         $this->relationship($mother, $son, MemberRelationship::TYPE_MOTHER);
         $this->relationship($mother, $daughter, MemberRelationship::TYPE_MOTHER);
-        $this->relationship($husband, $mother, MemberRelationship::TYPE_HUSBAND);
-        $this->relationship($mother, $husband, MemberRelationship::TYPE_WIFE);
+        $this->relationship($son, $daughterInLaw, MemberRelationship::TYPE_HUSBAND);
+        $this->relationship($son, $grandChild, MemberRelationship::TYPE_FATHER);
 
         $response = $this->active($user, $family)->get(route('members.show', $mother))->assertOk();
         $relationships = $response->viewData('relationships');
         $labels = $relationships->keyBy(fn (array $row): string => $row['member']->full_name)
             ->map(fn (array $row): string => $row['label']);
 
-        $this->assertCount(3, $relationships);
-        $this->assertSame('Husband', $labels['Ayah Fahrurozi']);
-        $this->assertSame('Child', $labels['Didin Muhyiddin']);
-        $this->assertSame('Child', $labels['Pipih Sopiah']);
+        $this->assertCount(8, $relationships);
+        $this->assertSame('Suami', $labels['Ayah Fahrurozi']);
+        $this->assertSame('Ayah', $labels['Kakek Ahmad']);
+        $this->assertSame('Ibu', $labels['Nenek Aminah']);
+        $this->assertSame('Saudara Laki-Laki', $labels['Paman Umar']);
+        $this->assertSame('Anak Laki-Laki', $labels['Didin Muhyiddin']);
+        $this->assertSame('Anak Perempuan', $labels['Pipih Sopiah']);
+        $this->assertSame('Menantu', $labels['Istri Didin']);
+        $this->assertSame('Cucu Perempuan', $labels['Cucu Didin']);
 
         $childResponse = $this->active($user, $family)->get(route('members.show', $son))->assertOk();
         $childLabels = $childResponse->viewData('relationships')
             ->keyBy(fn (array $row): string => $row['member']->full_name)
             ->map(fn (array $row): string => $row['label']);
 
-        $this->assertSame('Mother', $childLabels['Ibu Khodijah']);
+        $this->assertSame('Ibu', $childLabels['Ibu Khodijah']);
+        $this->assertSame('Istri', $childLabels['Istri Didin']);
+        $this->assertSame('Anak Perempuan', $childLabels['Cucu Didin']);
     }
 
     private function member(Family $family, string $name, string $gender, string $birthDate, User $user): FamilyMember

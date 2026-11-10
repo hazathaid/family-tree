@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\FamilyMember;
 use App\Models\MemberRelationship;
 use App\Repositories\Contracts\RelationshipRepositoryInterface;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use SplQueue;
 
@@ -70,6 +71,82 @@ class RelationshipTraversalService
         $this->cache->putPath($source, $target, []);
 
         return [];
+    }
+
+    /**
+     * @return Collection<int, array{member: FamilyMember, path: array<int, array<string, mixed>>}>
+     */
+    public function relativesWithinDepth(FamilyMember $source, int $maxDepth = 2): Collection
+    {
+        $maxDepth = max(1, $maxDepth);
+        $visited = [$source->id => true];
+        /** @var array<int, array<int, array<string, mixed>>> $paths */
+        $paths = [];
+        $frontier = [$source->id];
+
+        for ($depth = 0; $depth < $maxDepth && $frontier !== []; $depth++) {
+            $edges = $this->relationships->graphEdgesForMembers($source->family_id, $frontier);
+
+            $memberIds = [];
+
+            foreach ($edges as $edge) {
+                $memberIds[] = (int) $edge->source_member_id;
+                $memberIds[] = (int) $edge->target_member_id;
+            }
+
+            /** @var array<int, string|null> $memberGenders */
+            $memberGenders = DB::table('family_members')
+                ->where('family_id', $source->family_id)
+                ->whereIn('id', array_values(array_unique($memberIds)))
+                ->whereNull('deleted_at')
+                ->pluck('gender', 'id')
+                ->all();
+
+            $frontierLookup = array_fill_keys($frontier, true);
+            $next = [];
+
+            foreach ($edges as $edge) {
+                foreach ($this->normalizedEdges($edge, $memberGenders) as $normalized) {
+                    [$from, $to, $relationship, $relationshipId, $relationshipType] = $normalized;
+
+                    if (! isset($frontierLookup[$from]) || isset($visited[$to])) {
+                        continue;
+                    }
+
+                    $visited[$to] = true;
+                    $path = $paths[$from] ?? [];
+                    $path[] = [
+                        'from_member_id' => $from,
+                        'to_member_id' => $to,
+                        'relationship' => $relationship,
+                        'relationship_id' => $relationshipId,
+                        'relationship_type' => $relationshipType,
+                    ];
+                    $paths[$to] = $path;
+                    $next[$to] = true;
+                }
+            }
+
+            $frontier = array_keys($next);
+        }
+
+        if ($paths === []) {
+            return collect();
+        }
+
+        $members = FamilyMember::query()->whereIn('id', array_keys($paths))->get()->keyBy('id');
+        /** @var array<int, array{member: FamilyMember, path: array<int, array<string, mixed>>}> $relatives */
+        $relatives = [];
+
+        foreach ($paths as $memberId => $path) {
+            $member = $members->get($memberId);
+
+            if ($member instanceof FamilyMember) {
+                $relatives[] = ['member' => $member, 'path' => $path];
+            }
+        }
+
+        return collect($relatives);
     }
 
     /**

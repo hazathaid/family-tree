@@ -143,6 +143,30 @@ class EloquentRelationshipRepository implements RelationshipRepositoryInterface
             ->cursor();
     }
 
+    public function graphEdgesForMembers(int $familyId, array $memberIds): iterable
+    {
+        if ($memberIds === []) {
+            return [];
+        }
+
+        return DB::table('member_relationships')
+            ->select([
+                'id',
+                'family_id',
+                'source_member_id',
+                'target_member_id',
+                'relationship_type',
+            ])
+            ->where('family_id', $familyId)
+            ->where(function ($query) use ($memberIds): void {
+                $query->whereIn('source_member_id', $memberIds)
+                    ->orWhereIn('target_member_id', $memberIds);
+            })
+            ->whereNull('deleted_at')
+            ->orderBy('id')
+            ->get();
+    }
+
     public function forMember(FamilyMember $member): Collection
     {
         return MemberRelationship::query()

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\FamilyMember;
+use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
 
 class RelationshipResolverService
@@ -48,6 +49,28 @@ class RelationshipResolverService
             'relationship' => $relationship,
             'path' => $path,
         ];
+    }
+
+    /**
+     * @return Collection<int, array{member: FamilyMember, label: string}>
+     */
+    public function relatives(FamilyMember $source, int $maxDepth = 2): Collection
+    {
+        return $this->traversal->relativesWithinDepth($source, $maxDepth)
+            ->map(function (array $relative) use ($source): ?array {
+                $label = $this->nameFromPath($source, $relative['member'], $relative['path']);
+
+                if ($label === null || $label === 'Saya') {
+                    return null;
+                }
+
+                return [
+                    'member' => $relative['member'],
+                    'label' => $label,
+                ];
+            })
+            ->filter()
+            ->values();
     }
 
     /**

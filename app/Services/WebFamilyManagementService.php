@@ -5,13 +5,11 @@ namespace App\Services;
 use App\Models\Family;
 use App\Models\FamilyMember;
 use App\Models\FamilyViewGrant;
-use App\Models\MemberRelationship;
 use App\Models\User;
 use App\Repositories\Contracts\FamilyBranchRepositoryInterface;
 use App\Repositories\Contracts\FamilyMemberRepositoryInterface;
 use App\Repositories\Contracts\FamilyUserRoleRepositoryInterface;
 use App\Repositories\Contracts\FamilyViewGrantRepositoryInterface;
-use App\Repositories\Contracts\RelationshipRepositoryInterface;
 use Illuminate\Support\Collection;
 
 class WebFamilyManagementService
@@ -20,7 +18,6 @@ class WebFamilyManagementService
         private readonly FamilyBranchRepositoryInterface $branches,
         private readonly FamilyMemberRepositoryInterface $members,
         private readonly FamilyUserRoleRepositoryInterface $roles,
-        private readonly RelationshipRepositoryInterface $relationships,
         private readonly RelationshipResolverService $relationshipResolver,
         private readonly FamilyViewGrantRepositoryInterface $viewGrants,
     ) {}
@@ -63,46 +60,9 @@ class WebFamilyManagementService
         }
 
         return [
-            'relationships' => $this->basicRelationships($member),
+            'relationships' => $this->relationshipResolver->relatives($member),
             'relationship_to_viewer' => $relationship,
         ];
-    }
-
-    /**
-     * @return Collection<int, array{member: FamilyMember, label: string}>
-     */
-    private function basicRelationships(FamilyMember $member): Collection
-    {
-        return $this->relationships->forMember($member)
-            ->map(function (MemberRelationship $relationship) use ($member): array {
-                $memberIsSource = $relationship->source_member_id === $member->id;
-                $other = $memberIsSource ? $relationship->targetMember : $relationship->sourceMember;
-                $type = $memberIsSource
-                    ? $this->inverseRelationshipType($relationship->relationship_type, $other)
-                    : $relationship->relationship_type;
-
-                return [
-                    'member' => $other,
-                    'label' => ucfirst($type),
-                ];
-            })
-            ->unique(fn (array $row): string => $row['member']->id.'|'.$row['label'])
-            ->values();
-    }
-
-    private function inverseRelationshipType(string $type, FamilyMember $other): string
-    {
-        return match ($type) {
-            MemberRelationship::TYPE_FATHER, MemberRelationship::TYPE_MOTHER => MemberRelationship::TYPE_CHILD,
-            MemberRelationship::TYPE_CHILD => match ($other->gender) {
-                'male' => MemberRelationship::TYPE_FATHER,
-                'female' => MemberRelationship::TYPE_MOTHER,
-                default => 'parent',
-            },
-            MemberRelationship::TYPE_HUSBAND => MemberRelationship::TYPE_WIFE,
-            MemberRelationship::TYPE_WIFE => MemberRelationship::TYPE_HUSBAND,
-            default => $type,
-        };
     }
 
     public function branchesForForm(Family $family): Collection
