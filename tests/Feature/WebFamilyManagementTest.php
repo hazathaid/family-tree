@@ -167,6 +167,7 @@ class WebFamilyManagementTest extends TestCase
         $daughter = $this->member($family, 'Pipih Sopiah', 'female', '1978-01-01', $user);
         $daughterInLaw = $this->member($family, 'Istri Didin', 'female', '1977-01-01', $user);
         $grandChild = $this->member($family, 'Cucu Didin', 'female', '2005-01-01', $user);
+        $grandChildSpouse = $this->member($family, 'Suami Cucu', 'male', '2003-01-01', $user);
 
         $this->relationship($grandFather, $mother, MemberRelationship::TYPE_FATHER);
         $this->relationship($grandMother, $mother, MemberRelationship::TYPE_MOTHER);
@@ -177,13 +178,14 @@ class WebFamilyManagementTest extends TestCase
         $this->relationship($mother, $daughter, MemberRelationship::TYPE_MOTHER);
         $this->relationship($son, $daughterInLaw, MemberRelationship::TYPE_HUSBAND);
         $this->relationship($son, $grandChild, MemberRelationship::TYPE_FATHER);
+        $this->relationship($grandChild, $grandChildSpouse, MemberRelationship::TYPE_WIFE);
 
         $response = $this->active($user, $family)->get(route('members.show', $mother))->assertOk();
         $relationships = $response->viewData('relationships');
         $labels = $relationships->keyBy(fn (array $row): string => $row['member']->full_name)
             ->map(fn (array $row): string => $row['label']);
 
-        $this->assertCount(8, $relationships);
+        $this->assertCount(9, $relationships);
         $this->assertSame('Suami', $labels['Ayah Fahrurozi']);
         $this->assertSame('Ayah', $labels['Kakek Ahmad']);
         $this->assertSame('Ibu', $labels['Nenek Aminah']);
@@ -192,6 +194,7 @@ class WebFamilyManagementTest extends TestCase
         $this->assertSame('Anak Perempuan', $labels['Pipih Sopiah']);
         $this->assertSame('Menantu', $labels['Istri Didin']);
         $this->assertSame('Cucu Perempuan', $labels['Cucu Didin']);
+        $this->assertSame('Cucu Menantu', $labels['Suami Cucu']);
 
         $childResponse = $this->active($user, $family)->get(route('members.show', $son))->assertOk();
         $childLabels = $childResponse->viewData('relationships')

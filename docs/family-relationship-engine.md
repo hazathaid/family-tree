@@ -42,6 +42,8 @@ Shortest path is deterministic only to the extent repository neighbor ordering i
 | parent,child,child | target gender | Keponakan Laki-Laki / Perempuan / Keponakan |
 | spouse,parent | target gender | Mertua Laki-Laki / Perempuan / Mertua |
 | child,spouse | target gender | Menantu Laki-Laki / Perempuan / Menantu |
+| child,child,spouse | — | Cucu Menantu |
+| child,child,child,spouse | — | Cicit Menantu |
 
 The PHP resolver is the executable naming authority. Mobile displays its label/path verbatim and does not recreate this matrix in Dart. Unknown patterns return a safe generic/null result rather than inventing kinship.
 
@@ -51,7 +53,7 @@ Pakde/Bude versus Om/Tante uses available birth dates to compare the parent's si
 
 Web and API member detail surfaces resolve the authenticated user's linked member (`family_members.user_id` within the same family) and call `RelationshipResolverService::resolve(viewer, target)` server-side. The derived label is exposed as `relationship_to_viewer` on GET `/family-members/{family_member}` and rendered on the web member detail page ("X untuk Anda") and the mobile detail screen. When the user has no linked member in the target family, or viewer and target are disconnected, the field is `null` and no badge is shown. `source == target` yields `Saya`. Clients display the label verbatim and never recompute kinship.
 
-The web member detail "Relasi dasar" list uses `RelationshipTraversalService::relativesWithinDepth(member, 2)` and labels each discovered member with `RelationshipResolverService::nameFromPath`, so direct parents/spouse/children plus near derived relatives (siblings, grandparents, grandchildren, children-in-law, parents-in-law) are shown with the resolver's canonical labels. The list is intentionally bounded to two hops; deeper derived relatives (uncles/aunts, nephews/nieces, cousins, Buyut, Cicit) are not enumerated to keep the card bounded for very large families.
+The web member detail "Relasi dasar" list uses `RelationshipTraversalService::relativesWithinDepth(member, 3)` and labels each discovered member with `RelationshipResolverService::nameFromPath`, so direct parents/spouse/children plus near derived relatives (siblings, grandparents, grandchildren, children-in-law, parents-in-law, aunts/uncles, nephews/nieces, Buyut, Cicit, Cucu Menantu, Cicit Menantu) are shown with the resolver's canonical labels. The list is intentionally bounded to three hops; cousins and other deeper derived relatives are not enumerated to keep the card bounded for very large families. PNG/PDF tree exports render the same `relationship_to_root` label on each node.
 
 ## Integrity and cycle handling
 

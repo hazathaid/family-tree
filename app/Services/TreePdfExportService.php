@@ -11,7 +11,9 @@ class TreePdfExportService
         };
         $lines = ['Bagan Silsilah', 'Mode: '.$tree['mode'].' | Layout: '.$tree['layout'], 'Jumlah Anggota: '.$tree['statistics']['members'], 'Jumlah Generasi: '.$tree['statistics']['generations']];
         foreach (array_slice($tree['nodes'], 0, 100) as $node) {
-            $lines[] = $this->displayName($node).' (Generasi '.$node['generation'].')';
+            $relationship = $node['relationship_to_root'] ?? null;
+            $lines[] = $this->displayName($node)
+                .' (Generasi '.$node['generation'].($relationship ? ', '.$relationship : '').')';
         }
         $stream = 'BT /F1 12 Tf 40 '.($height - 50).' Td ';
         foreach ($lines as $index => $line) {

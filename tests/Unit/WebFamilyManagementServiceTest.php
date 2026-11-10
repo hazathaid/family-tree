@@ -54,7 +54,7 @@ class WebFamilyManagementServiceTest extends TestCase
         $viewGrants = Mockery::mock(FamilyViewGrantRepositoryInterface::class);
 
         $members->shouldReceive('findForUserInFamily')->once()->with($user, $family)->andReturn($viewer);
-        $resolver->shouldReceive('relatives')->once()->with($member)->andReturn(collect());
+        $resolver->shouldReceive('relatives')->once()->with($member, 3)->andReturn(collect());
         $resolver->shouldReceive('resolve')->once()->with($viewer, $member)->andReturn(['relationship' => 'Ayah', 'path' => []]);
 
         $result = (new WebFamilyManagementService($branches, $members, $roles, $resolver, $viewGrants))->memberDetail($member, $user);
@@ -76,7 +76,7 @@ class WebFamilyManagementServiceTest extends TestCase
         $viewGrants = Mockery::mock(FamilyViewGrantRepositoryInterface::class);
 
         $members->shouldReceive('findForUserInFamily')->once()->andReturnNull();
-        $resolver->shouldReceive('relatives')->once()->with($member)->andReturn(collect());
+        $resolver->shouldReceive('relatives')->once()->with($member, 3)->andReturn(collect());
         $resolver->shouldNotReceive('resolve');
 
         $result = (new WebFamilyManagementService($branches, $members, $roles, $resolver, $viewGrants))->memberDetail($member, $user);

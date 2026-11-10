@@ -110,6 +110,20 @@ class RelationshipEngineTest extends TestCase
         $this->assertSame('Cucu', $resolver->resolve($graph['source'], $graph['unknownGrandChild'])['relationship']);
     }
 
+    public function test_resolver_labels_grandchild_and_great_grandchild_in_law(): void
+    {
+        $graph = $this->relationshipGraph();
+        $resolver = app(RelationshipResolverService::class);
+
+        $grandChildInLaw = $this->member($graph['family'], 'Suami Cucu', 'male', '2040-06-01', $graph['user']);
+        $this->relationship($graph['grandChild'], $grandChildInLaw, 'husband');
+        $this->assertSame('Cucu Menantu', $resolver->resolve($graph['source'], $grandChildInLaw)['relationship']);
+
+        $greatGrandChildInLaw = $this->member($graph['family'], 'Istri Cicit', 'female', '2060-06-01', $graph['user']);
+        $this->relationship($graph['greatGrandChild'], $greatGrandChildInLaw, 'wife');
+        $this->assertSame('Cicit Menantu', $resolver->resolve($graph['source'], $greatGrandChildInLaw)['relationship']);
+    }
+
     public function test_resolver_returns_null_for_unrecognized_path_sequence(): void
     {
         $graph = $this->relationshipGraph();

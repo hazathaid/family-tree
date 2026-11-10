@@ -60,7 +60,7 @@ class WebFamilyManagementService
         }
 
         return [
-            'relationships' => $this->relationshipResolver->relatives($member),
+            'relationships' => $this->relationshipResolver->relatives($member, 3),
             'relationship_to_viewer' => $relationship,
         ];
     }

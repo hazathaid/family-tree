@@ -158,6 +158,14 @@ class RelationshipResolverService
             return 'Menantu';
         }
 
+        if ($sequence === ['child', 'child', 'spouse']) {
+            return 'Cucu Menantu';
+        }
+
+        if ($sequence === ['child', 'child', 'child', 'spouse']) {
+            return 'Cicit Menantu';
+        }
+
         if ($sequence === ['father', 'father', 'child', 'child']
             || $sequence === ['father', 'mother', 'child', 'child']
             || $sequence === ['mother', 'father', 'child', 'child']
