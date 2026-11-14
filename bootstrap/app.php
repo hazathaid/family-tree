@@ -36,7 +36,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 'success' => false,
                 'message' => 'Validation Error',
                 'errors' => $exception->errors(),
-            ], Response::HTTP_UNPROCESSABLE_ENTITY);
+            ], $exception->status);
         });
 
         $exceptions->render(function (AuthenticationException $exception, $request) {

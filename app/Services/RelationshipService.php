@@ -75,9 +75,7 @@ class RelationshipService
         $this->assertSpouseRelationship($relationship);
 
         if ($relationship->end_date !== null) {
-            throw ValidationException::withMessages([
-                'end_date' => ['This marriage is already ended.'],
-            ]);
+            $this->stateError('end_date', 'This marriage is already ended.');
         }
 
         $this->assertEndReason($endReason);
@@ -155,10 +153,16 @@ class RelationshipService
     private function assertMarriageHasEnded(MemberRelationship $relationship): void
     {
         if ($relationship->end_date === null) {
-            throw ValidationException::withMessages([
-                'end_date' => ['This marriage has not ended.'],
-            ]);
+            $this->stateError('end_date', 'This marriage has not ended.');
         }
+    }
+
+    private function stateError(string $key, string $message): never
+    {
+        $exception = ValidationException::withMessages([$key => [$message]]);
+        $exception->status = 409;
+
+        throw $exception;
     }
 
     private function assertEndReason(string $endReason): void

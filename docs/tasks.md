@@ -885,7 +885,7 @@ Keputusan terkunci (2026-11-14):
 
 - [x] PISAH-001 — Audit baseline dan dokumentasi keputusan
 - [x] PISAH-002 — Service koreksi dan pembatalan akhir pernikahan
-- [ ] PISAH-003 — Kontrak REST API perceraian
+- [x] PISAH-003 — Kontrak REST API perceraian
 - [ ] PISAH-004 — Web: koreksi dan pembatalan perceraian
 - [ ] PISAH-005 — Mobile parity perceraian
 - [ ] PISAH-006 — Pohon: mantan pasangan dengan anak bersama
@@ -919,22 +919,23 @@ Keputusan terkunci (2026-11-14):
   `AuditObserver` saat ada aktor.
 - [x] Tests: koreksi, reopen, edge non-spouse, tanggal sebelum menikah, alasan tidak valid,
   parent edge tetap, activity log (`tests/Unit/RelationshipServiceTest.php`).
-- [ ] Request/HTTP validation, route, dan UI: dikerjakan di PISAH-003/004.
+- [x] Request/route API: diselesaikan di PISAH-003.
+- [ ] Web/mobile UI: dikerjakan di PISAH-004/005.
 - Deliverable: `RelationshipService`, `ActivityLogService`, `ActivityLog` constants, tests, docs.
 
-## PISAH-003 — Kontrak REST API Perceraian 🔲 Planned
+## PISAH-003 — Kontrak REST API Perceraian ✅ Complete (2026-11-14)
 
-- `GET /api/v1/family-members/{member}/spouses` mengekspos `is_ended`, `end_date`,
-  `end_reason`, dan flag aksi server-side (`can_end`, `can_correct`).
-- `POST /api/v1/family-members/{member}/spouses/{relationship}/end` untuk mencatat perceraian.
-- `PATCH /api/v1/family-members/{member}/spouses/{relationship}` untuk koreksi tanggal/alasan.
-- `POST /api/v1/family-members/{member}/spouses/{relationship}/reopen` untuk membatalkan
+- [x] `GET /api/v1/family-members/{member}/spouses` mengekspos `is_ended`, `end_date`,
+  `end_reason`, dan flag aksi server-side (`can_end`, `can_correct`, `can_reopen`).
+- [x] `POST /api/v1/family-members/{member}/spouses/{relationship}/end` untuk mencatat perceraian.
+- [x] `PATCH /api/v1/family-members/{member}/spouses/{relationship}` untuk koreksi tanggal/alasan.
+- [x] `POST /api/v1/family-members/{member}/spouses/{relationship}/reopen` untuk membatalkan
   akhir pernikahan (dengan konfirmasi klien).
-- Semua endpoint memakai Form Request, policy `update` member, isolasi `family_id`,
-  limiter yang wajar, dan envelope JSON standar; 409 untuk kondisi sudah berakhir/belum
-  berakhir yang tidak valid.
-- Deliverable: controller, request, resource, routes, OpenAPI, feature tests
-  (`tests/Feature/RelationshipApiTest.php`).
+- [x] Form Request, policy `update` member, isolasi `family_id`, limiter 30/menit, envelope
+  JSON standar; 422 untuk validasi dan 409 untuk kondisi sudah berakhir/belum berakhir.
+- [x] `docs/openapi.json` diregenerasi dari route terdaftar.
+- Deliverable: `MemberSpouseController`, `MarriageEndRequest`, routes, OpenAPI,
+  feature tests (`tests/Feature/RelationshipApiTest.php`). Mobile action UI tetap PISAH-005.
 
 ## PISAH-004 — Web: Koreksi dan Pembatalan Perceraian 🔲 Planned
 

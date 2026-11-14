@@ -105,7 +105,7 @@ An accepted claim sets `family_members.user_id`, restores/creates a `member` fam
 | GET/PUT/DELETE `/family-members/{family_member}` | PUT member fields; death required when not alive | member / updated / soft-deleted null |
 | POST `/family-members/{family_member}/photo` | multipart `photo`, image <=10 MB in current request | updated member with photo |
 | POST `/family-members/{family_member}/relatives` | `relation` parent/spouse/child, `full_name`, `gender`; optional birth, death, biography fields; when `relation=child`, optional `co_parent_uuid` links the child to both biological parents (same family and already spouses) | created relative; allowed only for the linked member or family owner |
-| GET `/family-members/{family_member}/spouses` | none | spouse summaries with relationship UUID, spouse UUID/name, label, marriage start/end dates, `end_reason`, and `is_ended`; family membership required |
+| GET `/family-members/{family_member}/spouses` | none | spouse summaries with relationship UUID, spouse UUID/name, label, marriage start/end dates, `end_reason`, `is_ended`, and server-computed `can_end`/`can_correct`/`can_reopen`; family membership required |
 | GET `/families/{family}/members/duplicates` | optional `limit` 1–100 | bounded candidate duplicate pairs with confidence/reasons; owner/admin only |
 | POST `/family-members/{family_member}/merge` | `duplicate_uuid` (same family) | merged primary member; owner/admin only; reassigns base relationships/tags/invitations and soft-deletes the duplicate |
 | GET/POST `/family-members/{family_member}/documents` | POST multipart `file` (jpg/jpeg/png/webp/pdf, <=20 MB), `title`, optional `category`, `document_date`, `notes`; GET `limit`<=100 | paginated documents / created document; member-scoped |
@@ -118,16 +118,16 @@ An accepted claim sets `family_members.user_id`, restores/creates a `member` fam
 
 Member directory filters and sorting execute server-side. Relationship resolver inputs are public member UUIDs; numeric IDs are not accepted.
 
-Planned PISAH-003 marriage-ending contract (not yet implemented; routes, OpenAPI, and tests land with the implementation):
+Marriage-ending correction contract (PISAH-003):
 
 | Method/path | Request | Response / authorization |
 |---|---|---|
-| GET `/family-members/{family_member}/spouses` | none | existing summaries plus `is_ended`, `end_date`, `end_reason`, and server-computed `can_end`/`can_correct`; family membership required |
+| GET `/family-members/{family_member}/spouses` | none | existing summaries plus `is_ended`, `end_date`, `end_reason`, and server-computed `can_end`/`can_correct`/`can_reopen`; family membership required |
 | POST `/family-members/{family_member}/spouses/{relationship}/end` | `end_date`, `end_reason` divorced/widowed | ended spouse edge and inverse; policy `update` member; 409 when already ended |
 | PATCH `/family-members/{family_member}/spouses/{relationship}` | `end_date`, `end_reason` | corrected ending; only when already ended; 409 when not ended |
 | POST `/family-members/{family_member}/spouses/{relationship}/reopen` | none (client confirmation) | cleared `end_date`/`end_reason` on both spouse edges; 409 when not ended |
 
-All three mutations keep parent edges intact, invalidate relationship/tree cache, and record activity/audit entries. Until these routes exist, `PUT /relationships/{relationship}` already accepts `end_date`/`end_reason`; clients must not treat that as the dedicated correction contract.
+All three mutations return `MemberRelationshipResource`, keep parent edges intact, invalidate relationship/tree cache, and record activity/audit entries. The route `{relationship}` must be a spouse edge of the route member; other relationships return 404. Date/reason validation returns 422, while already-ended/not-ended state conflicts return 409. `PUT /relationships/{relationship}` remains a generic base-edge update and is not the dedicated correction contract.
 
 GET `/family-members/{family_member}` additionally resolves the derived
 relationship from the authenticated user's perspective: when the user has a
@@ -267,7 +267,7 @@ All v1 endpoints use `throttle:api`. Additional route limits are: login named li
 | API-G07 | No explicit active-family REST selection is needed for stateless mobile, but onboarding create/select semantics must be defined client-side from memberships | FT-MOB-103; add API only if server state is approved |
 | API-G08 | Web article upload route name differs but REST capability exists; no gap. Web-only super-admin console is intentionally excluded. | Documented decision |
 | API-G09 | Cross-family marriage links were web-only (request, approve, revoke, read-only partner tree) | Closed by XF-006 (2026-10-21): REST endpoints plus Flutter family-links screens; see Cross-family links |
-| API-G10 | Marriage-end correction/reopen has no dedicated REST contract or mobile spouse actions | PISAH-003 and PISAH-005 (planned) |
+| API-G10 | Marriage-end correction/reopen had no dedicated REST contract or mobile spouse actions | Closed by PISAH-003 (2026-11-14): end/correct/reopen endpoints, spouse action flags, OpenAPI and tests; mobile actions remain PISAH-005 |
 
 Historical phase API documents remain implementation history. This file is the sole Flutter contract; when routes/requests/resources change, update this file and tests in the same task.
 

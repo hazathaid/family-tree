@@ -278,4 +278,185 @@ class RelationshipApiTest extends TestCase
         ])->assertUnprocessable()
             ->assertJsonValidationErrors('end_reason');
     }
+
+    public function test_owner_can_end_correct_and_reopen_a_marriage_through_spouse_endpoints(): void
+    {
+        $owner = User::factory()->create();
+        $family = Family::factory()->create(['created_by' => $owner->id]);
+        $husband = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $owner->id, 'gender' => 'male']);
+        $wife = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $owner->id, 'gender' => 'female']);
+        FamilyUserRole::factory()->owner()->create([
+            'family_id' => $family->id,
+            'user_id' => $owner->id,
+        ]);
+        Sanctum::actingAs($owner);
+
+        $relationshipUuid = $this->postJson('/api/v1/relationships', [
+            'family_uuid' => $family->uuid,
+            'source_member_uuid' => $husband->uuid,
+            'target_member_uuid' => $wife->uuid,
+            'relationship_type' => 'husband',
+            'start_date' => '2010-01-01',
+        ])->assertCreated()->json('data.uuid');
+
+        $this->getJson('/api/v1/family-members/'.$husband->uuid.'/spouses')
+            ->assertOk()
+            ->assertJsonPath('data.0.can_end', true)
+            ->assertJsonPath('data.0.can_correct', false)
+            ->assertJsonPath('data.0.can_reopen', false);
+
+        $this->postJson('/api/v1/family-members/'.$husband->uuid.'/spouses/'.$relationshipUuid.'/end', [
+            'end_date' => '2024-06-01',
+            'end_reason' => 'divorced',
+        ])->assertOk()
+            ->assertJsonPath('data.end_date', '2024-06-01')
+            ->assertJsonPath('data.end_reason', 'divorced');
+
+        $this->assertDatabaseHas('member_relationships', [
+            'source_member_id' => $wife->id,
+            'target_member_id' => $husband->id,
+            'end_reason' => 'divorced',
+        ]);
+
+        $this->getJson('/api/v1/family-members/'.$husband->uuid.'/spouses')
+            ->assertOk()
+            ->assertJsonPath('data.0.label', 'Mantan Istri')
+            ->assertJsonPath('data.0.can_end', false)
+            ->assertJsonPath('data.0.can_correct', true)
+            ->assertJsonPath('data.0.can_reopen', true);
+
+        $this->patchJson('/api/v1/family-members/'.$husband->uuid.'/spouses/'.$relationshipUuid, [
+            'end_date' => '2023-12-31',
+            'end_reason' => 'widowed',
+        ])->assertOk()
+            ->assertJsonPath('data.end_date', '2023-12-31')
+            ->assertJsonPath('data.end_reason', 'widowed');
+
+        $this->postJson('/api/v1/family-members/'.$husband->uuid.'/spouses/'.$relationshipUuid.'/reopen')
+            ->assertOk()
+            ->assertJsonPath('data.end_date', null)
+            ->assertJsonPath('data.end_reason', null);
+
+        $this->getJson('/api/v1/family-members/'.$husband->uuid.'/spouses')
+            ->assertOk()
+            ->assertJsonPath('data.0.label', 'Istri')
+            ->assertJsonPath('data.0.can_end', true);
+    }
+
+    public function test_marriage_state_conflicts_return_409(): void
+    {
+        $owner = User::factory()->create();
+        $family = Family::factory()->create(['created_by' => $owner->id]);
+        $husband = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $owner->id, 'gender' => 'male']);
+        $wife = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $owner->id, 'gender' => 'female']);
+        FamilyUserRole::factory()->owner()->create([
+            'family_id' => $family->id,
+            'user_id' => $owner->id,
+        ]);
+        $marriage = MemberRelationship::factory()->create([
+            'family_id' => $family->id,
+            'source_member_id' => $husband->id,
+            'target_member_id' => $wife->id,
+            'relationship_type' => 'husband',
+        ]);
+        $ended = MemberRelationship::factory()->create([
+            'family_id' => $family->id,
+            'source_member_id' => $husband->id,
+            'target_member_id' => $wife->id,
+            'relationship_type' => 'husband',
+            'start_date' => '2010-01-01',
+            'end_date' => '2024-06-01',
+            'end_reason' => 'divorced',
+        ]);
+        Sanctum::actingAs($owner);
+
+        $this->postJson('/api/v1/family-members/'.$husband->uuid.'/spouses/'.$marriage->uuid.'/reopen')
+            ->assertStatus(409);
+
+        $this->postJson('/api/v1/family-members/'.$husband->uuid.'/spouses/'.$ended->uuid.'/end', [
+            'end_date' => '2025-01-01',
+            'end_reason' => 'divorced',
+        ])->assertStatus(409);
+    }
+
+    public function test_marriage_endpoints_require_update_permission(): void
+    {
+        [$owner, $user] = User::factory()->count(2)->create();
+        $family = Family::factory()->create(['created_by' => $owner->id]);
+        $husband = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $owner->id, 'gender' => 'male']);
+        $wife = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $owner->id, 'gender' => 'female']);
+        $marriage = MemberRelationship::factory()->create([
+            'family_id' => $family->id,
+            'source_member_id' => $husband->id,
+            'target_member_id' => $wife->id,
+            'relationship_type' => 'husband',
+        ]);
+        FamilyUserRole::factory()->create([
+            'family_id' => $family->id,
+            'user_id' => $user->id,
+            'role' => FamilyUserRole::ROLE_MEMBER,
+        ]);
+        Sanctum::actingAs($user);
+
+        $this->postJson('/api/v1/family-members/'.$husband->uuid.'/spouses/'.$marriage->uuid.'/end', [
+            'end_date' => '2024-06-01',
+            'end_reason' => 'divorced',
+        ])->assertForbidden();
+    }
+
+    public function test_marriage_endpoint_rejects_a_relationship_from_another_member(): void
+    {
+        $owner = User::factory()->create();
+        $family = Family::factory()->create(['created_by' => $owner->id]);
+        $husband = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $owner->id, 'gender' => 'male']);
+        $wife = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $owner->id, 'gender' => 'female']);
+        $outsider = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $owner->id]);
+        $marriage = MemberRelationship::factory()->create([
+            'family_id' => $family->id,
+            'source_member_id' => $husband->id,
+            'target_member_id' => $wife->id,
+            'relationship_type' => 'husband',
+        ]);
+        FamilyUserRole::factory()->owner()->create([
+            'family_id' => $family->id,
+            'user_id' => $owner->id,
+        ]);
+        Sanctum::actingAs($owner);
+
+        $this->postJson('/api/v1/family-members/'.$outsider->uuid.'/spouses/'.$marriage->uuid.'/end', [
+            'end_date' => '2024-06-01',
+            'end_reason' => 'divorced',
+        ])->assertNotFound();
+    }
+
+    public function test_marriage_end_endpoint_validates_dates_and_reasons(): void
+    {
+        $owner = User::factory()->create();
+        $family = Family::factory()->create(['created_by' => $owner->id]);
+        $husband = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $owner->id, 'gender' => 'male']);
+        $wife = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $owner->id, 'gender' => 'female']);
+        $marriage = MemberRelationship::factory()->create([
+            'family_id' => $family->id,
+            'source_member_id' => $husband->id,
+            'target_member_id' => $wife->id,
+            'relationship_type' => 'husband',
+            'start_date' => '2010-01-01',
+        ]);
+        FamilyUserRole::factory()->owner()->create([
+            'family_id' => $family->id,
+            'user_id' => $owner->id,
+        ]);
+        Sanctum::actingAs($owner);
+
+        $this->postJson('/api/v1/family-members/'.$husband->uuid.'/spouses/'.$marriage->uuid.'/end', [
+            'end_date' => '2024-06-01',
+        ])->assertUnprocessable()
+            ->assertJsonValidationErrors('end_reason');
+
+        $this->postJson('/api/v1/family-members/'.$husband->uuid.'/spouses/'.$marriage->uuid.'/end', [
+            'end_date' => '2009-12-31',
+            'end_reason' => 'divorced',
+        ])->assertUnprocessable()
+            ->assertJsonValidationErrors('end_date');
+    }
 }

@@ -119,6 +119,9 @@ Route::prefix('v1')->name('api.')->middleware('throttle:api')->group(function ()
         Route::post('family-members/{family_member}/account-invitations', [MemberAccountInvitationController::class, 'store']);
         Route::post('family-members/{family_member}/relatives', [TreeRelativeMemberController::class, 'store']);
         Route::get('family-members/{family_member}/spouses', [MemberSpouseController::class, 'index']);
+        Route::post('family-members/{family_member}/spouses/{relationship}/end', [MemberSpouseController::class, 'end'])->middleware('throttle:30,1');
+        Route::patch('family-members/{family_member}/spouses/{relationship}', [MemberSpouseController::class, 'correct'])->middleware('throttle:30,1');
+        Route::post('family-members/{family_member}/spouses/{relationship}/reopen', [MemberSpouseController::class, 'reopen'])->middleware('throttle:30,1');
 
         Route::get('relationship-engine', [RelationshipEngineController::class, 'show']);
         Route::apiResource('relationships', RelationshipController::class);
