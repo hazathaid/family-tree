@@ -545,16 +545,22 @@ class TreeEdge {
   const TreeEdge(
       {required this.sourceUuid,
       required this.targetUuid,
-      required this.relationship});
+      required this.relationship,
+      this.label,
+      this.isEnded = false});
 
   final String sourceUuid;
   final String targetUuid;
   final String relationship;
+  final String? label;
+  final bool isEnded;
 
   factory TreeEdge.fromJson(Map<String, dynamic> json) => TreeEdge(
         sourceUuid: (json['source_uuid'] ?? json['source']) as String,
         targetUuid: (json['target_uuid'] ?? json['target']) as String,
         relationship: json['relationship'] as String? ?? '',
+        label: json['label'] as String?,
+        isEnded: json['is_ended'] as bool? ?? false,
       );
 }
 

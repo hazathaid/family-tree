@@ -41,6 +41,32 @@ class WebFamilyTreeTest extends TestCase
             ->assertSee('name="co_parent_uuid"', false);
     }
 
+    public function test_tree_renders_a_divorced_spouse_with_a_shared_child(): void
+    {
+        [$user, $family] = $this->userWithFamily();
+        $father = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $user->id, 'full_name' => 'Ayah', 'gender' => 'male']);
+        $mother = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $user->id, 'full_name' => 'Ibu Mantan', 'gender' => 'female']);
+        $child = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $user->id, 'full_name' => 'Anak']);
+        MemberRelationship::factory()->create([
+            'family_id' => $family->id,
+            'source_member_id' => $father->id,
+            'target_member_id' => $mother->id,
+            'relationship_type' => MemberRelationship::TYPE_HUSBAND,
+            'start_date' => '2010-01-01',
+            'end_date' => '2024-06-01',
+            'end_reason' => 'divorced',
+        ]);
+        MemberRelationship::factory()->create(['family_id' => $family->id, 'source_member_id' => $father->id, 'target_member_id' => $child->id, 'relationship_type' => MemberRelationship::TYPE_FATHER]);
+        MemberRelationship::factory()->create(['family_id' => $family->id, 'source_member_id' => $mother->id, 'target_member_id' => $child->id, 'relationship_type' => MemberRelationship::TYPE_MOTHER]);
+
+        $this->active($user, $family)->get(route('tree.index', [
+            'root' => $father->uuid, 'mode' => 'descendant', 'depth' => 1, 'layout' => 'vertical',
+        ]))->assertOk()
+            ->assertSee('Ibu Mantan')
+            ->assertSee('Mantan Istri')
+            ->assertSee('"is_ended":true', false);
+    }
+
     public function test_tree_rejects_invalid_controls_and_foreign_root(): void
     {
         [$user, $family] = $this->userWithFamily();

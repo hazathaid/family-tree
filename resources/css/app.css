@@ -536,6 +536,7 @@ a {
 .tree-stage { position: absolute; inset: 0 auto auto 0; transform-origin: 0 0; }
 .tree-edges { position: absolute; inset: 0; overflow: visible; }
 .tree-edge { stroke: #91a8ba; stroke-width: 2; fill: none; }
+.tree-edge-ended { stroke: #b0793b; stroke-dasharray: 7 6; }
 .tree-edge-label { fill: var(--family-muted); font-size: 12px; text-anchor: middle; }
 .tree-node { position: absolute; width: 12rem; min-height: 7rem; transform: translate(-50%, -50%); border: 2px solid var(--family-border); background: var(--family-surface); border-radius: .75rem; box-shadow: var(--family-shadow); text-align: left; }
 .tree-node:hover, .tree-node:focus-visible { border-color: var(--family-primary); }

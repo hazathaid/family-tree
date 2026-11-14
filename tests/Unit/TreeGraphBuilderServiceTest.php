@@ -39,6 +39,34 @@ class TreeGraphBuilderServiceTest extends TestCase
         $this->assertContains('spouse', array_column($graph['adjacency'][$wife->id], 'relationship'));
     }
 
+    public function test_build_exposes_spouse_labels_and_ended_metadata(): void
+    {
+        $user = User::factory()->create();
+        $family = Family::factory()->create(['created_by' => $user->id]);
+        $husband = $this->member($family, 'Suami', 'male', $user);
+        $divorcedWife = $this->member($family, 'Mantan Istri', 'female', $user);
+        $widowedWife = $this->member($family, 'Istri Wafat', 'female', $user);
+
+        $this->edge($family, $husband, $divorcedWife, MemberRelationship::TYPE_HUSBAND, [
+            'start_date' => '2010-01-01',
+            'end_date' => '2024-06-01',
+            'end_reason' => MemberRelationship::END_REASON_DIVORCED,
+        ]);
+        $this->edge($family, $husband, $widowedWife, MemberRelationship::TYPE_HUSBAND, [
+            'start_date' => '2000-01-01',
+            'end_date' => '2020-01-01',
+            'end_reason' => MemberRelationship::END_REASON_WIDOWED,
+        ]);
+
+        $graph = app(TreeGraphBuilderService::class)->build($family->id);
+        $husbandEdges = collect($graph['adjacency'][$husband->id])->keyBy('to');
+
+        $this->assertSame('Mantan Istri', $husbandEdges[$divorcedWife->id]['label']);
+        $this->assertTrue($husbandEdges[$divorcedWife->id]['is_ended']);
+        $this->assertSame('Istri', $husbandEdges[$widowedWife->id]['label']);
+        $this->assertTrue($husbandEdges[$widowedWife->id]['is_ended']);
+    }
+
     public function test_build_skips_relationships_to_deleted_members(): void
     {
         $user = User::factory()->create();
@@ -65,13 +93,14 @@ class TreeGraphBuilderServiceTest extends TestCase
         ]);
     }
 
-    private function edge(Family $family, FamilyMember $source, FamilyMember $target, string $type): MemberRelationship
+    private function edge(Family $family, FamilyMember $source, FamilyMember $target, string $type, array $attributes = []): MemberRelationship
     {
         return MemberRelationship::factory()->create([
             'family_id' => $family->id,
             'source_member_id' => $source->id,
             'target_member_id' => $target->id,
             'relationship_type' => $type,
+            ...$attributes,
         ]);
     }
 }

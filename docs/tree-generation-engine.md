@@ -29,7 +29,7 @@ No recursive traversal or derived relationship rows are used.
 
 Nodes include public identity/display fields, generation/distance, living state, root/boundary flags, photo and nullable `relationship_to_root`. Spouse edges carry nullable `end_date`/`end_reason`; a divorced spouse stays in the graph for child context but resolves to `Mantan Istri`/`Mantan Suami`, while widowed spouses keep the normal spouse label. Labels use the authoritative PHP resolver over the already traversed path, avoiding a second BFS per node. Deceased nodes remain present with a memorial marker. Edges use member UUIDs and normalized base relationships.
 
-PISAH target contract (not yet applied to rendering): a former spouse stays visible in `ancestor`, `descendant`, and `full` trees when the couple has shared children, so the child keeps both parents without duplicating members. The spouse edge carries the `Mantan ...` label and is presented with a distinct style (for example a dashed line) in web, PNG, and PDF output. A former spouse is excluded from active co-parent/household selection; a later spouse is a separate spouse edge. Layout and cache keys do not change for this presentation rule.
+A divorced spouse stays visible in `ancestor`, `descendant`, and `full` trees when the couple has shared children, so the child keeps both parents without duplicating members. Directional modes add the former spouse as lateral context only when a shared child exists; full mode already traverses spouse edges. Spouse edges expose `label` (`Istri`/`Suami`/`Mantan Istri`/`Mantan Suami`) and `is_ended`, and ended edges render dashed in web, mobile, and PNG output. A former spouse is excluded from active co-parent/household selection; a later spouse is a separate spouse edge. Layout and cache keys do not change for this presentation rule.
 
 Web rendering and PNG/PDF exports use the server-derived memorial prefix:
 `Alm.`/`Almh.` for Islam, `†` for Christian/Catholic, and `Mendiang` for other
@@ -60,6 +60,8 @@ server commits the new node and base relationship.
 ## Layouts
 
 Current `TreeLayoutService` supports `vertical`, `horizontal`, `radial`, and `compact` positioning. Vertical is the baseline generation-axis layout; horizontal swaps axes; compact reduces spacing; radial places generations around root. Layout is deterministic presentation metadata over the same graph and does not alter kinship.
+
+Within each generation, spouses are kept adjacent and siblings are grouped under the same parent, so a couple is drawn as one unit. Parent units are centred above their children, and horizontal positions are resolved left-to-right without overlap. Radial layouts use distinct points for root-generation members and separate ancestor/descendant arcs.
 
 Web controls currently expose the supported layouts through the tree viewer. API request validation and documentation must agree on exact accepted values; FT-API-301 owns any change.
 

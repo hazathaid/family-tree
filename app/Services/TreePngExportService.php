@@ -30,7 +30,12 @@ class TreePngExportService
         foreach ($tree['edges'] as $edge) {
             [$sourceX, $sourceY] = $positions[$edge['source_uuid']];
             [$targetX, $targetY] = $positions[$edge['target_uuid']];
-            imageline($image, $sourceX, $sourceY, $targetX, $targetY, $line);
+
+            if ($edge['is_ended'] ?? false) {
+                $this->dashedLine($image, $sourceX, $sourceY, $targetX, $targetY, $line);
+            } else {
+                imageline($image, $sourceX, $sourceY, $targetX, $targetY, $line);
+            }
         }
         foreach ($tree['nodes'] as $node) {
             [$x, $y] = $positions[$node['uuid']];
@@ -51,6 +56,33 @@ class TreePngExportService
         }
 
         return $contents;
+    }
+
+    /**
+     * @param  \GdImage  $image
+     */
+    private function dashedLine($image, int $x1, int $y1, int $x2, int $y2, int $color): void
+    {
+        $length = hypot($x2 - $x1, $y2 - $y1);
+
+        if ($length < 1) {
+            return;
+        }
+
+        $dx = ($x2 - $x1) / $length;
+        $dy = ($y2 - $y1) / $length;
+
+        for ($position = 0.0; $position < $length; $position += 15.0) {
+            $end = min($position + 9.0, $length);
+            imageline(
+                $image,
+                (int) round($x1 + $dx * $position),
+                (int) round($y1 + $dy * $position),
+                (int) round($x1 + $dx * $end),
+                (int) round($y1 + $dy * $end),
+                $color,
+            );
+        }
     }
 
     private function displayName(array $node): string

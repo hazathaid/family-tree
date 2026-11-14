@@ -98,7 +98,9 @@ if (viewer && dataElement) {
         const source = nodes.get(edge.source_uuid);
         const target = nodes.get(edge.target_uuid);
         if (!source || !target) return;
-        edgesLayer.insertAdjacentHTML('beforeend', `<line class="tree-edge" data-edge="${source.uuid}:${target.uuid}" x1="${source.position.x}" y1="${source.position.y}" x2="${target.position.x}" y2="${target.position.y}"></line><text class="tree-edge-label" x="${(source.position.x + target.position.x) / 2}" y="${(source.position.y + target.position.y) / 2 - 6}">${escape(edge.relationship)}</text>`);
+        const edgeLabel = edge.label ?? edge.relationship;
+        const edgeClass = edge.is_ended ? 'tree-edge tree-edge-ended' : 'tree-edge';
+        edgesLayer.insertAdjacentHTML('beforeend', `<line class="${edgeClass}" data-edge="${source.uuid}:${target.uuid}" x1="${source.position.x}" y1="${source.position.y}" x2="${target.position.x}" y2="${target.position.y}"></line><text class="tree-edge-label" x="${(source.position.x + target.position.x) / 2}" y="${(source.position.y + target.position.y) / 2 - 6}">${escape(edgeLabel)}</text>`);
     });
     tree.nodes.forEach((node) => {
         const button = document.createElement('button');

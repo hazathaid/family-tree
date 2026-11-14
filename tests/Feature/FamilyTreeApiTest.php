@@ -74,6 +74,43 @@ class FamilyTreeApiTest extends TestCase
         }
     }
 
+    public function test_descendant_tree_exposes_a_divorced_spouse_with_a_shared_child(): void
+    {
+        $user = User::factory()->create();
+        $family = Family::factory()->create(['created_by' => $user->id]);
+        $father = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $user->id, 'gender' => 'male']);
+        $mother = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $user->id, 'gender' => 'female']);
+        $child = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $user->id]);
+        FamilyUserRole::factory()->owner()->create(['family_id' => $family->id, 'user_id' => $user->id]);
+        MemberRelationship::factory()->create([
+            'family_id' => $family->id,
+            'source_member_id' => $father->id,
+            'target_member_id' => $mother->id,
+            'relationship_type' => 'husband',
+            'start_date' => '2010-01-01',
+            'end_date' => '2024-06-01',
+            'end_reason' => 'divorced',
+        ]);
+        MemberRelationship::factory()->create(['family_id' => $family->id, 'source_member_id' => $father->id, 'target_member_id' => $child->id, 'relationship_type' => 'father']);
+        MemberRelationship::factory()->create(['family_id' => $family->id, 'source_member_id' => $mother->id, 'target_member_id' => $child->id, 'relationship_type' => 'mother']);
+        Sanctum::actingAs($user);
+
+        $this->getJson('/api/v1/tree/generate?'.http_build_query([
+            'member_uuid' => $father->uuid,
+            'mode' => 'descendant',
+            'depth' => 1,
+            'layout' => 'vertical',
+        ]))->assertOk()
+            ->assertJsonFragment(['uuid' => $mother->uuid, 'relationship_to_root' => 'Mantan Istri'])
+            ->assertJsonFragment([
+                'source_uuid' => $father->uuid,
+                'target_uuid' => $mother->uuid,
+                'relationship' => 'spouse',
+                'label' => 'Mantan Istri',
+                'is_ended' => true,
+            ]);
+    }
+
     public function test_outsider_cannot_generate_or_export_foreign_family_tree(): void
     {
         $outsider = User::factory()->create();

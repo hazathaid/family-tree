@@ -148,7 +148,11 @@ class _TreeScreenState extends ConsumerState<TreeScreen> {
     try {
       final repo = ref.read(treeRepositoryProvider);
       var job = await repo.requestExport(root!.uuid,
-          format: format, mode: mode, depth: depth, layout: layout, paperSize: 'A4');
+          format: format,
+          mode: mode,
+          depth: depth,
+          layout: layout,
+          paperSize: 'A4');
       final deadline = DateTime.now().add(const Duration(seconds: 60));
       while (!job.isCompleted &&
           !job.isFailed &&
@@ -192,8 +196,8 @@ class _TreeScreenState extends ConsumerState<TreeScreen> {
         exportProgress = null;
       });
       final l10n = AppLocalizations.of(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.exportShareFailed)));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.exportShareFailed)));
     }
   }
 
@@ -301,8 +305,8 @@ class _TreeScreenState extends ConsumerState<TreeScreen> {
                           TextFormField(
                               controller: name,
                               autofocus: true,
-                              decoration: InputDecoration(
-                                  labelText: l10n.fullName),
+                              decoration:
+                                  InputDecoration(labelText: l10n.fullName),
                               validator: (value) =>
                                   value?.trim().isEmpty ?? true
                                       ? l10n.nameRequired
@@ -310,8 +314,7 @@ class _TreeScreenState extends ConsumerState<TreeScreen> {
                           const SizedBox(height: 8),
                           DropdownButtonFormField<String>(
                             initialValue: gender,
-                            decoration: InputDecoration(
-                                labelText: l10n.gender),
+                            decoration: InputDecoration(labelText: l10n.gender),
                             items: [
                               DropdownMenuItem(
                                   value: 'male', child: Text(l10n.male)),
@@ -380,18 +383,18 @@ class _TreeScreenState extends ConsumerState<TreeScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Column(children: [
-        _controls(),
-        if (exportCancellation != null)
-          ListTile(
-              leading: const CircularProgressIndicator(),
-              title: Text(l10n.preparingExport),
-              subtitle: LinearProgressIndicator(value: exportProgress),
-              trailing: IconButton(
-                  tooltip: l10n.cancelExport,
-                  onPressed: exportCancellation!.cancel,
-                  icon: const Icon(Icons.close))),
-        Expanded(child: _content()),
-      ]);
+      _controls(),
+      if (exportCancellation != null)
+        ListTile(
+            leading: const CircularProgressIndicator(),
+            title: Text(l10n.preparingExport),
+            subtitle: LinearProgressIndicator(value: exportProgress),
+            trailing: IconButton(
+                tooltip: l10n.cancelExport,
+                onPressed: exportCancellation!.cancel,
+                icon: const Icon(Icons.close))),
+      Expanded(child: _content()),
+    ]);
   }
 
   Widget _controls() {
@@ -421,7 +424,8 @@ class _TreeScreenState extends ConsumerState<TreeScreen> {
                               value: 'pdf', child: Text(l10n.exportPdf))
                         ],
                     child: const Padding(
-                        padding: EdgeInsets.all(12), child: Icon(Icons.download)))
+                        padding: EdgeInsets.all(12),
+                        child: Icon(Icons.download)))
               ]),
               Wrap(spacing: 8, runSpacing: 8, children: [
                 DropdownButton<String>(
@@ -430,8 +434,7 @@ class _TreeScreenState extends ConsumerState<TreeScreen> {
                       DropdownMenuItem(
                           value: 'ancestor', child: Text(l10n.ancestor)),
                       DropdownMenuItem(
-                          value: 'descendant',
-                          child: Text(l10n.descendant)),
+                          value: 'descendant', child: Text(l10n.descendant)),
                       DropdownMenuItem(
                           value: 'full', child: Text(l10n.fullTree))
                     ],
@@ -447,8 +450,7 @@ class _TreeScreenState extends ConsumerState<TreeScreen> {
                       DropdownMenuItem(
                           value: 'vertical', child: Text(l10n.vertical)),
                       DropdownMenuItem(
-                          value: 'horizontal',
-                          child: Text(l10n.horizontal)),
+                          value: 'horizontal', child: Text(l10n.horizontal)),
                       DropdownMenuItem(
                           value: 'radial', child: Text(l10n.radial)),
                       DropdownMenuItem(
@@ -611,11 +613,10 @@ class _TreeScreenState extends ConsumerState<TreeScreen> {
                                                   MainAxisAlignment.center,
                                               children: [
                                                 Text(node.displayName,
-                                                    textAlign:
-                                                        TextAlign.center,
+                                                    textAlign: TextAlign.center,
                                                     maxLines: 2,
-                                                    overflow: TextOverflow
-                                                        .ellipsis),
+                                                    overflow:
+                                                        TextOverflow.ellipsis),
                                                 Text(
                                                     node.relationshipToRoot ??
                                                         '—',
@@ -623,8 +624,7 @@ class _TreeScreenState extends ConsumerState<TreeScreen> {
                                                         .textTheme
                                                         .labelSmall),
                                                 if (!node.isAlive)
-                                                  Icon(
-                                                      Icons.local_florist,
+                                                  Icon(Icons.local_florist,
                                                       size: 14,
                                                       semanticLabel:
                                                           l10n.deceased)
@@ -658,9 +658,29 @@ class _TreePainter extends CustomPainter {
       final source = byUuid[edge.sourceUuid];
       final target = byUuid[edge.targetUuid];
       if (source != null && target != null) {
-        canvas.drawLine(
-            Offset(source.x, source.y), Offset(target.x, target.y), paint);
+        final start = Offset(source.x, source.y);
+        final end = Offset(target.x, target.y);
+        if (edge.isEnded) {
+          _drawDashedLine(canvas, start, end, paint);
+        } else {
+          canvas.drawLine(start, end, paint);
+        }
       }
+    }
+  }
+
+  void _drawDashedLine(Canvas canvas, Offset start, Offset end, Paint paint) {
+    final delta = end - start;
+    final length = delta.distance;
+
+    if (length < 1) return;
+
+    final direction = delta / length;
+
+    for (var position = 0.0; position < length; position += 15) {
+      final dashEnd = position + 9 > length ? length : position + 9;
+      canvas.drawLine(
+          start + direction * position, start + direction * dashEnd, paint);
     }
   }
 
@@ -698,63 +718,60 @@ class _TreeRootPickerState extends ConsumerState<_TreeRootPicker> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return AlertDialog(
-          title: Text(l10n.pickTreeRoot),
-          content: SizedBox(
-              width: 480,
-              height: 480,
-              child: Column(children: [
-                SearchBar(
-                    controller: search,
-                    hintText: l10n.searchMembers,
-                    onSubmitted: (_) => reload()),
-                Expanded(
-                    child: FutureBuilder<PageData<FamilyMember>>(
-                        future: future,
-                        builder: (_, snapshot) {
-                          if (!snapshot.hasData) {
-                            return const Center(
-                                child: CircularProgressIndicator());
-                          }
-                          final result = snapshot.data!;
-                          return Column(children: [
-                            Expanded(
-                                child: ListView(
-                                    children: result.items
-                                        .map((member) => ListTile(
-                                            title: Text(member.displayName),
-                                            subtitle: Text(member.isAlive
-                                                ? l10n.alive
-                                                : l10n.deceased),
-                                            onTap: () => Navigator.pop(
-                                                context, member)))
-                                        .toList())),
-                            Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  IconButton(
-                                      tooltip: l10n.previousPage,
-                                      onPressed: result.currentPage > 1
-                                          ? () =>
-                                              reload(result.currentPage - 1)
-                                          : null,
-                                      icon: const Icon(Icons.chevron_left)),
-                                  Text(l10n.pageFraction(result.currentPage,
-                                      result.lastPage)),
-                                  IconButton(
-                                      tooltip: l10n.nextPage,
-                                      onPressed: result.hasMore
-                                          ? () =>
-                                              reload(result.currentPage + 1)
-                                          : null,
-                                      icon: const Icon(Icons.chevron_right))
-                                ])
-                          ]);
-                        }))
-              ])),
-          actions: [
-            TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text(l10n.cancel))
-          ]);
+        title: Text(l10n.pickTreeRoot),
+        content: SizedBox(
+            width: 480,
+            height: 480,
+            child: Column(children: [
+              SearchBar(
+                  controller: search,
+                  hintText: l10n.searchMembers,
+                  onSubmitted: (_) => reload()),
+              Expanded(
+                  child: FutureBuilder<PageData<FamilyMember>>(
+                      future: future,
+                      builder: (_, snapshot) {
+                        if (!snapshot.hasData) {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        }
+                        final result = snapshot.data!;
+                        return Column(children: [
+                          Expanded(
+                              child: ListView(
+                                  children: result.items
+                                      .map((member) => ListTile(
+                                          title: Text(member.displayName),
+                                          subtitle: Text(member.isAlive
+                                              ? l10n.alive
+                                              : l10n.deceased),
+                                          onTap: () =>
+                                              Navigator.pop(context, member)))
+                                      .toList())),
+                          Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                IconButton(
+                                    tooltip: l10n.previousPage,
+                                    onPressed: result.currentPage > 1
+                                        ? () => reload(result.currentPage - 1)
+                                        : null,
+                                    icon: const Icon(Icons.chevron_left)),
+                                Text(l10n.pageFraction(
+                                    result.currentPage, result.lastPage)),
+                                IconButton(
+                                    tooltip: l10n.nextPage,
+                                    onPressed: result.hasMore
+                                        ? () => reload(result.currentPage + 1)
+                                        : null,
+                                    icon: const Icon(Icons.chevron_right))
+                              ])
+                        ]);
+                      }))
+            ])),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(context), child: Text(l10n.cancel))
+        ]);
   }
 }

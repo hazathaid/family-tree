@@ -158,6 +158,8 @@ Synchronous `/tree/export/png|pdf` remain for backward compatibility. The queued
 
 Lazy expansion uses `replace_depth`: repeat the same root/mode/layout request with `next_depth`, then atomically replace the graph. Collapse repeats with `previous_depth`. Depth remains bounded at 20. Binary successes are bytes; errors remain safe JSON.
 
+Tree edges expose `relationship` plus nullable `label`, `end_date`, `end_reason`, and `is_ended`. For spouse edges the server computes `label` (`Istri`/`Suami`/`Mantan Istri`/`Mantan Suami`); clients render it verbatim and may style `is_ended` edges differently. A divorced spouse with a shared child remains in ancestor/descendant graphs as lateral context.
+
 ### Cross-family links
 
 A `family_links` record connects one member of family A to one member of family B after two-party owner/admin consent. Access is read-only across the link; member records are never duplicated or mutated. All endpoints below use the `family-link` limiter (30/min) and return the standard envelope.

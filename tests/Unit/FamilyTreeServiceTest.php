@@ -85,6 +85,71 @@ class FamilyTreeServiceTest extends TestCase
         $this->assertContains($secondChild->uuid, array_column($descendants['nodes'], 'uuid'));
     }
 
+    public function test_directional_trees_keep_a_divorced_spouse_with_a_shared_child(): void
+    {
+        $user = User::factory()->create();
+        $family = Family::factory()->create(['created_by' => $user->id]);
+        $father = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $user->id, 'gender' => 'male']);
+        $mother = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $user->id, 'gender' => 'female']);
+        $child = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $user->id]);
+
+        MemberRelationship::factory()->create([
+            'family_id' => $family->id,
+            'source_member_id' => $father->id,
+            'target_member_id' => $mother->id,
+            'relationship_type' => MemberRelationship::TYPE_HUSBAND,
+            'start_date' => '2010-01-01',
+            'end_date' => '2024-06-01',
+            'end_reason' => MemberRelationship::END_REASON_DIVORCED,
+        ]);
+        foreach ([[$father, 'father'], [$mother, 'mother']] as [$parent, $type]) {
+            MemberRelationship::factory()->create([
+                'family_id' => $family->id,
+                'source_member_id' => $parent->id,
+                'target_member_id' => $child->id,
+                'relationship_type' => $type,
+            ]);
+        }
+
+        $tree = app(FamilyTreeService::class)->generate($father, 'descendant', 1);
+        $this->assertContains($mother->uuid, array_column($tree['nodes'], 'uuid'));
+        $this->assertTrue(collect($tree['edges'])->contains(
+            fn (array $edge): bool => $edge['source_uuid'] === $father->uuid
+                && $edge['target_uuid'] === $mother->uuid
+                && $edge['label'] === 'Mantan Istri'
+                && $edge['is_ended'] === true,
+        ));
+    }
+
+    public function test_directional_trees_do_not_add_a_divorced_spouse_without_shared_children(): void
+    {
+        $user = User::factory()->create();
+        $family = Family::factory()->create(['created_by' => $user->id]);
+        $father = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $user->id, 'gender' => 'male']);
+        $formerWife = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $user->id, 'gender' => 'female']);
+        $child = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $user->id]);
+
+        MemberRelationship::factory()->create([
+            'family_id' => $family->id,
+            'source_member_id' => $father->id,
+            'target_member_id' => $formerWife->id,
+            'relationship_type' => MemberRelationship::TYPE_HUSBAND,
+            'start_date' => '2010-01-01',
+            'end_date' => '2024-06-01',
+            'end_reason' => MemberRelationship::END_REASON_DIVORCED,
+        ]);
+        MemberRelationship::factory()->create([
+            'family_id' => $family->id,
+            'source_member_id' => $father->id,
+            'target_member_id' => $child->id,
+            'relationship_type' => MemberRelationship::TYPE_FATHER,
+        ]);
+
+        $tree = app(FamilyTreeService::class)->generate($father, 'descendant', 1);
+
+        $this->assertNotContains($formerWife->uuid, array_column($tree['nodes'], 'uuid'));
+    }
+
     public function test_rejects_invalid_mode_and_depth(): void
     {
         $user = User::factory()->create();

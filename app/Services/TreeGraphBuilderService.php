@@ -44,23 +44,44 @@ class TreeGraphBuilderService
                 $this->add($adjacency, $source, $target, $parent, -1);
                 $this->add($adjacency, $target, $source, 'child', 1);
             } else {
-                $this->add($adjacency, $source, $target, 'spouse', 0, $relation);
-                $this->add($adjacency, $target, $source, 'spouse', 0, $relation);
+                $this->add($adjacency, $source, $target, 'spouse', 0, $relation, $nodes[$target]);
+                $this->add($adjacency, $target, $source, 'spouse', 0, $relation, $nodes[$source]);
             }
         }
 
         return compact('nodes', 'adjacency');
     }
 
-    private function add(array &$adjacency, int $from, int $to, string $relationship, int $delta, ?MemberRelationship $relation = null): void
-    {
+    private function add(
+        array &$adjacency,
+        int $from,
+        int $to,
+        string $relationship,
+        int $delta,
+        ?MemberRelationship $relation = null,
+        ?array $targetNode = null,
+    ): void {
         $edge = compact('from', 'to', 'relationship', 'delta');
 
         if ($relationship === 'spouse' && $relation !== null) {
             $edge['end_date'] = $relation->end_date?->toDateString();
             $edge['end_reason'] = $relation->end_reason;
+            $edge['is_ended'] = $relation->end_date !== null;
+            $edge['label'] = $this->spouseLabel($targetNode['gender'] ?? null, $relation);
         }
 
         $adjacency[$from][] = $edge;
+    }
+
+    private function spouseLabel(?string $gender, MemberRelationship $relation): string
+    {
+        $divorced = $relation->end_date !== null
+            && $relation->end_reason === MemberRelationship::END_REASON_DIVORCED;
+
+        return match (true) {
+            $gender === 'male' => $divorced ? 'Mantan Suami' : 'Suami',
+            $gender === 'female' => $divorced ? 'Mantan Istri' : 'Istri',
+            default => $divorced ? 'Mantan Pasangan' : 'Pasangan',
+        };
     }
 }

@@ -888,7 +888,7 @@ Keputusan terkunci (2026-11-14):
 - [x] PISAH-003 — Kontrak REST API perceraian
 - [x] PISAH-004 — Web: koreksi dan pembatalan perceraian
 - [x] PISAH-005 — Mobile parity perceraian
-- [ ] PISAH-006 — Pohon: mantan pasangan dengan anak bersama
+- [x] PISAH-006 — Pohon: mantan pasangan dengan anak bersama
 - [ ] PISAH-007 — Tests, GEDCOM, dan dokumentasi final
 
 ## PISAH-001 — Audit Baseline dan Dokumentasi Keputusan ✅ Complete (2026-11-14)
@@ -963,18 +963,21 @@ Keputusan terkunci (2026-11-14):
 - Deliverable: `mobile/lib/core/models.dart`, `mobile/lib/features/members/**`,
   `mobile/lib/l10n/app_*.arb`, `mobile/test/**`.
 
-## PISAH-006 — Pohon: Mantan Pasangan dengan Anak Bersama 🔲 Planned
+## PISAH-006 — Pohon: Mantan Pasangan dengan Anak Bersama ✅ Complete (2026-11-14)
 
-- Mantan pasangan tetap muncul pada mode `ancestor`, `descendant`, dan `full` ketika pasangan
-  memiliki anak bersama; edge pasangan diberi label `Mantan Istri`/`Mantan Suami` dan gaya
-  visual berbeda (mis. garis putus-putus).
-- Parent edge tetap utuh sehingga anak tetap terhubung ke ayah dan ibu; resolver tidak
+- [x] Mantan pasangan tetap muncul pada mode `ancestor`, `descendant`, dan `full` ketika
+  pasangan memiliki anak bersama. Mode terarah menambahkan mantan pasangan sebagai konteks
+  lateral hanya jika ada anak bersama; mode `full` sudah menelusuri edge pasangan.
+- [x] Edge pasangan mengekspos `label` (`Istri`/`Suami`/`Mantan Istri`/`Mantan Suami`) dan
+  `is_ended`; edge berakhir dirender garis putus-putus di web, mobile, dan PNG.
+- [x] Parent edge tetap utuh sehingga anak tetap terhubung ke ayah dan ibu; resolver tidak
   menghitung ulang relasi anak menjadi “anak tiri” hanya karena perceraian.
-- Mantan pasangan tidak masuk pilihan co-parent/household aktif saat menambah anak baru;
-  pasangan baru tetap didukung (polygamy/multiple spouse edges).
-- Berlaku untuk tampilan web, PNG, PDF, dan graph API; tidak ada BFS kedua di klien.
-- Deliverable: `TreeGraphBuilderService`, `TreePresentationService`, `FamilyTreeService`,
-  `RelationshipResolverService` (jika perlu), tests tree + resolver.
+- [x] Mantan pasangan tidak masuk pilihan co-parent/household aktif saat menambah anak baru.
+- [x] Graph API, web viewer, mobile painter, dan PNG export memakai metadata edge yang sama;
+  tidak ada BFS kedua di klien.
+- Deliverable: `TreeGraphBuilderService`, `FamilyTreeService`, `TreePresentationService`,
+  `TreePngExportService`, `resources/js/app.js`, `resources/css/app.css`,
+  `mobile/lib/core/models.dart`, `mobile/lib/features/tree/tree_screen.dart`, tests.
 
 ## PISAH-007 — Tests, GEDCOM, dan Dokumentasi Final 🔲 Planned
 

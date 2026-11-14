@@ -34,6 +34,16 @@ void main() {
     expect(spouse.isEnded, isTrue);
     expect(spouse.canCorrect, isTrue);
     expect(spouse.canReopen, isTrue);
+
+    final edge = TreeEdge.fromJson({
+      'source_uuid': 'father',
+      'target_uuid': 'mother',
+      'relationship': 'spouse',
+      'label': 'Mantan Istri',
+      'is_ended': true,
+    });
+    expect(edge.label, 'Mantan Istri');
+    expect(edge.isEnded, isTrue);
   });
 
   testWidgets('member detail shows spouses and opens the marriage end sheet',
