@@ -118,6 +118,30 @@ class RelationshipResolverService
             };
         }
 
+        if ($sequence === ['spouse', 'spouse']) {
+            return match ($target->gender) {
+                'male' => 'Suami Lain',
+                'female' => 'Istri Lain',
+                default => 'Pasangan Lain',
+            };
+        }
+
+        if ($sequence === ['spouse', 'child'] || $sequence === ['spouse', 'spouse', 'child']) {
+            return match ($target->gender) {
+                'male' => 'Anak Tiri Laki-Laki',
+                'female' => 'Anak Tiri Perempuan',
+                default => 'Anak Tiri',
+            };
+        }
+
+        if ($sequence === ['father', 'spouse'] || $sequence === ['mother', 'spouse']) {
+            return match ($target->gender) {
+                'male' => 'Ayah Tiri',
+                'female' => 'Ibu Tiri',
+                default => 'Orang Tua Tiri',
+            };
+        }
+
         if ($this->isParentSequence($sequence, 2)) {
             return $target->gender === 'female' ? 'Nenek' : 'Kakek';
         }

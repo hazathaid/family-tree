@@ -31,6 +31,9 @@ Shortest path is deterministic only to the extent repository neighbor ordering i
 | father / mother / parent | target gender/path | Ayah / Ibu / Orang Tua |
 | child | male/female/other | Anak Laki-Laki / Anak Perempuan / Anak |
 | spouse | target gender | Suami / Istri / Pasangan |
+| spouse,spouse | target gender | Istri Lain / Suami Lain / Pasangan Lain (co-spouse) |
+| spouse,child or spouse,spouse,child | target gender | Anak Tiri Laki-Laki / Anak Tiri Perempuan / Anak Tiri |
+| father,spouse or mother,spouse | target gender | Ibu Tiri / Ayah Tiri / Orang Tua Tiri |
 | parent,parent | target gender | Kakek / Nenek / Kakek/Nenek |
 | child,child | target gender | Cucu Laki-Laki / Cucu Perempuan / Cucu |
 | 3+ all parent | — | Buyut (extended ancestor label per resolver) |
@@ -71,7 +74,7 @@ Target relationship resolution is <500 ms for a family of up to 100,000 members.
 
 ## Required verification matrix
 
-Unit/feature coverage must include Ayah, Ibu, Kakek, Nenek, Pakde, Bude, Om, Tante, Sepupu, Keponakan, Menantu, Mertua, Buyut and Cicit; self, spouse, sibling, disconnected, cross-family denial, duplicate parent, self-edge, cycle rejection, inverse spouse, cache hit/expiry/invalidation are also required. Relationship engine coverage target is >=95%.
+Unit/feature coverage must include Ayah, Ibu, Kakek, Nenek, Pakde, Bude, Om, Tante, Sepupu, Keponakan, Menantu, Mertua, Buyut and Cicit; self, spouse, sibling, disconnected, cross-family denial, duplicate parent, self-edge, cycle rejection, inverse spouse, cache hit/expiry/invalidation are also required. Polygamous fixtures must cover co-spouse (`Istri Lain`/`Suami Lain`), stepchild (`Anak Tiri`) and stepparent (`Ibu Tiri`/`Ayah Tiri`) labels. Relationship engine coverage target is >=95%.
 
 Cross-family isolation is "denial unless connected by an active `family_links` row". The single-family `RelationshipTraversalService`/`RelationshipResolverService` remain unchanged (engine containment); cross-family resolution is opt-in through `CrossFamilyRelationshipResolverService`, which BFS over family-scoped edges plus active links treated as `spouse` bridges and reuses `RelationshipResolverService::nameFromPath` for labels. Pending/revoked/expired links never connect. No derived relationship is persisted.
 

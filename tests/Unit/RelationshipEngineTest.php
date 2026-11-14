@@ -124,12 +124,45 @@ class RelationshipEngineTest extends TestCase
         $this->assertSame('Cicit Menantu', $resolver->resolve($graph['source'], $greatGrandChildInLaw)['relationship']);
     }
 
+    public function test_resolver_labels_polygamous_household(): void
+    {
+        $user = User::factory()->create();
+        $family = Family::factory()->create(['created_by' => $user->id]);
+        $husband = $this->member($family, 'Suami Utama', 'male', '1970-01-01', $user);
+        $firstWife = $this->member($family, 'Istri Pertama', 'female', '1972-01-01', $user);
+        $secondWife = $this->member($family, 'Istri Kedua', 'female', '1976-01-01', $user);
+        $firstChild = $this->member($family, 'Anak Pertama', 'male', '1998-01-01', $user);
+        $secondChild = $this->member($family, 'Anak Kedua', 'female', '2002-01-01', $user);
+
+        $this->relationship($husband, $firstWife, 'husband');
+        $this->relationship($firstWife, $husband, 'wife');
+        $this->relationship($husband, $secondWife, 'husband');
+        $this->relationship($secondWife, $husband, 'wife');
+        $this->relationship($husband, $firstChild, 'father');
+        $this->relationship($firstWife, $firstChild, 'mother');
+        $this->relationship($husband, $secondChild, 'father');
+        $this->relationship($secondWife, $secondChild, 'mother');
+
+        $resolver = app(RelationshipResolverService::class);
+
+        $this->assertSame('Istri', $resolver->resolve($husband, $firstWife)['relationship']);
+        $this->assertSame('Istri Lain', $resolver->resolve($firstWife, $secondWife)['relationship']);
+        $this->assertSame('Istri Lain', $resolver->resolve($secondWife, $firstWife)['relationship']);
+        $this->assertSame('Anak Laki-Laki', $resolver->resolve($firstWife, $firstChild)['relationship']);
+        $this->assertSame('Anak Perempuan', $resolver->resolve($secondWife, $secondChild)['relationship']);
+        $this->assertSame('Anak Tiri Perempuan', $resolver->resolve($firstWife, $secondChild)['relationship']);
+        $this->assertSame('Anak Tiri Laki-Laki', $resolver->resolve($secondWife, $firstChild)['relationship']);
+        $this->assertSame('Ibu Tiri', $resolver->resolve($secondChild, $firstWife)['relationship']);
+        $this->assertSame('Ibu Tiri', $resolver->resolve($firstChild, $secondWife)['relationship']);
+    }
+
     public function test_resolver_returns_null_for_unrecognized_path_sequence(): void
     {
         $graph = $this->relationshipGraph();
         $path = [
             ['from_member_id' => $graph['source']->id, 'to_member_id' => $graph['father']->id, 'relationship' => 'father'],
-            ['from_member_id' => $graph['father']->id, 'to_member_id' => $graph['olderUncle']->id, 'relationship' => 'spouse'],
+            ['from_member_id' => $graph['father']->id, 'to_member_id' => $graph['grandFather']->id, 'relationship' => 'father'],
+            ['from_member_id' => $graph['grandFather']->id, 'to_member_id' => $graph['olderUncle']->id, 'relationship' => 'spouse'],
         ];
 
         $result = app(RelationshipResolverService::class)->nameFromPath($graph['source'], $graph['olderUncle'], $path);
