@@ -96,12 +96,7 @@ class MemberController extends Controller
     {
         $this->ensureActiveFamilyMember($request, $member);
         Gate::authorize('update', $member);
-
-        abort_unless(
-            $relationship->family_id === $member->family_id
-            && in_array($member->id, [$relationship->source_member_id, $relationship->target_member_id], true),
-            404
-        );
+        $this->ensureMarriageBelongsToMember($member, $relationship);
 
         $this->relationships->endMarriage(
             $relationship,
@@ -110,6 +105,33 @@ class MemberController extends Controller
         );
 
         return redirect()->route('members.show', $member)->with('status', 'Akhir pernikahan berhasil dicatat.');
+    }
+
+    public function correctMarriage(EndMarriageRequest $request, FamilyMember $member, MemberRelationship $relationship): RedirectResponse
+    {
+        $this->ensureActiveFamilyMember($request, $member);
+        Gate::authorize('update', $member);
+        $this->ensureMarriageBelongsToMember($member, $relationship);
+
+        $this->relationships->correctMarriageEnd(
+            $relationship,
+            (string) $request->validated('end_date'),
+            (string) $request->validated('end_reason'),
+            $request->user(),
+        );
+
+        return redirect()->route('members.show', $member)->with('status', 'Koreksi akhir pernikahan berhasil disimpan.');
+    }
+
+    public function reopenMarriage(Request $request, FamilyMember $member, MemberRelationship $relationship): RedirectResponse
+    {
+        $this->ensureActiveFamilyMember($request, $member);
+        Gate::authorize('update', $member);
+        $this->ensureMarriageBelongsToMember($member, $relationship);
+
+        $this->relationships->reopenMarriage($relationship, $request->user());
+
+        return redirect()->route('members.show', $member)->with('status', 'Akhir pernikahan dibatalkan. Pernikahan kembali aktif.');
     }
 
     public function destroy(ConfirmDeleteRequest $request, FamilyMember $member): RedirectResponse
@@ -135,5 +157,14 @@ class MemberController extends Controller
         abort_unless($member->family_id === $family->id, 404);
 
         return $family;
+    }
+
+    private function ensureMarriageBelongsToMember(FamilyMember $member, MemberRelationship $relationship): void
+    {
+        abort_unless(
+            $relationship->family_id === $member->family_id
+            && in_array($member->id, [$relationship->source_member_id, $relationship->target_member_id], true),
+            404
+        );
     }
 }

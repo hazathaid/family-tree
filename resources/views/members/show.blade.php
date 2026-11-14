@@ -30,6 +30,21 @@
                                     <div class="col-sm-3"><button class="btn btn-outline-danger btn-sm w-100" type="submit">Catat</button></div>
                                 </form>
                             @endcan
+                        @else
+                            @can('update', $member)
+                                <div class="small text-secondary mt-1">Salah input? Koreksi tanggal/alasan atau batalkan akhir pernikahan.</div>
+                                <form method="POST" action="{{ route('members.spouses.correct', [$member, $link['relationship_uuid']]) }}" class="row g-2 mt-2" onsubmit="return confirm('Simpan koreksi akhir pernikahan ini?')">
+                                    @csrf
+                                    @method('PATCH')
+                                    <div class="col-sm-5"><input type="date" name="end_date" value="{{ old('end_date', $link['end_date']) }}" class="form-control form-control-sm" aria-label="Tanggal akhir pernikahan yang dikoreksi" required></div>
+                                    <div class="col-sm-4"><select name="end_reason" class="form-select form-select-sm" aria-label="Alasan berakhir yang dikoreksi"><option value="divorced" @selected(old('end_reason', $link['end_reason']) === 'divorced')>Bercerai</option><option value="widowed" @selected(old('end_reason', $link['end_reason']) === 'widowed')>Meninggal</option></select></div>
+                                    <div class="col-sm-3"><button class="btn btn-outline-primary btn-sm w-100" type="submit">Koreksi</button></div>
+                                </form>
+                                <form method="POST" action="{{ route('members.spouses.reopen', [$member, $link['relationship_uuid']]) }}" class="mt-2" onsubmit="return confirm('Batalkan akhir pernikahan ini? Status pernikahan akan kembali aktif.')">
+                                    @csrf
+                                    <button class="btn btn-outline-secondary btn-sm" type="submit">{{ $link['end_reason'] === 'widowed' ? 'Batalkan status meninggal' : 'Batalkan perceraian' }}</button>
+                                </form>
+                            @endcan
                         @endif
                     </div>
                 @empty

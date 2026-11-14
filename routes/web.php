@@ -82,6 +82,8 @@ Route::middleware('auth')->group(function (): void {
             Route::post('/tree/members/{member}/relatives', [TreeRelativeMemberController::class, 'store'])->name('tree.relatives.store');
             Route::get('/tree/members/{member}/spouses', [TreeMemberSpouseController::class, 'index'])->name('tree.members.spouses');
             Route::post('/members/{member}/spouses/{relationship}/end', [MemberController::class, 'endMarriage'])->name('members.spouses.end');
+            Route::patch('/members/{member}/spouses/{relationship}', [MemberController::class, 'correctMarriage'])->name('members.spouses.correct');
+            Route::post('/members/{member}/spouses/{relationship}/reopen', [MemberController::class, 'reopenMarriage'])->name('members.spouses.reopen');
             Route::get('/family-links', [FamilyLinkController::class, 'index'])->name('family-links.index')->middleware('throttle:family-link');
             Route::post('/family-links', [FamilyLinkController::class, 'store'])->name('family-links.store')->middleware('throttle:family-link');
             Route::post('/family-links/{link}/approve', [FamilyLinkController::class, 'approve'])->name('family-links.approve')->middleware('throttle:family-link');

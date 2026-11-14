@@ -141,6 +141,135 @@ class WebTreeRelativeMemberTest extends TestCase
         ]);
     }
 
+    public function test_owner_can_correct_and_reopen_a_marriage_end(): void
+    {
+        [$owner, $family] = $this->userWithFamily(FamilyUserRole::ROLE_OWNER);
+        $husband = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $owner->id, 'gender' => 'male']);
+        $wife = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $owner->id, 'gender' => 'female']);
+        $this->marry($family, $husband, $wife);
+        $relationship = MemberRelationship::query()
+            ->where('family_id', $family->id)
+            ->where('source_member_id', $husband->id)
+            ->where('target_member_id', $wife->id)
+            ->where('relationship_type', MemberRelationship::TYPE_HUSBAND)
+            ->firstOrFail();
+
+        $this->active($owner, $family)->post(route('members.spouses.end', [$husband, $relationship->uuid]), [
+            'end_date' => '2024-06-01',
+            'end_reason' => 'divorced',
+        ])->assertRedirect(route('members.show', $husband));
+
+        $this->active($owner, $family)->get(route('members.show', $husband))
+            ->assertOk()
+            ->assertSee('Mantan Istri')
+            ->assertSee('Koreksi')
+            ->assertSee('Batalkan perceraian');
+
+        $this->active($owner, $family)->patch(route('members.spouses.correct', [$husband, $relationship->uuid]), [
+            'end_date' => '2023-12-31',
+            'end_reason' => 'widowed',
+        ])->assertRedirect(route('members.show', $husband));
+
+        $relationship->refresh();
+        $this->assertSame('2023-12-31', $relationship->end_date?->toDateString());
+        $this->assertSame('widowed', $relationship->end_reason);
+        $this->assertDatabaseHas('member_relationships', [
+            'source_member_id' => $wife->id,
+            'target_member_id' => $husband->id,
+            'end_reason' => 'widowed',
+        ]);
+
+        $this->active($owner, $family)->post(route('members.spouses.reopen', [$husband, $relationship->uuid]))
+            ->assertRedirect(route('members.show', $husband));
+
+        $relationship->refresh();
+        $this->assertNull($relationship->end_date);
+        $this->assertNull($relationship->end_reason);
+        $this->assertDatabaseHas('member_relationships', [
+            'source_member_id' => $wife->id,
+            'target_member_id' => $husband->id,
+            'end_date' => null,
+            'end_reason' => null,
+        ]);
+    }
+
+    public function test_member_cannot_correct_or_reopen_a_marriage_end(): void
+    {
+        [$owner, $family] = $this->userWithFamily(FamilyUserRole::ROLE_OWNER);
+        [$memberUser] = $this->userWithFamilyInFamily(FamilyUserRole::ROLE_MEMBER, $family);
+        $husband = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $owner->id, 'gender' => 'male']);
+        $wife = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $owner->id, 'gender' => 'female']);
+        $this->marry($family, $husband, $wife);
+        $relationship = MemberRelationship::query()
+            ->where('family_id', $family->id)
+            ->where('source_member_id', $husband->id)
+            ->where('target_member_id', $wife->id)
+            ->where('relationship_type', MemberRelationship::TYPE_HUSBAND)
+            ->firstOrFail();
+
+        $this->active($owner, $family)->post(route('members.spouses.end', [$husband, $relationship->uuid]), [
+            'end_date' => '2024-06-01',
+            'end_reason' => 'divorced',
+        ])->assertRedirect(route('members.show', $husband));
+
+        $this->active($memberUser, $family)->patch(route('members.spouses.correct', [$husband, $relationship->uuid]), [
+            'end_date' => '2023-12-31',
+            'end_reason' => 'widowed',
+        ])->assertForbidden();
+
+        $this->active($memberUser, $family)->post(route('members.spouses.reopen', [$husband, $relationship->uuid]))
+            ->assertForbidden();
+    }
+
+    public function test_marriage_end_correction_rejects_a_relationship_from_another_member(): void
+    {
+        [$owner, $family] = $this->userWithFamily(FamilyUserRole::ROLE_OWNER);
+        $husband = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $owner->id, 'gender' => 'male']);
+        $wife = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $owner->id, 'gender' => 'female']);
+        $outsider = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $owner->id]);
+        $this->marry($family, $husband, $wife);
+        $relationship = MemberRelationship::query()
+            ->where('family_id', $family->id)
+            ->where('source_member_id', $husband->id)
+            ->where('target_member_id', $wife->id)
+            ->where('relationship_type', MemberRelationship::TYPE_HUSBAND)
+            ->firstOrFail();
+
+        $this->active($owner, $family)->post(route('members.spouses.end', [$husband, $relationship->uuid]), [
+            'end_date' => '2024-06-01',
+            'end_reason' => 'divorced',
+        ]);
+
+        $this->active($owner, $family)->patch(route('members.spouses.correct', [$outsider, $relationship->uuid]), [
+            'end_date' => '2023-12-31',
+            'end_reason' => 'widowed',
+        ])->assertNotFound();
+    }
+
+    public function test_marriage_end_correction_rejects_a_date_before_the_marriage_start(): void
+    {
+        [$owner, $family] = $this->userWithFamily(FamilyUserRole::ROLE_OWNER);
+        $husband = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $owner->id, 'gender' => 'male']);
+        $wife = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $owner->id, 'gender' => 'female']);
+        $this->marry($family, $husband, $wife);
+        $relationship = MemberRelationship::query()
+            ->where('family_id', $family->id)
+            ->where('source_member_id', $husband->id)
+            ->where('target_member_id', $wife->id)
+            ->where('relationship_type', MemberRelationship::TYPE_HUSBAND)
+            ->firstOrFail();
+        $relationship->update([
+            'start_date' => '2010-01-01',
+            'end_date' => '2024-06-01',
+            'end_reason' => 'divorced',
+        ]);
+
+        $this->active($owner, $family)->patch(route('members.spouses.correct', [$husband, $relationship->uuid]), [
+            'end_date' => '2009-12-31',
+            'end_reason' => 'divorced',
+        ])->assertSessionHasErrors('end_date');
+    }
+
     private function marry(Family $family, FamilyMember $husband, FamilyMember $wife): void
     {
         MemberRelationship::query()->create([
@@ -164,6 +293,14 @@ class WebTreeRelativeMemberTest extends TestCase
         FamilyUserRole::factory()->create(['family_id' => $family->id, 'user_id' => $user->id, 'role' => $role]);
 
         return [$user, $family];
+    }
+
+    private function userWithFamilyInFamily(string $role, Family $family): array
+    {
+        $user = User::factory()->create();
+        FamilyUserRole::factory()->create(['family_id' => $family->id, 'user_id' => $user->id, 'role' => $role]);
+
+        return [$user];
     }
 
     private function active(User $user, Family $family): static

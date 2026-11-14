@@ -886,7 +886,7 @@ Keputusan terkunci (2026-11-14):
 - [x] PISAH-001 — Audit baseline dan dokumentasi keputusan
 - [x] PISAH-002 — Service koreksi dan pembatalan akhir pernikahan
 - [x] PISAH-003 — Kontrak REST API perceraian
-- [ ] PISAH-004 — Web: koreksi dan pembatalan perceraian
+- [x] PISAH-004 — Web: koreksi dan pembatalan perceraian
 - [ ] PISAH-005 — Mobile parity perceraian
 - [ ] PISAH-006 — Pohon: mantan pasangan dengan anak bersama
 - [ ] PISAH-007 — Tests, GEDCOM, dan dokumentasi final
@@ -937,14 +937,18 @@ Keputusan terkunci (2026-11-14):
 - Deliverable: `MemberSpouseController`, `MarriageEndRequest`, routes, OpenAPI,
   feature tests (`tests/Feature/RelationshipApiTest.php`). Mobile action UI tetap PISAH-005.
 
-## PISAH-004 — Web: Koreksi dan Pembatalan Perceraian 🔲 Planned
+## PISAH-004 — Web: Koreksi dan Pembatalan Perceraian ✅ Complete (2026-11-14)
 
-- Kartu “Pasangan” menampilkan status berakhir + tombol **Koreksi** (ubah tanggal/alasan)
+- [x] Kartu “Pasangan” menampilkan status berakhir + tombol **Koreksi** (ubah tanggal/alasan)
   dan **Batalkan perceraian** dengan dialog konfirmasi.
-- Validasi dan pesan error dalam Bahasa Indonesia; hanya owner/admin/linked member yang
+- [x] Validasi dan pesan error dalam Bahasa Indonesia; hanya owner/admin/linked member yang
   boleh (mengikuti policy update member).
-- Deliverable: `resources/views/members/show.blade.php`, controller, form requests,
-  feature tests (`tests/Feature/WebFamilyTreeTest`/member detail tests).
+- [x] Route `PATCH /members/{member}/spouses/{relationship}` dan
+  `POST /members/{member}/spouses/{relationship}/reopen`; relationship wajib milik member
+  (selain itu 404).
+- [x] Activity log tercatat karena service menerima aktor dari request.
+- Deliverable: `MemberController`, `EndMarriageRequest`, `resources/views/members/show.blade.php`,
+  feature tests (`tests/Feature/WebTreeRelativeMemberTest.php`).
 
 ## PISAH-005 — Mobile Parity Perceraian 🔲 Planned
 
