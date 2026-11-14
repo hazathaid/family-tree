@@ -38,6 +38,7 @@ class FamilyTreeService
                 $queue->enqueue([$edge['to'], $distance + 1, $generation + $edge['delta']]);
             }
         }
+        $edges = $this->addMissingParentEdges($graph['adjacency'], array_keys($nodes), $edges);
         $ids = array_column($nodes, 'uuid', 'id');
         $edges = array_map(fn (array $edge): array => ['source_uuid' => $ids[$edge['source_id']], 'target_uuid' => $ids[$edge['target_id']], 'relationship' => $edge['relationship']], $edges);
         $generations = array_column($nodes, 'generation');
@@ -48,5 +49,54 @@ class FamilyTreeService
         $this->cache->put($root, $mode, $depth, $tree);
 
         return $tree;
+    }
+
+    /**
+     * Add the second biological parent link when both parents are already in
+     * the visited tree. This keeps polygamous households groupable per wife
+     * without changing the set of members returned by the traversal.
+     *
+     * @param  array<int, array<int, array<string, mixed>>>  $adjacency
+     * @param  array<int, int>  $visitedIds
+     * @param  array<int, array{source_id: int, target_id: int, relationship: string}>  $edges
+     * @return array<int, array{source_id: int, target_id: int, relationship: string}>
+     */
+    private function addMissingParentEdges(array $adjacency, array $visitedIds, array $edges): array
+    {
+        $visited = array_fill_keys($visitedIds, true);
+        $connected = [];
+
+        foreach ($edges as $edge) {
+            if (in_array($edge['relationship'], ['father', 'mother'], true)) {
+                $connected[$edge['source_id'].':'.$edge['target_id']] = true;
+            } elseif ($edge['relationship'] === 'child') {
+                $connected[$edge['target_id'].':'.$edge['source_id']] = true;
+            }
+        }
+
+        foreach ($visitedIds as $childId) {
+            foreach ($adjacency[$childId] ?? [] as $edge) {
+                if (! in_array($edge['relationship'], ['father', 'mother'], true)) {
+                    continue;
+                }
+
+                $parentId = $edge['to'];
+
+                if (! isset($visited[$parentId])) {
+                    continue;
+                }
+
+                $key = $childId.':'.$parentId;
+
+                if (isset($connected[$key])) {
+                    continue;
+                }
+
+                $edges[] = ['source_id' => $parentId, 'target_id' => $childId, 'relationship' => 'child'];
+                $connected[$key] = true;
+            }
+        }
+
+        return $edges;
     }
 }

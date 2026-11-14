@@ -33,6 +33,10 @@ class TreePresentationService
                 continue;
             }
 
+            if (isset($paths[$to->uuid])) {
+                continue;
+            }
+
             $paths[$to->uuid] = [...($paths[$from->uuid] ?? []), [
                 'from_member_id' => $from->id,
                 'to_member_id' => $to->id,

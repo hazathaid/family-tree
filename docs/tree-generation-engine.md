@@ -16,6 +16,13 @@ The server receives an authorized root member UUID, mode and depth; graph traver
 - traversal stops expanding a node at requested depth;
 - each member appears once, preventing cycles and runaway traversal.
 
+Full trees connect each child to both biological parents when both are already
+in the visited component. The generator adds the missing base parent/child edge
+without adding members or derived relationships. Layout then pivots a shared
+spouse between co-wives and orders each child by its mother, centring it
+between the mother and the shared spouse; children without a recorded mother
+fall back to the father's position.
+
 No recursive traversal or derived relationship rows are used.
 
 ## Nodes, edges and labels

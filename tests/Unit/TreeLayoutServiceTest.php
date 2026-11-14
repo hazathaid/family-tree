@@ -60,6 +60,48 @@ class TreeLayoutServiceTest extends TestCase
         $this->assertSame(count($points), count(array_unique($points)));
     }
 
+    public function test_polygamous_layout_places_cowives_around_shared_spouse_and_children_under_each_mother(): void
+    {
+        $result = (new TreeLayoutService)->layout($this->polygamousFamily(), 'vertical');
+        $positions = $this->positionsByUuid($result);
+
+        $this->assertSame($positions['firstWife']['y'], $positions['husband']['y']);
+        $this->assertSame($positions['secondWife']['y'], $positions['husband']['y']);
+        $this->assertTrue($positions['firstWife']['x'] < $positions['husband']['x']);
+        $this->assertTrue($positions['husband']['x'] < $positions['secondWife']['x']);
+        $this->assertSame((int) (($positions['firstWife']['x'] + $positions['husband']['x']) / 2), $positions['firstChild']['x']);
+        $this->assertSame((int) (($positions['husband']['x'] + $positions['secondWife']['x']) / 2), $positions['secondChild']['x']);
+
+        $points = array_map(
+            fn (array $node): string => $node['position']['x'].':'.$node['position']['y'],
+            $result['nodes'],
+        );
+
+        $this->assertSame(count($points), count(array_unique($points)));
+    }
+
+    private function polygamousFamily(): array
+    {
+        return [
+            'root_member_uuid' => 'husband',
+            'nodes' => [
+                ['uuid' => 'husband', 'generation' => 0, 'gender' => 'male'],
+                ['uuid' => 'firstWife', 'generation' => 0, 'gender' => 'female'],
+                ['uuid' => 'secondWife', 'generation' => 0, 'gender' => 'female'],
+                ['uuid' => 'firstChild', 'generation' => 1, 'gender' => 'male'],
+                ['uuid' => 'secondChild', 'generation' => 1, 'gender' => 'female'],
+            ],
+            'edges' => [
+                ['source_uuid' => 'husband', 'target_uuid' => 'firstWife', 'relationship' => 'spouse'],
+                ['source_uuid' => 'husband', 'target_uuid' => 'secondWife', 'relationship' => 'spouse'],
+                ['source_uuid' => 'husband', 'target_uuid' => 'firstChild', 'relationship' => 'child'],
+                ['source_uuid' => 'husband', 'target_uuid' => 'secondChild', 'relationship' => 'child'],
+                ['source_uuid' => 'firstWife', 'target_uuid' => 'firstChild', 'relationship' => 'child'],
+                ['source_uuid' => 'secondWife', 'target_uuid' => 'secondChild', 'relationship' => 'child'],
+            ],
+        ];
+    }
+
     private function coupleWithChild(): array
     {
         return [

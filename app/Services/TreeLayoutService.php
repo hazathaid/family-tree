@@ -29,7 +29,7 @@ class TreeLayoutService
             $nodeByUuid[(string) $node['uuid']] = $node;
         }
 
-        [$childrenOf, $spousesOf] = $this->relations($tree['edges'] ?? [], $nodeByUuid);
+        [$childrenOf, $spousesOf, $anchorOf] = $this->relations($tree['edges'] ?? [], $nodeByUuid);
 
         $generations = [];
         $generationOf = [];
@@ -44,7 +44,7 @@ class TreeLayoutService
         ksort($generations);
         $generationKeys = array_keys($generations);
 
-        $ordered = $this->orderGenerations($generationKeys, $generations, $childrenOf, $spousesOf, $generationOf);
+        $ordered = $this->orderGenerations($generationKeys, $generations, $childrenOf, $spousesOf, $generationOf, $anchorOf);
         $units = [];
 
         foreach ($generationKeys as $generation) {
@@ -77,7 +77,7 @@ class TreeLayoutService
     }
 
     /**
-     * @return array{0: array<string, array<int, string>>, 1: array<string, array<int, string>>}
+     * @return array{0: array<string, array<int, string>>, 1: array<string, array<int, string>>, 2: array<string, string>}
      */
     private function relations(array $edges, array $nodeByUuid): array
     {
@@ -109,7 +109,38 @@ class TreeLayoutService
             }
         }
 
-        return [$childrenOf, $spousesOf];
+        $parentsOf = [];
+
+        foreach ($childrenOf as $parent => $children) {
+            foreach ($children as $child) {
+                $parentsOf[$child][] = $parent;
+            }
+        }
+
+        $anchorOf = [];
+
+        foreach ($parentsOf as $child => $parents) {
+            $anchorOf[$child] = $this->firstParentWithGender($parents, $nodeByUuid, 'female')
+                ?? $this->firstParentWithGender($parents, $nodeByUuid, 'male')
+                ?? $parents[0];
+        }
+
+        return [$childrenOf, $spousesOf, $anchorOf];
+    }
+
+    /**
+     * @param  array<int, string>  $parents
+     * @param  array<string, array<string, mixed>>  $nodeByUuid
+     */
+    private function firstParentWithGender(array $parents, array $nodeByUuid, string $gender): ?string
+    {
+        foreach ($parents as $parent) {
+            if (($nodeByUuid[$parent]['gender'] ?? null) === $gender) {
+                return $parent;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -121,6 +152,7 @@ class TreeLayoutService
         array $childrenOf,
         array $spousesOf,
         array $generationOf,
+        array $anchorOf,
     ): array {
         $ordered = [];
         $placed = [];
@@ -131,7 +163,8 @@ class TreeLayoutService
             if ($index > 0) {
                 foreach ($ordered[$generationKeys[$index - 1]] as $parent) {
                     foreach ($childrenOf[$parent] ?? [] as $child) {
-                        if (($generationOf[$child] ?? null) !== $generation) {
+                        if (($generationOf[$child] ?? null) !== $generation
+                            || ($anchorOf[$child] ?? $parent) !== $parent) {
                             continue;
                         }
 
@@ -207,10 +240,54 @@ class TreeLayoutService
             }
 
             usort($members, fn (string $left, string $right): int => $index[$left] <=> $index[$right]);
-            $units[] = $members;
+            $units[] = $this->pivotSharedSpouse($members, $spousesOf);
         }
 
         return $units;
+    }
+
+    /**
+     * Place a member with multiple spouses in the middle of its unit so each
+     * co-wife sits beside the shared spouse and children can be centred under
+     * the correct couple.
+     *
+     * @param  array<int, string>  $members
+     * @param  array<string, array<int, string>>  $spousesOf
+     * @return array<int, string>
+     */
+    private function pivotSharedSpouse(array $members, array $spousesOf): array
+    {
+        if (count($members) < 3) {
+            return $members;
+        }
+
+        $memberLookup = array_fill_keys($members, true);
+        $pivot = null;
+        $mostSpouses = 1;
+
+        foreach ($members as $uuid) {
+            $count = 0;
+
+            foreach ($spousesOf[$uuid] ?? [] as $spouse) {
+                if (isset($memberLookup[$spouse])) {
+                    $count++;
+                }
+            }
+
+            if ($count > $mostSpouses) {
+                $mostSpouses = $count;
+                $pivot = $uuid;
+            }
+        }
+
+        if ($pivot === null) {
+            return $members;
+        }
+
+        $others = array_values(array_filter($members, fn (string $uuid): bool => $uuid !== $pivot));
+        array_splice($others, intdiv(count($members) - 1, 2), 0, [$pivot]);
+
+        return $others;
     }
 
     /**

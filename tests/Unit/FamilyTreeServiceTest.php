@@ -32,6 +32,59 @@ class FamilyTreeServiceTest extends TestCase
         $this->assertTrue($service->generate($child, 'ancestor', 2)['cached']);
     }
 
+    public function test_generates_polygamous_trees_with_each_wife_children(): void
+    {
+        $user = User::factory()->create();
+        $family = Family::factory()->create(['created_by' => $user->id]);
+        $husband = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $user->id, 'gender' => 'male']);
+        $firstWife = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $user->id, 'gender' => 'female']);
+        $secondWife = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $user->id, 'gender' => 'female']);
+        $firstChild = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $user->id, 'gender' => 'male']);
+        $secondChild = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $user->id, 'gender' => 'female']);
+
+        foreach ([[$husband, $firstWife, 'husband'], [$firstWife, $husband, 'wife'], [$husband, $secondWife, 'husband'], [$secondWife, $husband, 'wife']] as [$source, $target, $type]) {
+            MemberRelationship::factory()->create([
+                'family_id' => $family->id,
+                'source_member_id' => $source->id,
+                'target_member_id' => $target->id,
+                'relationship_type' => $type,
+            ]);
+        }
+
+        foreach ([[$husband, $firstChild, 'father'], [$firstWife, $firstChild, 'mother'], [$husband, $secondChild, 'father'], [$secondWife, $secondChild, 'mother']] as [$source, $target, $type]) {
+            MemberRelationship::factory()->create([
+                'family_id' => $family->id,
+                'source_member_id' => $source->id,
+                'target_member_id' => $target->id,
+                'relationship_type' => $type,
+            ]);
+        }
+
+        $service = app(FamilyTreeService::class);
+        $full = $service->generate($husband, 'full', 1);
+
+        $this->assertCount(5, $full['nodes']);
+        $this->assertCount(5, array_unique(array_column($full['nodes'], 'uuid')));
+        $this->assertTrue($this->hasParentEdge($full['edges'], $husband->uuid, $firstChild->uuid));
+        $this->assertTrue($this->hasParentEdge($full['edges'], $firstWife->uuid, $firstChild->uuid));
+        $this->assertTrue($this->hasParentEdge($full['edges'], $husband->uuid, $secondChild->uuid));
+        $this->assertTrue($this->hasParentEdge($full['edges'], $secondWife->uuid, $secondChild->uuid));
+
+        $firstWifeTree = $service->generate($firstWife, 'descendant', 1);
+        $this->assertCount(2, $firstWifeTree['nodes']);
+        $this->assertContains($firstChild->uuid, array_column($firstWifeTree['nodes'], 'uuid'));
+        $this->assertNotContains($secondChild->uuid, array_column($firstWifeTree['nodes'], 'uuid'));
+
+        $secondWifeTree = $service->generate($secondWife, 'descendant', 1);
+        $this->assertCount(2, $secondWifeTree['nodes']);
+        $this->assertContains($secondChild->uuid, array_column($secondWifeTree['nodes'], 'uuid'));
+
+        $descendants = $service->generate($husband, 'descendant', 1);
+        $this->assertCount(3, $descendants['nodes']);
+        $this->assertContains($firstChild->uuid, array_column($descendants['nodes'], 'uuid'));
+        $this->assertContains($secondChild->uuid, array_column($descendants['nodes'], 'uuid'));
+    }
+
     public function test_rejects_invalid_mode_and_depth(): void
     {
         $user = User::factory()->create();
@@ -41,5 +94,24 @@ class FamilyTreeServiceTest extends TestCase
         $this->expectException(ValidationException::class);
 
         app(FamilyTreeService::class)->generate($member, 'invalid', 1);
+    }
+
+    private function hasParentEdge(array $edges, string $parentUuid, string $childUuid): bool
+    {
+        foreach ($edges as $edge) {
+            if ($edge['relationship'] === 'child'
+                && $edge['source_uuid'] === $parentUuid
+                && $edge['target_uuid'] === $childUuid) {
+                return true;
+            }
+
+            if (in_array($edge['relationship'], ['father', 'mother'], true)
+                && $edge['source_uuid'] === $childUuid
+                && $edge['target_uuid'] === $parentUuid) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
