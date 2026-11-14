@@ -85,7 +85,8 @@ void main() {
       'category': 'legal',
       'size': 1234,
       'document_date': '2020-01-01',
-      'download_url': 'https://api.test/api/v1/member-documents/doc-uuid/download',
+      'download_url':
+          'https://api.test/api/v1/member-documents/doc-uuid/download',
       'uploaded_by': {'uuid': 'user-uuid', 'name': 'Budi'},
       'created_at': '2024-01-01T00:00:00Z'
     });
@@ -112,12 +113,14 @@ void main() {
         title: 'Akta Lahir',
         category: 'legal',
         documentDate: null);
-    await tester.pumpWidget(ProviderScope(overrides: [
-      memberRepositoryProvider
-          .overrideWithValue(_FakeMemberRepository(member, documentItems: [document])),
-      currentFamilyProvider.overrideWith((ref) => family)
-    ], child: _app(const MemberDocumentsScreen(
-        memberUuid: 'member-uuid', canWrite: true))));
+    await tester.pumpWidget(ProviderScope(
+        overrides: [
+          memberRepositoryProvider.overrideWithValue(
+              _FakeMemberRepository(member, documentItems: [document])),
+          currentFamilyProvider.overrideWith((ref) => family)
+        ],
+        child: _app(const MemberDocumentsScreen(
+            memberUuid: 'member-uuid', canWrite: true))));
     await tester.pumpAndSettle();
     expect(find.text('Akta Lahir'), findsOneWidget);
     expect(find.byIcon(Icons.delete_outline), findsOneWidget);
@@ -136,8 +139,8 @@ void main() {
         confidence: 'high',
         reasons: ['same_name']);
     await tester.pumpWidget(ProviderScope(overrides: [
-      memberRepositoryProvider
-          .overrideWithValue(_FakeMemberRepository(member, candidateItems: [candidate])),
+      memberRepositoryProvider.overrideWithValue(
+          _FakeMemberRepository(member, candidateItems: [candidate])),
       currentFamilyProvider.overrideWith((ref) => family)
     ], child: _app(const MemberDuplicatesScreen())));
     await tester.pumpAndSettle();
@@ -192,6 +195,22 @@ class _FakeMemberRepository implements MemberRepository {
       throw UnimplementedError();
   @override
   Future<void> deleteRelationship(String uuid) async {}
+  @override
+  Future<List<MemberSpouse>> spouses(String memberUuid) async => const [];
+  @override
+  Future<MemberRelationship> endMarriage(
+          String memberUuid, String relationshipUuid,
+          {required String endDate, required String endReason}) =>
+      throw UnimplementedError();
+  @override
+  Future<MemberRelationship> correctMarriage(
+          String memberUuid, String relationshipUuid,
+          {required String endDate, required String endReason}) =>
+      throw UnimplementedError();
+  @override
+  Future<MemberRelationship> reopenMarriage(
+          String memberUuid, String relationshipUuid) =>
+      throw UnimplementedError();
   @override
   Future<List<MemberDocument>> documents(String memberUuid) async =>
       documentItems;

@@ -265,6 +265,62 @@ class AppLocalizationsId extends AppLocalizations {
   String get noBasicRelationships => 'Belum ada relationship dasar.';
 
   @override
+  String get spousesTitle => 'Pasangan';
+
+  @override
+  String get noSpouses => 'Belum ada pasangan.';
+
+  @override
+  String get marriageStartUnknown => 'Tanggal menikah belum dicatat';
+
+  @override
+  String marriageStart(String date) {
+    return 'Menikah $date';
+  }
+
+  @override
+  String marriageEnded(String date, String reason) {
+    return 'Berakhir $date ($reason)';
+  }
+
+  @override
+  String get marriageEndDivorced => 'Bercerai';
+
+  @override
+  String get marriageEndWidowed => 'Meninggal';
+
+  @override
+  String get recordMarriageEnd => 'Catat akhir pernikahan';
+
+  @override
+  String get correctMarriageEnd => 'Koreksi akhir pernikahan';
+
+  @override
+  String get reopenMarriage => 'Batalkan perceraian';
+
+  @override
+  String get reopenMarriageWidowed => 'Batalkan status meninggal';
+
+  @override
+  String get reopenMarriageConfirm =>
+      'Batalkan akhir pernikahan ini? Status pernikahan akan kembali aktif.';
+
+  @override
+  String get marriageEndDate => 'Tanggal berakhir';
+
+  @override
+  String get marriageEndReason => 'Alasan';
+
+  @override
+  String get selectMarriageEndDate => 'Pilih tanggal';
+
+  @override
+  String get marriageUpdated => 'Data pernikahan diperbarui.';
+
+  @override
+  String get marriageActionFailed => 'Tidak dapat memperbarui data pernikahan.';
+
+  @override
   String get relatedContent => 'Konten terkait';
 
   @override

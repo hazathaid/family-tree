@@ -108,7 +108,8 @@ void main() {
       'uuid': 'export-uuid',
       'status': 'completed',
       'format': 'png',
-      'download_url': 'https://api.test/api/v1/tree/exports/export-uuid/download',
+      'download_url':
+          'https://api.test/api/v1/tree/exports/export-uuid/download',
     });
     expect(job.isCompleted, isTrue);
     expect(job.isFailed, isFalse);
@@ -150,10 +151,11 @@ class _Trees implements TreeRepository {
           required int depth,
           required String layout,
           required String paperSize}) async =>
-      const TreeExportJob(uuid: 'export-uuid', status: 'pending', format: 'pdf');
+      const TreeExportJob(
+          uuid: 'export-uuid', status: 'pending', format: 'pdf');
   @override
-  Future<TreeExportJob> exportStatus(String uuid) async =>
-      const TreeExportJob(uuid: 'export-uuid', status: 'completed', format: 'pdf');
+  Future<TreeExportJob> exportStatus(String uuid) async => const TreeExportJob(
+      uuid: 'export-uuid', status: 'completed', format: 'pdf');
   @override
   Future<Uint8List> downloadExport(String uuid,
           {CancelToken? cancelToken, ProgressCallback? onProgress}) async =>
@@ -199,6 +201,22 @@ class _Members implements MemberRepository {
       throw UnimplementedError();
   @override
   Future<void> deleteRelationship(String uuid) async {}
+  @override
+  Future<List<MemberSpouse>> spouses(String memberUuid) async => const [];
+  @override
+  Future<MemberRelationship> endMarriage(
+          String memberUuid, String relationshipUuid,
+          {required String endDate, required String endReason}) =>
+      throw UnimplementedError();
+  @override
+  Future<MemberRelationship> correctMarriage(
+          String memberUuid, String relationshipUuid,
+          {required String endDate, required String endReason}) =>
+      throw UnimplementedError();
+  @override
+  Future<MemberRelationship> reopenMarriage(
+          String memberUuid, String relationshipUuid) =>
+      throw UnimplementedError();
   @override
   Future<RelationshipResolution> resolve(
           String sourceUuid, String targetUuid) =>

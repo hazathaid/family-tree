@@ -47,6 +47,21 @@ Map<String, dynamic> relationshipJson() => {
       'relationship_type': 'father',
     };
 
+Map<String, dynamic> spouseJson() => {
+      'relationship_uuid': 'relationship-uuid',
+      'spouse_uuid': 'spouse-uuid',
+      'spouse_name': 'Dewi',
+      'label': 'Mantan Istri',
+      'gender': 'female',
+      'start_date': '2010-01-01',
+      'end_date': '2024-06-01',
+      'end_reason': 'divorced',
+      'is_ended': true,
+      'can_end': false,
+      'can_correct': true,
+      'can_reopen': true,
+    };
+
 Map<String, dynamic> treeJson() => {
       'root_member_uuid': 'member-uuid',
       'mode': 'full',
@@ -321,6 +336,19 @@ void main() {
         if (path.startsWith('/relationships/') && method == 'PUT') {
           return relationshipJson();
         }
+        if (path.endsWith('/spouses') && method == 'GET') {
+          return [spouseJson()];
+        }
+        if (path.endsWith('/end') && method == 'POST') {
+          return relationshipJson();
+        }
+        if (path.startsWith('/family-members/member-uuid/spouses/') &&
+            method == 'PATCH') {
+          return relationshipJson();
+        }
+        if (path.endsWith('/reopen') && method == 'POST') {
+          return relationshipJson();
+        }
         if (path == '/relationship-engine') {
           return {
             'relationship': 'Ayah',
@@ -382,6 +410,23 @@ void main() {
       expect((await repo.updateRelationship('relationship-uuid', {})).uuid,
           'relationship-uuid');
       await repo.deleteRelationship('relationship-uuid');
+
+      final spouses = await repo.spouses('member-uuid');
+      expect(spouses.single.label, 'Mantan Istri');
+      expect(spouses.single.canReopen, isTrue);
+      expect(
+          (await repo.endMarriage('member-uuid', 'relationship-uuid',
+                  endDate: '2024-06-01', endReason: 'divorced'))
+              .uuid,
+          'relationship-uuid');
+      expect(
+          (await repo.correctMarriage('member-uuid', 'relationship-uuid',
+                  endDate: '2023-12-31', endReason: 'widowed'))
+              .uuid,
+          'relationship-uuid');
+      expect(
+          (await repo.reopenMarriage('member-uuid', 'relationship-uuid')).uuid,
+          'relationship-uuid');
 
       final resolved = await repo.resolve('member-uuid', 'child-uuid');
       expect(resolved.relationship, 'Ayah');

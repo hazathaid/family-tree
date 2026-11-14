@@ -21,6 +21,15 @@ abstract interface class MemberRepository {
   Future<MemberRelationship> updateRelationship(
       String uuid, Map<String, dynamic> values);
   Future<void> deleteRelationship(String uuid);
+  Future<List<MemberSpouse>> spouses(String memberUuid);
+  Future<MemberRelationship> endMarriage(
+      String memberUuid, String relationshipUuid,
+      {required String endDate, required String endReason});
+  Future<MemberRelationship> correctMarriage(
+      String memberUuid, String relationshipUuid,
+      {required String endDate, required String endReason});
+  Future<MemberRelationship> reopenMarriage(
+      String memberUuid, String relationshipUuid);
   Future<RelationshipResolution> resolve(String sourceUuid, String targetUuid);
   Future<List<MemberDocument>> documents(String memberUuid);
   Future<MemberDocument> uploadDocument(String memberUuid,

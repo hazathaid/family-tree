@@ -584,6 +584,108 @@ abstract class AppLocalizations {
   /// **'Belum ada relationship dasar.'**
   String get noBasicRelationships;
 
+  /// No description provided for @spousesTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'Pasangan'**
+  String get spousesTitle;
+
+  /// No description provided for @noSpouses.
+  ///
+  /// In id, this message translates to:
+  /// **'Belum ada pasangan.'**
+  String get noSpouses;
+
+  /// No description provided for @marriageStartUnknown.
+  ///
+  /// In id, this message translates to:
+  /// **'Tanggal menikah belum dicatat'**
+  String get marriageStartUnknown;
+
+  /// No description provided for @marriageStart.
+  ///
+  /// In id, this message translates to:
+  /// **'Menikah {date}'**
+  String marriageStart(String date);
+
+  /// No description provided for @marriageEnded.
+  ///
+  /// In id, this message translates to:
+  /// **'Berakhir {date} ({reason})'**
+  String marriageEnded(String date, String reason);
+
+  /// No description provided for @marriageEndDivorced.
+  ///
+  /// In id, this message translates to:
+  /// **'Bercerai'**
+  String get marriageEndDivorced;
+
+  /// No description provided for @marriageEndWidowed.
+  ///
+  /// In id, this message translates to:
+  /// **'Meninggal'**
+  String get marriageEndWidowed;
+
+  /// No description provided for @recordMarriageEnd.
+  ///
+  /// In id, this message translates to:
+  /// **'Catat akhir pernikahan'**
+  String get recordMarriageEnd;
+
+  /// No description provided for @correctMarriageEnd.
+  ///
+  /// In id, this message translates to:
+  /// **'Koreksi akhir pernikahan'**
+  String get correctMarriageEnd;
+
+  /// No description provided for @reopenMarriage.
+  ///
+  /// In id, this message translates to:
+  /// **'Batalkan perceraian'**
+  String get reopenMarriage;
+
+  /// No description provided for @reopenMarriageWidowed.
+  ///
+  /// In id, this message translates to:
+  /// **'Batalkan status meninggal'**
+  String get reopenMarriageWidowed;
+
+  /// No description provided for @reopenMarriageConfirm.
+  ///
+  /// In id, this message translates to:
+  /// **'Batalkan akhir pernikahan ini? Status pernikahan akan kembali aktif.'**
+  String get reopenMarriageConfirm;
+
+  /// No description provided for @marriageEndDate.
+  ///
+  /// In id, this message translates to:
+  /// **'Tanggal berakhir'**
+  String get marriageEndDate;
+
+  /// No description provided for @marriageEndReason.
+  ///
+  /// In id, this message translates to:
+  /// **'Alasan'**
+  String get marriageEndReason;
+
+  /// No description provided for @selectMarriageEndDate.
+  ///
+  /// In id, this message translates to:
+  /// **'Pilih tanggal'**
+  String get selectMarriageEndDate;
+
+  /// No description provided for @marriageUpdated.
+  ///
+  /// In id, this message translates to:
+  /// **'Data pernikahan diperbarui.'**
+  String get marriageUpdated;
+
+  /// No description provided for @marriageActionFailed.
+  ///
+  /// In id, this message translates to:
+  /// **'Tidak dapat memperbarui data pernikahan.'**
+  String get marriageActionFailed;
+
   /// No description provided for @relatedContent.
   ///
   /// In id, this message translates to:

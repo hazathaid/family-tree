@@ -267,7 +267,7 @@ All v1 endpoints use `throttle:api`. Additional route limits are: login named li
 | API-G07 | No explicit active-family REST selection is needed for stateless mobile, but onboarding create/select semantics must be defined client-side from memberships | FT-MOB-103; add API only if server state is approved |
 | API-G08 | Web article upload route name differs but REST capability exists; no gap. Web-only super-admin console is intentionally excluded. | Documented decision |
 | API-G09 | Cross-family marriage links were web-only (request, approve, revoke, read-only partner tree) | Closed by XF-006 (2026-10-21): REST endpoints plus Flutter family-links screens; see Cross-family links |
-| API-G10 | Marriage-end correction/reopen had no dedicated REST contract or mobile spouse actions | Closed by PISAH-003 (2026-11-14): end/correct/reopen endpoints, spouse action flags, OpenAPI and tests; mobile actions remain PISAH-005 |
+| API-G10 | Marriage-end correction/reopen had no dedicated REST contract or mobile spouse actions | Closed by PISAH-003/005 (2026-11-14): end/correct/reopen endpoints, spouse action flags, OpenAPI, web and mobile actions with tests |
 
 Historical phase API documents remain implementation history. This file is the sole Flutter contract; when routes/requests/resources change, update this file and tests in the same task.
 

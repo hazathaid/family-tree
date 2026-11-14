@@ -887,7 +887,7 @@ Keputusan terkunci (2026-11-14):
 - [x] PISAH-002 — Service koreksi dan pembatalan akhir pernikahan
 - [x] PISAH-003 — Kontrak REST API perceraian
 - [x] PISAH-004 — Web: koreksi dan pembatalan perceraian
-- [ ] PISAH-005 — Mobile parity perceraian
+- [x] PISAH-005 — Mobile parity perceraian
 - [ ] PISAH-006 — Pohon: mantan pasangan dengan anak bersama
 - [ ] PISAH-007 — Tests, GEDCOM, dan dokumentasi final
 
@@ -950,14 +950,18 @@ Keputusan terkunci (2026-11-14):
 - Deliverable: `MemberController`, `EndMarriageRequest`, `resources/views/members/show.blade.php`,
   feature tests (`tests/Feature/WebTreeRelativeMemberTest.php`).
 
-## PISAH-005 — Mobile Parity Perceraian 🔲 Planned
+## PISAH-005 — Mobile Parity Perceraian ✅ Complete (2026-11-14)
 
-- Daftar pasangan pada member detail: tampilkan `Istri`/`Suami`, `Mantan Istri`/`Mantan Suami`,
-  tanggal menikah, tanggal berakhir, dan alasan.
-- Aksi catat perceraian, koreksi, dan batalkan perceraian dari bottom sheet; konfirmasi
+- [x] Daftar pasangan pada member detail: menampilkan `Istri`/`Suami`,
+  `Mantan Istri`/`Mantan Suami`, tanggal menikah, tanggal berakhir, dan alasan.
+- [x] Aksi catat perceraian, koreksi, dan batalkan perceraian dari bottom sheet; konfirmasi
   sebelum reopen.
-- Tambah l10n ID/EN dan widget test; tidak ada perhitungan relasi di Dart (label dari API).
-- Deliverable: `mobile/lib/features/family/**`, `app_*.arb`, `mobile/test/**`.
+- [x] `MemberSpouse` model + repository `spouses`/`endMarriage`/`correctMarriage`/
+  `reopenMarriage`; label dan flag aksi berasal dari API, bukan dihitung di Dart.
+- [x] l10n ID/EN dan widget test (`mobile/test/marriage_mobile_test.dart`,
+  `mobile/test/api_repositories_test.dart`).
+- Deliverable: `mobile/lib/core/models.dart`, `mobile/lib/features/members/**`,
+  `mobile/lib/l10n/app_*.arb`, `mobile/test/**`.
 
 ## PISAH-006 — Pohon: Mantan Pasangan dengan Anak Bersama 🔲 Planned
 

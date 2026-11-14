@@ -327,6 +327,49 @@ class MemberRelationship {
       );
 }
 
+class MemberSpouse {
+  const MemberSpouse(
+      {required this.relationshipUuid,
+      required this.spouseUuid,
+      required this.spouseName,
+      required this.label,
+      this.gender,
+      this.startDate,
+      this.endDate,
+      this.endReason,
+      this.isEnded = false,
+      this.canEnd = false,
+      this.canCorrect = false,
+      this.canReopen = false});
+  final String relationshipUuid;
+  final String spouseUuid;
+  final String spouseName;
+  final String label;
+  final String? gender;
+  final DateTime? startDate;
+  final DateTime? endDate;
+  final String? endReason;
+  final bool isEnded;
+  final bool canEnd;
+  final bool canCorrect;
+  final bool canReopen;
+
+  factory MemberSpouse.fromJson(Map<String, dynamic> json) => MemberSpouse(
+        relationshipUuid: json['relationship_uuid'] as String,
+        spouseUuid: json['spouse_uuid'] as String,
+        spouseName: json['spouse_name'] as String,
+        label: json['label'] as String? ?? '',
+        gender: json['gender'] as String?,
+        startDate: DateTime.tryParse(json['start_date'] as String? ?? ''),
+        endDate: DateTime.tryParse(json['end_date'] as String? ?? ''),
+        endReason: json['end_reason'] as String?,
+        isEnded: json['is_ended'] as bool? ?? false,
+        canEnd: json['can_end'] as bool? ?? false,
+        canCorrect: json['can_correct'] as bool? ?? false,
+        canReopen: json['can_reopen'] as bool? ?? false,
+      );
+}
+
 class RelationshipResolution {
   const RelationshipResolution(
       {required this.relationship, required this.path});

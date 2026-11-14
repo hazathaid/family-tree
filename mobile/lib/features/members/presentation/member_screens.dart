@@ -227,7 +227,8 @@ class _MemberDirectoryScreenState extends ConsumerState<MemberDirectoryScreen> {
                             cells: [
                               DataCell(Text(m.displayName)),
                               DataCell(Text(_gender(l10n, m.gender))),
-                              DataCell(Text(m.isAlive ? l10n.alive : l10n.deceased)),
+                              DataCell(
+                                  Text(m.isAlive ? l10n.alive : l10n.deceased)),
                               DataCell(Text(m.branchName ?? l10n.noValue))
                             ]))
                     .toList()))
@@ -271,19 +272,179 @@ class _MemberDirectoryScreenState extends ConsumerState<MemberDirectoryScreen> {
   }
 }
 
-class MemberDetailScreen extends ConsumerWidget {
+class MemberDetailScreen extends ConsumerStatefulWidget {
   const MemberDetailScreen({required this.uuid, super.key});
   final String uuid;
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MemberDetailScreen> createState() => _MemberDetailScreenState();
+}
+
+class _MemberDetailScreenState extends ConsumerState<MemberDetailScreen> {
+  late Future<List<Object>> _future;
+
+  @override
+  void initState() {
+    super.initState();
+    _future = _load();
+  }
+
+  Future<List<Object>> _load() {
     final familyUuid = ref.read(currentFamilyProvider)!.uuid;
+    return Future.wait<Object>([
+      ref.read(memberRepositoryProvider).member(widget.uuid),
+      ref
+          .read(memberRepositoryProvider)
+          .relationships(familyUuid, memberUuid: widget.uuid),
+      ref.read(memberRepositoryProvider).spouses(widget.uuid),
+    ]);
+  }
+
+  void _reload() => setState(() => _future = _load());
+
+  Future<void> _openMarriageSheet(MemberSpouse spouse,
+      {required bool correct}) async {
+    final l10n = AppLocalizations.of(context);
+    var date = correct ? spouse.endDate : null;
+    var reason = correct ? (spouse.endReason ?? 'divorced') : 'divorced';
+    var saving = false;
+    final updated = await showModalBottomSheet<bool>(
+        context: context,
+        isScrollControlled: true,
+        builder: (sheetContext) => StatefulBuilder(
+            builder: (context, setSheet) => Padding(
+                padding: EdgeInsets.only(
+                    bottom: MediaQuery.of(context).viewInsets.bottom),
+                child: SafeArea(
+                    child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Text(
+                                  correct
+                                      ? l10n.correctMarriageEnd
+                                      : l10n.recordMarriageEnd,
+                                  style:
+                                      Theme.of(context).textTheme.titleLarge),
+                              ListTile(
+                                  contentPadding: EdgeInsets.zero,
+                                  title: Text(l10n.marriageEndDate),
+                                  subtitle: Text(date == null
+                                      ? l10n.selectMarriageEndDate
+                                      : _iso(date)),
+                                  trailing: const Icon(Icons.calendar_today),
+                                  onTap: () async {
+                                    final picked = await showDatePicker(
+                                        context: context,
+                                        initialDate: date ?? DateTime.now(),
+                                        firstDate: DateTime(1900),
+                                        lastDate: DateTime.now()
+                                            .add(const Duration(days: 365)));
+                                    if (picked != null) {
+                                      setSheet(() => date = picked);
+                                    }
+                                  }),
+                              DropdownButtonFormField<String>(
+                                  initialValue: reason,
+                                  decoration: InputDecoration(
+                                      labelText: l10n.marriageEndReason),
+                                  items: ['divorced', 'widowed']
+                                      .map((value) => DropdownMenuItem<String>(
+                                          value: value,
+                                          child: Text(
+                                              _marriageEndReason(l10n, value))))
+                                      .toList(),
+                                  onChanged: (value) =>
+                                      setSheet(() => reason = value!)),
+                              const SizedBox(height: 16),
+                              FilledButton(
+                                  onPressed: date == null || saving
+                                      ? null
+                                      : () async {
+                                          setSheet(() => saving = true);
+                                          try {
+                                            if (correct) {
+                                              await ref
+                                                  .read(
+                                                      memberRepositoryProvider)
+                                                  .correctMarriage(widget.uuid,
+                                                      spouse.relationshipUuid,
+                                                      endDate: _iso(date),
+                                                      endReason: reason);
+                                            } else {
+                                              await ref
+                                                  .read(
+                                                      memberRepositoryProvider)
+                                                  .endMarriage(widget.uuid,
+                                                      spouse.relationshipUuid,
+                                                      endDate: _iso(date),
+                                                      endReason: reason);
+                                            }
+                                            if (context.mounted) {
+                                              Navigator.pop(context, true);
+                                            }
+                                          } catch (_) {
+                                            if (!context.mounted) return;
+                                            setSheet(() => saving = false);
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(SnackBar(
+                                                    content: Text(l10n
+                                                        .marriageActionFailed)));
+                                          }
+                                        },
+                                  child:
+                                      Text(saving ? l10n.saving : l10n.save)),
+                              TextButton(
+                                  onPressed: () =>
+                                      Navigator.pop(context, false),
+                                  child: Text(l10n.cancel))
+                            ]))))));
+    if (updated == true && mounted) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.marriageUpdated)));
+      _reload();
+    }
+  }
+
+  Future<void> _reopenMarriage(MemberSpouse spouse) async {
+    final l10n = AppLocalizations.of(context);
+    final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+                title: Text(spouse.endReason == 'widowed'
+                    ? l10n.reopenMarriageWidowed
+                    : l10n.reopenMarriage),
+                content: Text(l10n.reopenMarriageConfirm),
+                actions: [
+                  TextButton(
+                      onPressed: () => Navigator.pop(dialogContext, false),
+                      child: Text(l10n.cancel)),
+                  FilledButton(
+                      onPressed: () => Navigator.pop(dialogContext, true),
+                      child: Text(l10n.reopenMarriage))
+                ]));
+    if (confirmed != true || !mounted) return;
+    try {
+      await ref
+          .read(memberRepositoryProvider)
+          .reopenMarriage(widget.uuid, spouse.relationshipUuid);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.marriageUpdated)));
+      _reload();
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.marriageActionFailed)));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final uuid = widget.uuid;
     return FutureBuilder<List<Object>>(
-      future: Future.wait<Object>([
-        ref.read(memberRepositoryProvider).member(uuid),
-        ref
-            .read(memberRepositoryProvider)
-            .relationships(familyUuid, memberUuid: uuid),
-      ]),
+      future: _future,
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
           return const Scaffold(
@@ -293,10 +454,12 @@ class MemberDetailScreen extends ConsumerWidget {
           return Scaffold(
               appBar: AppBar(),
               body: Center(
-                  child: Text(AppLocalizations.of(context).memberDetailLoadFailed)));
+                  child: Text(
+                      AppLocalizations.of(context).memberDetailLoadFailed)));
         }
         final member = snapshot.data![0] as FamilyMember;
         final relations = snapshot.data![1] as PageData<MemberRelationship>;
+        final spouses = snapshot.data![2] as List<MemberSpouse>;
         final canManage = ref.read(currentFamilyProvider)?.canManage ?? false;
         final l10n = AppLocalizations.of(context);
         return Scaffold(
@@ -314,12 +477,13 @@ class MemberDetailScreen extends ConsumerWidget {
               Center(
                   child: Chip(
                       avatar: const Icon(Icons.family_restroom, size: 18),
-                      label: Text(l10n.relationshipToYou(
-                          member.relationshipToViewer!)),
+                      label: Text(
+                          l10n.relationshipToYou(member.relationshipToViewer!)),
                       backgroundColor:
                           Theme.of(context).colorScheme.primaryContainer,
                       labelStyle: TextStyle(
-                          color: Theme.of(context).colorScheme.onPrimaryContainer,
+                          color:
+                              Theme.of(context).colorScheme.onPrimaryContainer,
                           fontWeight: FontWeight.w600))),
             if (!member.isAlive)
               Center(
@@ -334,7 +498,8 @@ class MemberDetailScreen extends ConsumerWidget {
               _Info(l10n.religionBelief, _religion(l10n, member.religion)),
               _Info(l10n.born, _datePlace(member.birthDate, member.birthPlace)),
               if (!member.isAlive)
-                _Info(l10n.died, _datePlace(member.deathDate, member.deathPlace))
+                _Info(
+                    l10n.died, _datePlace(member.deathDate, member.deathPlace))
             ]),
             _Section(title: l10n.family, children: [
               _Info(l10n.branch, member.branchName ?? l10n.noBranch)
@@ -357,6 +522,57 @@ class MemberDetailScreen extends ConsumerWidget {
                                 : r.sourceName),
                             subtitle: Text(_relationshipType(l10n, r.type))))
                         .toList()),
+            _Section(
+                title: l10n.spousesTitle,
+                children: spouses.isEmpty
+                    ? [Text(l10n.noSpouses)]
+                    : spouses.map((spouse) {
+                        final details = [
+                          spouse.label,
+                          spouse.startDate == null
+                              ? l10n.marriageStartUnknown
+                              : l10n.marriageStart(_iso(spouse.startDate)),
+                          if (spouse.isEnded && spouse.endDate != null)
+                            l10n.marriageEnded(_iso(spouse.endDate),
+                                _marriageEndReason(l10n, spouse.endReason)),
+                        ];
+                        final actions = <PopupMenuEntry<String>>[
+                          if (spouse.canEnd)
+                            PopupMenuItem(
+                                value: 'end',
+                                child: Text(l10n.recordMarriageEnd)),
+                          if (spouse.canCorrect)
+                            PopupMenuItem(
+                                value: 'correct',
+                                child: Text(l10n.correctMarriageEnd)),
+                          if (spouse.canReopen)
+                            PopupMenuItem(
+                                value: 'reopen',
+                                child: Text(spouse.endReason == 'widowed'
+                                    ? l10n.reopenMarriageWidowed
+                                    : l10n.reopenMarriage)),
+                        ];
+                        return ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            leading: Icon(spouse.isEnded
+                                ? Icons.link_off
+                                : Icons.favorite_outline),
+                            title: Text(spouse.spouseName),
+                            subtitle: Text(details.join(' · ')),
+                            trailing: canManage && actions.isNotEmpty
+                                ? PopupMenuButton<String>(
+                                    tooltip: l10n.spousesTitle,
+                                    onSelected: (action) {
+                                      if (action == 'reopen') {
+                                        _reopenMarriage(spouse);
+                                      } else {
+                                        _openMarriageSheet(spouse,
+                                            correct: action == 'correct');
+                                      }
+                                    },
+                                    itemBuilder: (_) => actions)
+                                : null);
+                      }).toList()),
             if (canManage || member.isOwnProfile)
               _Section(title: l10n.documentsTitle, children: [
                 ListTile(
@@ -483,16 +699,16 @@ class _MemberFormScreenState extends ConsumerState<MemberFormScreen> {
         builder: (dialogContext) {
           final l10n = AppLocalizations.of(dialogContext);
           return AlertDialog(
-                title: Text(l10n.deleteMemberTitle(widget.member!.fullName)),
-                content: Text(l10n.deleteMemberConfirmation),
-                actions: [
-                  TextButton(
-                      onPressed: () => Navigator.pop(context, false),
-                      child: Text(l10n.cancel)),
-                  FilledButton(
-                      onPressed: () => Navigator.pop(context, true),
-                      child: Text(l10n.delete))
-                ]);
+              title: Text(l10n.deleteMemberTitle(widget.member!.fullName)),
+              content: Text(l10n.deleteMemberConfirmation),
+              actions: [
+                TextButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    child: Text(l10n.cancel)),
+                FilledButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    child: Text(l10n.delete))
+              ]);
         });
     if (ok == true) {
       await ref
@@ -508,7 +724,8 @@ class _MemberFormScreenState extends ConsumerState<MemberFormScreen> {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
         appBar: AppBar(
-            title: Text(widget.member == null ? l10n.addMember : l10n.editMember)),
+            title:
+                Text(widget.member == null ? l10n.addMember : l10n.editMember)),
         body: FutureBuilder(
             future: ref.read(familyRepositoryProvider).branches(family!.uuid),
             builder: (context, snapshot) {
@@ -547,19 +764,22 @@ class _MemberFormScreenState extends ConsumerState<MemberFormScreen> {
                         items: [
                           DropdownMenuItem(
                               value: null, child: Text(l10n.unspecified)),
-                          DropdownMenuItem(value: 'islam', child: Text(l10n.islam)),
+                          DropdownMenuItem(
+                              value: 'islam', child: Text(l10n.islam)),
                           DropdownMenuItem(
                               value: 'christian', child: Text(l10n.christian)),
                           DropdownMenuItem(
                               value: 'catholic', child: Text(l10n.catholic)),
-                          DropdownMenuItem(value: 'hindu', child: Text(l10n.hindu)),
+                          DropdownMenuItem(
+                              value: 'hindu', child: Text(l10n.hindu)),
                           DropdownMenuItem(
                               value: 'buddhist', child: Text(l10n.buddhist)),
                           DropdownMenuItem(
                               value: 'confucian', child: Text(l10n.confucian)),
                           DropdownMenuItem(
                               value: 'belief', child: Text(l10n.belief)),
-                          DropdownMenuItem(value: 'other', child: Text(l10n.other))
+                          DropdownMenuItem(
+                              value: 'other', child: Text(l10n.other))
                         ],
                         onChanged: (v) => setState(() => religion = v)),
                     DropdownButtonFormField<String?>(
@@ -580,7 +800,8 @@ class _MemberFormScreenState extends ConsumerState<MemberFormScreen> {
                         decoration: InputDecoration(labelText: l10n.birthDate)),
                     TextFormField(
                         controller: birthPlace,
-                        decoration: InputDecoration(labelText: l10n.birthPlace)),
+                        decoration:
+                            InputDecoration(labelText: l10n.birthPlace)),
                     SwitchListTile(
                         contentPadding: EdgeInsets.zero,
                         title: Text(l10n.stillAlive),
@@ -594,7 +815,8 @@ class _MemberFormScreenState extends ConsumerState<MemberFormScreen> {
                               errorText: errors['death_date']?.first)),
                       TextFormField(
                           controller: deathPlace,
-                          decoration: InputDecoration(labelText: l10n.deathPlace))
+                          decoration:
+                              InputDecoration(labelText: l10n.deathPlace))
                     ],
                     TextFormField(
                         controller: biography,
@@ -685,7 +907,8 @@ class _RelationshipManagementScreenState
                                   },
                                   itemBuilder: (_) => [
                                         PopupMenuItem(
-                                            value: 'edit', child: Text(l10n.editRelationship)),
+                                            value: 'edit',
+                                            child: Text(l10n.editRelationship)),
                                         PopupMenuItem(
                                             value: 'delete',
                                             child: Text(l10n.delete))
@@ -823,8 +1046,15 @@ Future<void> _relationshipDialog(BuildContext context, WidgetRef ref,
                     }),
                     DropdownButtonFormField<String>(
                         initialValue: type,
-                        decoration: InputDecoration(labelText: l10n.relationshipType),
-                        items: const ['father', 'mother', 'child', 'husband', 'wife']
+                        decoration:
+                            InputDecoration(labelText: l10n.relationshipType),
+                        items: const [
+                          'father',
+                          'mother',
+                          'child',
+                          'husband',
+                          'wife'
+                        ]
                             .map((value) => DropdownMenuItem<String>(
                                 value: value,
                                 child: Text(_relationshipType(l10n, value))))
@@ -863,8 +1093,8 @@ Future<void> _relationshipDialog(BuildContext context, WidgetRef ref,
                   ])));
 }
 
-Widget _memberPickerTile(
-        String label, String? name, AppLocalizations l10n, VoidCallback onTap) =>
+Widget _memberPickerTile(String label, String? name, AppLocalizations l10n,
+        VoidCallback onTap) =>
     ListTile(
         contentPadding: EdgeInsets.zero,
         title: Text(label),
@@ -912,69 +1142,66 @@ class _PaginatedMemberPickerDialogState
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return AlertDialog(
-          title: Text(l10n.selectMemberTitle),
-          content: SizedBox(
-              width: 480,
-              height: 480,
-              child: Column(children: [
-                SearchBar(
-                    controller: search,
-                    hintText: l10n.searchMembers,
-                    onSubmitted: (_) => reload()),
-                const SizedBox(height: 8),
-                Expanded(
-                    child: FutureBuilder<PageData<FamilyMember>>(
-                        future: future,
-                        builder: (_, snapshot) {
-                          if (snapshot.connectionState !=
-                              ConnectionState.done) {
-                            return const Center(
-                                child: CircularProgressIndicator());
-                          }
-                          if (snapshot.hasError) {
-                            return Center(
-                                child: FilledButton(
-                                    onPressed: reload,
-                                    child: Text(l10n.retry)));
-                          }
-                          final result = snapshot.data!;
-                          return Column(children: [
-                            Expanded(
-                                child: ListView(
-                                    children: result.items
-                                        .map((member) => ListTile(
-                                            title: Text(member.displayName),
-                                            subtitle: Text(member.branchName ??
-                                                l10n.noBranchShort),
-                                            onTap: () =>
-                                                Navigator.pop(context, member)))
-                                        .toList())),
-                            Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  IconButton(
-                                      tooltip: l10n.previousPage,
-                                      onPressed: result.currentPage > 1
-                                          ? () => reload(result.currentPage - 1)
-                                          : null,
-                                      icon: const Icon(Icons.chevron_left)),
-                                  Text(l10n.pageFraction(
-                                      result.currentPage, result.lastPage)),
-                                  IconButton(
-                                      tooltip: l10n.nextPage,
-                                      onPressed: result.hasMore
-                                          ? () => reload(result.currentPage + 1)
-                                          : null,
-                                      icon: const Icon(Icons.chevron_right))
-                                ])
-                          ]);
-                        }))
-              ])),
-          actions: [
-            TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text(l10n.cancel))
-          ]);
+        title: Text(l10n.selectMemberTitle),
+        content: SizedBox(
+            width: 480,
+            height: 480,
+            child: Column(children: [
+              SearchBar(
+                  controller: search,
+                  hintText: l10n.searchMembers,
+                  onSubmitted: (_) => reload()),
+              const SizedBox(height: 8),
+              Expanded(
+                  child: FutureBuilder<PageData<FamilyMember>>(
+                      future: future,
+                      builder: (_, snapshot) {
+                        if (snapshot.connectionState != ConnectionState.done) {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        }
+                        if (snapshot.hasError) {
+                          return Center(
+                              child: FilledButton(
+                                  onPressed: reload, child: Text(l10n.retry)));
+                        }
+                        final result = snapshot.data!;
+                        return Column(children: [
+                          Expanded(
+                              child: ListView(
+                                  children: result.items
+                                      .map((member) => ListTile(
+                                          title: Text(member.displayName),
+                                          subtitle: Text(member.branchName ??
+                                              l10n.noBranchShort),
+                                          onTap: () =>
+                                              Navigator.pop(context, member)))
+                                      .toList())),
+                          Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                IconButton(
+                                    tooltip: l10n.previousPage,
+                                    onPressed: result.currentPage > 1
+                                        ? () => reload(result.currentPage - 1)
+                                        : null,
+                                    icon: const Icon(Icons.chevron_left)),
+                                Text(l10n.pageFraction(
+                                    result.currentPage, result.lastPage)),
+                                IconButton(
+                                    tooltip: l10n.nextPage,
+                                    onPressed: result.hasMore
+                                        ? () => reload(result.currentPage + 1)
+                                        : null,
+                                    icon: const Icon(Icons.chevron_right))
+                              ])
+                        ]);
+                      }))
+            ])),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(context), child: Text(l10n.cancel))
+        ]);
   }
 }
 
@@ -1027,9 +1254,10 @@ class _Info extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
         SizedBox(width: 120, child: Text(label)),
-        Expanded(child: Text(value?.isNotEmpty == true
-            ? value!
-            : AppLocalizations.of(context).noValue))
+        Expanded(
+            child: Text(value?.isNotEmpty == true
+                ? value!
+                : AppLocalizations.of(context).noValue))
       ]));
 }
 
@@ -1051,7 +1279,8 @@ String _religion(AppLocalizations l10n, String? value) => switch (value) {
       _ => l10n.unspecified,
     };
 
-String _relationshipType(AppLocalizations l10n, String value) => switch (value) {
+String _relationshipType(AppLocalizations l10n, String value) =>
+    switch (value) {
       'father' => l10n.father,
       'mother' => l10n.mother,
       'child' => l10n.child,
@@ -1059,6 +1288,8 @@ String _relationshipType(AppLocalizations l10n, String value) => switch (value) 
       'wife' => l10n.wife,
       _ => value,
     };
+String _marriageEndReason(AppLocalizations l10n, String? value) =>
+    value == 'widowed' ? l10n.marriageEndWidowed : l10n.marriageEndDivorced;
 String _datePlace(DateTime? date, String? place) => [
       if (date != null) _iso(date),
       if (place?.isNotEmpty == true) place!
@@ -1119,9 +1350,8 @@ class _MemberDocumentsScreenState extends ConsumerState<MemberDocumentsScreen> {
       error = null;
     });
     try {
-      final items = await ref
-          .read(memberRepositoryProvider)
-          .documents(widget.memberUuid);
+      final items =
+          await ref.read(memberRepositoryProvider).documents(widget.memberUuid);
       if (mounted) {
         setState(() {
           documents = items;
@@ -1153,8 +1383,8 @@ class _MemberDocumentsScreenState extends ConsumerState<MemberDocumentsScreen> {
             notes: form.notes,
           );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(AppLocalizations.of(context).documentUploaded)));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(AppLocalizations.of(context).documentUploaded)));
       }
       await load();
     } on AppError catch (e) {
@@ -1186,8 +1416,8 @@ class _MemberDocumentsScreenState extends ConsumerState<MemberDocumentsScreen> {
     try {
       await ref.read(memberRepositoryProvider).deleteDocument(document.uuid);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(AppLocalizations.of(context).documentDeleted)));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(AppLocalizations.of(context).documentDeleted)));
       }
       await load();
     } on AppError catch (e) {
@@ -1260,7 +1490,12 @@ Future<({String title, String? category, String? documentDate, String? notes})?>
   final notes = TextEditingController();
   String? category;
   return showDialog<
-      ({String title, String? category, String? documentDate, String? notes})>(
+          ({
+            String title,
+            String? category,
+            String? documentDate,
+            String? notes
+          })>(
       context: context,
       builder: (dialogContext) => StatefulBuilder(
           builder: (_, setDialog) => AlertDialog(
@@ -1269,8 +1504,8 @@ Future<({String title, String? category, String? documentDate, String? notes})?>
                       child: Column(mainAxisSize: MainAxisSize.min, children: [
                     TextField(
                         controller: title,
-                        decoration:
-                            InputDecoration(labelText: l10n.documentTitleLabel)),
+                        decoration: InputDecoration(
+                            labelText: l10n.documentTitleLabel)),
                     DropdownButtonFormField<String?>(
                         initialValue: category,
                         decoration: InputDecoration(
@@ -1297,7 +1532,8 @@ Future<({String title, String? category, String? documentDate, String? notes})?>
                               value: 'medical',
                               child: Text(l10n.categoryMedical))
                         ],
-                        onChanged: (value) => setDialog(() => category = value)),
+                        onChanged: (value) =>
+                            setDialog(() => category = value)),
                     TextField(
                         controller: date,
                         decoration: InputDecoration(
@@ -1306,8 +1542,8 @@ Future<({String title, String? category, String? documentDate, String? notes})?>
                     TextField(
                         controller: notes,
                         maxLines: 2,
-                        decoration:
-                            InputDecoration(labelText: l10n.documentNotesLabel)),
+                        decoration: InputDecoration(
+                            labelText: l10n.documentNotesLabel)),
                     const SizedBox(height: 8),
                     Text(l10n.documentFileHint,
                         style: Theme.of(context).textTheme.bodySmall)
@@ -1404,8 +1640,8 @@ class _MemberDuplicatesScreenState
     try {
       await ref.read(memberRepositoryProvider).mergeMember(primary, duplicate);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(AppLocalizations.of(context).mergedSuccessfully)));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(AppLocalizations.of(context).mergedSuccessfully)));
       }
       await load();
     } on AppError catch (e) {
@@ -1420,8 +1656,7 @@ class _MemberDuplicatesScreenState
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
-        appBar: AppBar(title: Text(l10n.duplicatesTitle)),
-        body: _body(l10n));
+        appBar: AppBar(title: Text(l10n.duplicatesTitle)), body: _body(l10n));
   }
 
   Widget _body(AppLocalizations l10n) {
@@ -1446,16 +1681,15 @@ class _MemberDuplicatesScreenState
             itemBuilder: (_, i) {
               final candidate = items[i];
               return Card(
-                  margin: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 4),
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                   child: Padding(
                       padding: const EdgeInsets.all(12),
                       child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(candidate.primary.displayName,
-                                style:
-                                    Theme.of(context).textTheme.titleMedium),
+                                style: Theme.of(context).textTheme.titleMedium),
                             const SizedBox(height: 4),
                             Text('↔ ${candidate.duplicate.displayName}'),
                             const SizedBox(height: 8),

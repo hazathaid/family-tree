@@ -265,6 +265,62 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noBasicRelationships => 'No basic relationships yet.';
 
   @override
+  String get spousesTitle => 'Spouses';
+
+  @override
+  String get noSpouses => 'No spouses yet.';
+
+  @override
+  String get marriageStartUnknown => 'Marriage date not recorded';
+
+  @override
+  String marriageStart(String date) {
+    return 'Married $date';
+  }
+
+  @override
+  String marriageEnded(String date, String reason) {
+    return 'Ended $date ($reason)';
+  }
+
+  @override
+  String get marriageEndDivorced => 'Divorced';
+
+  @override
+  String get marriageEndWidowed => 'Widowed';
+
+  @override
+  String get recordMarriageEnd => 'Record marriage end';
+
+  @override
+  String get correctMarriageEnd => 'Correct marriage end';
+
+  @override
+  String get reopenMarriage => 'Reopen marriage';
+
+  @override
+  String get reopenMarriageWidowed => 'Mark marriage active';
+
+  @override
+  String get reopenMarriageConfirm =>
+      'Reopen this marriage? The marriage status will become active again.';
+
+  @override
+  String get marriageEndDate => 'End date';
+
+  @override
+  String get marriageEndReason => 'Reason';
+
+  @override
+  String get selectMarriageEndDate => 'Select a date';
+
+  @override
+  String get marriageUpdated => 'Marriage details updated.';
+
+  @override
+  String get marriageActionFailed => 'Unable to update marriage details.';
+
+  @override
   String get relatedContent => 'Related content';
 
   @override

@@ -113,6 +113,14 @@ const sampleRelationship = MemberRelationship(
     targetName: 'Siti Santoso',
     type: 'father');
 
+const sampleSpouse = MemberSpouse(
+    relationshipUuid: 'spouse-relationship-uuid',
+    spouseUuid: 'spouse-uuid',
+    spouseName: 'Dewi Santoso',
+    label: 'Istri',
+    gender: 'female',
+    canEnd: true);
+
 const sampleResolution = RelationshipResolution(relationship: 'Ayah', path: [
   RelationshipPathStep(relationship: 'father', fromName: 'Siti', toName: 'Budi')
 ]);
@@ -460,6 +468,7 @@ class FakeMemberRepository implements MemberRepository {
   FamilyMember memberValue = richMember;
   PageData<FamilyMember>? memberPage;
   List<MemberRelationship> relationshipItems = const [sampleRelationship];
+  List<MemberSpouse> spouseItems = const [sampleSpouse];
   List<MemberDocument> documentItems = [sampleDocument];
   List<DuplicateCandidate> duplicateItems = [sampleDuplicate];
   RelationshipResolution resolution = sampleResolution;
@@ -543,6 +552,27 @@ class FakeMemberRepository implements MemberRepository {
   @override
   Future<void> deleteRelationship(String uuid) =>
       _run('deleteRelationship', () {});
+
+  @override
+  Future<List<MemberSpouse>> spouses(String memberUuid) =>
+      _run('spouses', () => spouseItems);
+
+  @override
+  Future<MemberRelationship> endMarriage(
+          String memberUuid, String relationshipUuid,
+          {required String endDate, required String endReason}) =>
+      _run('endMarriage', () => sampleRelationship);
+
+  @override
+  Future<MemberRelationship> correctMarriage(
+          String memberUuid, String relationshipUuid,
+          {required String endDate, required String endReason}) =>
+      _run('correctMarriage', () => sampleRelationship);
+
+  @override
+  Future<MemberRelationship> reopenMarriage(
+          String memberUuid, String relationshipUuid) =>
+      _run('reopenMarriage', () => sampleRelationship);
 
   @override
   Future<RelationshipResolution> resolve(
