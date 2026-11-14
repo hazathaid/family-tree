@@ -54,6 +54,7 @@ The import never computes or stores derived kinship. It writes only the five bas
 - GEDCOM dates are normalized: `12 MAY 2001` -> `2001-05-12`, `MAY 1990` -> `1990-05-01`, `1990` -> `1990-01-01`. Qualifiers (`ABT`, `EST`, `CAL`, `BEF`, `AFT`, `INT`, `FROM`, `TO`) are stripped. Unparseable dates are ignored.
 - INDI records without a name are skipped and counted in `members_skipped`.
 - Duplicate edges inside one file (the same couple/child pair referenced by more than one `FAM` record) are skipped and counted in `relationships_skipped`.
+- Multiple `FAM` records that share the same `HUSB` but name different `WIFE` members are imported as separate spouse pairs. Each `CHIL` is linked to the father and mother from its own `FAM`, so polygamous households keep each wife's children with that wife.
 - The import runs in a single transaction; a failure rolls back the whole import.
 - Relationship and tree caches are invalidated for the family; a `GEDCOM_IMPORTED` activity log entry is written.
 
@@ -70,5 +71,5 @@ No migration or schema change was required. Members and relationships are create
 
 ## Tests
 
-- `tests/Unit/GedcomImportServiceTest.php` — individuals, life details, spouse edges, activity log, within-file dedup, unnamed skip, invalid document rejection, partial dates/names.
+- `tests/Unit/GedcomImportServiceTest.php` — individuals, life details, spouse edges, polygamous FAM-per-wife import with correct father/mother edges, activity log, within-file dedup, unnamed skip, invalid document rejection, partial dates/names.
 - `tests/Feature/FamilyImportApiTest.php` — owner/admin import, regular-member/outsider/unauthenticated rejection, invalid content 422, missing file 422.

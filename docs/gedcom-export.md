@@ -78,6 +78,12 @@ Families are then built in two passes:
 
 Per-member links: `FAMC` for every family the member is a child of, `FAMS` for every family the member is a husband or wife in. Soft-deleted members and relationships are excluded.
 
+### Polygamous households
+
+A husband with multiple wives is exported as one `FAM` per wife. The shared husband receives one `1 FAMS` line per family, and each child receives a `1 FAMC` line pointing to the family that contains both its recorded father and mother. This keeps each wife's children attached to the correct couple and is valid GEDCOM 5.5.1 (multiple `FAMS` links per individual).
+
+When a child has only one recorded parent, the child stays in a single-parent `FAM`. The exporter never guesses a missing mother or father, so polygamous data with incomplete parent edges is preserved rather than misattributed.
+
 ## Formatting rules
 
 - Line endings are CRLF per the GEDCOM spec.
@@ -98,5 +104,5 @@ No migration or schema change was required. The service reads `family_members` a
 
 ## Tests
 
-- `tests/Unit/GedcomExportServiceTest.php` — envelope, INDI/FAM structure, sex mapping, parent/spouse/child mapping, escaping, multiline continuation, line-length budget, filename, soft-delete exclusion.
+- `tests/Unit/GedcomExportServiceTest.php` — envelope, INDI/FAM structure, sex mapping, parent/spouse/child mapping, polygamous one-FAM-per-wife export with multiple `FAMS` and correct `FAMC`, escaping, multiline continuation, line-length budget, filename, soft-delete exclusion.
 - `tests/Feature/FamilyExportApiTest.php` — owner/member export, outsider and unauthenticated rejection, web download, settings-page link, web outsider redirect.

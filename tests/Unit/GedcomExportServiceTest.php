@@ -128,6 +128,51 @@ class GedcomExportServiceTest extends TestCase
         $this->assertStringContainsString('1 CHIL @I'.$child->id.'@', $content);
     }
 
+    public function test_polygamous_household_exports_one_family_per_wife(): void
+    {
+        $family = Family::factory()->create();
+        $husband = FamilyMember::factory()->create(['family_id' => $family->id, 'gender' => 'male']);
+        $firstWife = FamilyMember::factory()->create(['family_id' => $family->id, 'gender' => 'female']);
+        $secondWife = FamilyMember::factory()->create(['family_id' => $family->id, 'gender' => 'female']);
+        $firstChild = FamilyMember::factory()->create(['family_id' => $family->id, 'gender' => 'male']);
+        $secondChild = FamilyMember::factory()->create(['family_id' => $family->id, 'gender' => 'female']);
+
+        foreach ([
+            [$husband, $firstWife, MemberRelationship::TYPE_HUSBAND],
+            [$firstWife, $husband, MemberRelationship::TYPE_WIFE],
+            [$husband, $secondWife, MemberRelationship::TYPE_HUSBAND],
+            [$secondWife, $husband, MemberRelationship::TYPE_WIFE],
+            [$husband, $firstChild, MemberRelationship::TYPE_FATHER],
+            [$firstWife, $firstChild, MemberRelationship::TYPE_MOTHER],
+            [$husband, $secondChild, MemberRelationship::TYPE_FATHER],
+            [$secondWife, $secondChild, MemberRelationship::TYPE_MOTHER],
+        ] as [$source, $target, $type]) {
+            MemberRelationship::factory()->create([
+                'family_id' => $family->id,
+                'source_member_id' => $source->id,
+                'target_member_id' => $target->id,
+                'relationship_type' => $type,
+            ]);
+        }
+
+        $content = $this->service()->export($family);
+        $families = $this->familyRecords($content);
+
+        $this->assertCount(2, $families);
+
+        $firstFamily = $this->familyFor($families, $husband->id, $firstWife->id, $firstChild->id);
+        $secondFamily = $this->familyFor($families, $husband->id, $secondWife->id, $secondChild->id);
+
+        $this->assertNotNull($firstFamily);
+        $this->assertNotNull($secondFamily);
+        $this->assertNotSame($firstFamily, $secondFamily);
+
+        $this->assertSame(2, substr_count($this->individualBlock($content, $husband->id), '1 FAMS @'));
+        $this->assertStringContainsString('1 FAMC @'.$firstFamily.'@', $this->individualBlock($content, $firstChild->id));
+        $this->assertStringContainsString('1 FAMC @'.$secondFamily.'@', $this->individualBlock($content, $secondChild->id));
+        $this->assertStringNotContainsString('1 FAMC @'.$secondFamily.'@', $this->individualBlock($content, $firstChild->id));
+    }
+
     public function test_gedcom_at_signs_are_escaped(): void
     {
         $family = Family::factory()->create();
@@ -179,5 +224,72 @@ class GedcomExportServiceTest extends TestCase
 
         $this->assertStringNotContainsString('1 HUSB @I'.$father->id.'@', $content);
         $this->assertStringNotContainsString('1 CHIL @I'.$child->id.'@', $content);
+    }
+
+    /**
+     * @return array<string, array{husbands: list<int>, wives: list<int>, children: list<int>}>
+     */
+    private function familyRecords(string $content): array
+    {
+        $records = [];
+        $current = null;
+
+        foreach (preg_split('/\r\n/', trim($content)) ?: [] as $line) {
+            if (preg_match('/^0 @(F\d+)@ FAM$/', $line, $match) === 1) {
+                $current = $match[1];
+                $records[$current] = ['husbands' => [], 'wives' => [], 'children' => []];
+
+                continue;
+            }
+
+            if (str_starts_with($line, '0 ')) {
+                $current = null;
+
+                continue;
+            }
+
+            if ($current === null) {
+                continue;
+            }
+
+            if (preg_match('/^1 HUSB @I(\d+)@$/', $line, $match) === 1) {
+                $records[$current]['husbands'][] = (int) $match[1];
+            }
+            if (preg_match('/^1 WIFE @I(\d+)@$/', $line, $match) === 1) {
+                $records[$current]['wives'][] = (int) $match[1];
+            }
+            if (preg_match('/^1 CHIL @I(\d+)@$/', $line, $match) === 1) {
+                $records[$current]['children'][] = (int) $match[1];
+            }
+        }
+
+        return $records;
+    }
+
+    /**
+     * @param  array<string, array{husbands: list<int>, wives: list<int>, children: list<int>}>  $records
+     */
+    private function familyFor(array $records, int $husbandId, int $wifeId, int $childId): ?string
+    {
+        foreach ($records as $xref => $record) {
+            if (in_array($husbandId, $record['husbands'], true)
+                && in_array($wifeId, $record['wives'], true)
+                && in_array($childId, $record['children'], true)) {
+                return $xref;
+            }
+        }
+
+        return null;
+    }
+
+    private function individualBlock(string $content, int $memberId): string
+    {
+        $normalized = str_replace("\r\n", "\n", $content);
+
+        if (preg_match('/^0 @I'.$memberId.'@ INDI\n(.*?)(?=^0 @|^0 TRLR)/ms', $normalized, $match) === 1) {
+            return $match[1];
+        }
+
+        return '';
     }
 }

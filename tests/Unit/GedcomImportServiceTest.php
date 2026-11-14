@@ -203,4 +203,90 @@ GEDCOM;
         $this->assertSame('1990-05-01', $budi->birth_date->format('Y-m-d'));
         $this->assertDatabaseHas('family_members', ['full_name' => 'Santoso']);
     }
+
+    public function test_it_imports_polygamous_families_and_keeps_children_with_their_mother(): void
+    {
+        $user = User::factory()->create();
+        $family = Family::factory()->create(['created_by' => $user->id]);
+        $gedcom = <<<'GEDCOM'
+0 HEAD
+0 @I1@ INDI
+1 NAME Suami /Utama/
+1 SEX M
+0 @I2@ INDI
+1 NAME Istri /Pertama/
+1 SEX F
+0 @I3@ INDI
+1 NAME Istri /Kedua/
+1 SEX F
+0 @I4@ INDI
+1 NAME Anak /Pertama/
+1 SEX M
+0 @I5@ INDI
+1 NAME Anak /Kedua/
+1 SEX F
+0 @F1@ FAM
+1 HUSB @I1@
+1 WIFE @I2@
+1 CHIL @I4@
+0 @F2@ FAM
+1 HUSB @I1@
+1 WIFE @I3@
+1 CHIL @I5@
+0 TRLR
+GEDCOM;
+
+        $summary = app(GedcomImportService::class)->import($user, $family, $gedcom);
+
+        $this->assertSame(5, $summary['members_created']);
+        $this->assertSame(8, $summary['relationships_created']);
+        $this->assertSame(0, $summary['relationships_skipped']);
+
+        $husband = FamilyMember::where('full_name', 'Suami Utama')->firstOrFail();
+        $firstWife = FamilyMember::where('full_name', 'Istri Pertama')->firstOrFail();
+        $secondWife = FamilyMember::where('full_name', 'Istri Kedua')->firstOrFail();
+        $firstChild = FamilyMember::where('full_name', 'Anak Pertama')->firstOrFail();
+        $secondChild = FamilyMember::where('full_name', 'Anak Kedua')->firstOrFail();
+
+        $this->assertDatabaseHas('member_relationships', [
+            'family_id' => $family->id,
+            'source_member_id' => $husband->id,
+            'target_member_id' => $firstChild->id,
+            'relationship_type' => MemberRelationship::TYPE_FATHER,
+        ]);
+        $this->assertDatabaseHas('member_relationships', [
+            'family_id' => $family->id,
+            'source_member_id' => $firstWife->id,
+            'target_member_id' => $firstChild->id,
+            'relationship_type' => MemberRelationship::TYPE_MOTHER,
+        ]);
+        $this->assertDatabaseHas('member_relationships', [
+            'family_id' => $family->id,
+            'source_member_id' => $husband->id,
+            'target_member_id' => $secondChild->id,
+            'relationship_type' => MemberRelationship::TYPE_FATHER,
+        ]);
+        $this->assertDatabaseHas('member_relationships', [
+            'family_id' => $family->id,
+            'source_member_id' => $secondWife->id,
+            'target_member_id' => $secondChild->id,
+            'relationship_type' => MemberRelationship::TYPE_MOTHER,
+        ]);
+        $this->assertDatabaseHas('member_relationships', [
+            'family_id' => $family->id,
+            'source_member_id' => $husband->id,
+            'target_member_id' => $firstWife->id,
+            'relationship_type' => MemberRelationship::TYPE_HUSBAND,
+        ]);
+        $this->assertDatabaseHas('member_relationships', [
+            'family_id' => $family->id,
+            'source_member_id' => $husband->id,
+            'target_member_id' => $secondWife->id,
+            'relationship_type' => MemberRelationship::TYPE_HUSBAND,
+        ]);
+        $this->assertSame(2, MemberRelationship::where('family_id', $family->id)
+            ->where('source_member_id', $husband->id)
+            ->where('relationship_type', MemberRelationship::TYPE_HUSBAND)
+            ->count());
+    }
 }
