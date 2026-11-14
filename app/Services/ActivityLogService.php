@@ -10,6 +10,7 @@ use App\Models\FamilyMember;
 use App\Models\FamilyViewGrant;
 use App\Models\MemberDocument;
 use App\Models\MemberPhoto;
+use App\Models\MemberRelationship;
 use App\Models\User;
 use App\Repositories\Contracts\ActivityLogRepositoryInterface;
 
@@ -117,6 +118,26 @@ class ActivityLogService
         return $this->record($event->family_id, $user, ActivityLog::EVENT_CREATED, ['subject_uuid' => $event->uuid, 'title' => $event->title]);
     }
 
+    public function marriageEndCorrected(
+        User $user,
+        MemberRelationship $relationship,
+        ?string $previousEndDate,
+        ?string $previousEndReason,
+    ): ActivityLog {
+        return $this->record($relationship->family_id, $user, ActivityLog::MARRIAGE_END_CORRECTED, $this->marriagePayload($relationship, [
+            'previous_end_date' => $previousEndDate,
+            'previous_end_reason' => $previousEndReason,
+        ]));
+    }
+
+    public function marriageReopened(User $user, MemberRelationship $relationship, ?string $previousEndDate, ?string $previousEndReason): ActivityLog
+    {
+        return $this->record($relationship->family_id, $user, ActivityLog::MARRIAGE_REOPENED, $this->marriagePayload($relationship, [
+            'previous_end_date' => $previousEndDate,
+            'previous_end_reason' => $previousEndReason,
+        ]));
+    }
+
     public function familyLinkRequested(User $user, FamilyLink $link): ActivityLog
     {
         return $this->record($link->family_id, $user, ActivityLog::FAMILY_LINK_REQUESTED, $this->familyLinkPayload($link));
@@ -175,6 +196,17 @@ class ActivityLogService
             'linked_member_uuid' => $link->linkedMember?->uuid,
             'status' => $link->status,
         ];
+    }
+
+    private function marriagePayload(MemberRelationship $relationship, array $extra = []): array
+    {
+        return array_merge([
+            'subject_uuid' => $relationship->uuid,
+            'source_member_uuid' => $relationship->sourceMember?->uuid,
+            'target_member_uuid' => $relationship->targetMember?->uuid,
+            'end_date' => $relationship->end_date?->toDateString(),
+            'end_reason' => $relationship->end_reason,
+        ], $extra);
     }
 
     private function memberPayload(FamilyMember $member): array

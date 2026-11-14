@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Family;
 use App\Models\FamilyMember;
 use App\Models\MemberRelationship;
+use App\Models\User;
 use App\Repositories\Contracts\FamilyMemberRepositoryInterface;
 use App\Repositories\Contracts\FamilyRepositoryInterface;
 use App\Repositories\Contracts\RelationshipRepositoryInterface;
@@ -19,6 +20,7 @@ class RelationshipService
         private readonly FamilyMemberRepositoryInterface $members,
         private readonly RelationshipCacheService $cache,
         private readonly TreeCacheService $treeCache,
+        private readonly ActivityLogService $activityLog,
     ) {}
 
     public function create(array $data): MemberRelationship
@@ -70,11 +72,7 @@ class RelationshipService
 
     public function endMarriage(MemberRelationship $relationship, string $endDate, string $endReason): MemberRelationship
     {
-        if (! in_array($relationship->relationship_type, [MemberRelationship::TYPE_HUSBAND, MemberRelationship::TYPE_WIFE], true)) {
-            throw ValidationException::withMessages([
-                'relationship_type' => ['Only spouse relationships can be ended.'],
-            ]);
-        }
+        $this->assertSpouseRelationship($relationship);
 
         if ($relationship->end_date !== null) {
             throw ValidationException::withMessages([
@@ -82,12 +80,55 @@ class RelationshipService
             ]);
         }
 
-        if ($relationship->start_date !== null && $endDate < $relationship->start_date->toDateString()) {
-            throw ValidationException::withMessages([
-                'end_date' => ['The end date must be after or equal to the start date.'],
-            ]);
+        $this->assertEndReason($endReason);
+        $this->assertEndDateAfterStart($relationship, $endDate);
+
+        return $this->applyMarriageEnd($relationship, $endDate, $endReason);
+    }
+
+    public function correctMarriageEnd(
+        MemberRelationship $relationship,
+        string $endDate,
+        string $endReason,
+        ?User $user = null,
+    ): MemberRelationship {
+        $this->assertSpouseRelationship($relationship);
+        $this->assertMarriageHasEnded($relationship);
+        $this->assertEndReason($endReason);
+        $this->assertEndDateAfterStart($relationship, $endDate);
+
+        $previousEndDate = $relationship->end_date?->toDateString();
+        $previousEndReason = $relationship->end_reason;
+        $updated = $this->applyMarriageEnd($relationship, $endDate, $endReason);
+
+        if ($user instanceof User) {
+            $this->activityLog->marriageEndCorrected($user, $updated, $previousEndDate, $previousEndReason);
         }
 
+        return $updated;
+    }
+
+    public function reopenMarriage(MemberRelationship $relationship, ?User $user = null): MemberRelationship
+    {
+        $this->assertSpouseRelationship($relationship);
+        $this->assertMarriageHasEnded($relationship);
+
+        $previousEndDate = $relationship->end_date?->toDateString();
+        $previousEndReason = $relationship->end_reason;
+        $updated = $this->applyMarriageEnd($relationship, null, null);
+
+        if ($user instanceof User) {
+            $this->activityLog->marriageReopened($user, $updated, $previousEndDate, $previousEndReason);
+        }
+
+        return $updated;
+    }
+
+    private function applyMarriageEnd(
+        MemberRelationship $relationship,
+        ?string $endDate,
+        ?string $endReason,
+    ): MemberRelationship {
         $relationship->loadMissing(['family', 'sourceMember', 'targetMember']);
 
         return $this->update($relationship, [
@@ -100,6 +141,42 @@ class RelationshipService
             'end_reason' => $endReason,
             'notes' => $relationship->notes,
         ]);
+    }
+
+    private function assertSpouseRelationship(MemberRelationship $relationship): void
+    {
+        if (! in_array($relationship->relationship_type, [MemberRelationship::TYPE_HUSBAND, MemberRelationship::TYPE_WIFE], true)) {
+            throw ValidationException::withMessages([
+                'relationship_type' => ['Only spouse relationships can be ended.'],
+            ]);
+        }
+    }
+
+    private function assertMarriageHasEnded(MemberRelationship $relationship): void
+    {
+        if ($relationship->end_date === null) {
+            throw ValidationException::withMessages([
+                'end_date' => ['This marriage has not ended.'],
+            ]);
+        }
+    }
+
+    private function assertEndReason(string $endReason): void
+    {
+        if (! in_array($endReason, MemberRelationship::END_REASONS, true)) {
+            throw ValidationException::withMessages([
+                'end_reason' => ['The end reason must be divorced or widowed.'],
+            ]);
+        }
+    }
+
+    private function assertEndDateAfterStart(MemberRelationship $relationship, string $endDate): void
+    {
+        if ($relationship->start_date !== null && $endDate < $relationship->start_date->toDateString()) {
+            throw ValidationException::withMessages([
+                'end_date' => ['The end date must be after or equal to the start date.'],
+            ]);
+        }
     }
 
     public function delete(MemberRelationship $relationship): void

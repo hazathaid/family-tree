@@ -884,7 +884,7 @@ Keputusan terkunci (2026-11-14):
 ## Checklist Progres PISAH
 
 - [x] PISAH-001 — Audit baseline dan dokumentasi keputusan
-- [ ] PISAH-002 — Service koreksi dan pembatalan akhir pernikahan
+- [x] PISAH-002 — Service koreksi dan pembatalan akhir pernikahan
 - [ ] PISAH-003 — Kontrak REST API perceraian
 - [ ] PISAH-004 — Web: koreksi dan pembatalan perceraian
 - [ ] PISAH-005 — Mobile parity perceraian
@@ -906,17 +906,21 @@ Keputusan terkunci (2026-11-14):
   belum ada; regenerasi manual sebelum route terdaftar akan membuat `OpenApiContractTest`
   drift.
 
-## PISAH-002 — Service Koreksi dan Pembatalan Akhir Pernikahan 🔲 Planned
+## PISAH-002 — Service Koreksi dan Pembatalan Akhir Pernikahan ✅ Complete (2026-11-14)
 
-- Tambah `RelationshipService::correctMarriageEnd($relationship, $endDate, $endReason)`:
+- [x] Tambah `RelationshipService::correctMarriageEnd($relationship, $endDate, $endReason, ?User $user)`:
   hanya untuk edge `husband`/`wife`, hanya jika sudah berakhir, tanggal tidak boleh sebelum
   `start_date`, dan `end_reason` wajib `divorced`/`widowed`.
-- Tambah `RelationshipService::reopenMarriage($relationship)`: set `end_date` dan
-  `end_reason` menjadi null pada kedua arah spouse edge dalam satu transaksi; edge orang tua
-  tidak disentuh.
-- Sinkronisasi inverse spouse edge untuk kedua operasi; invalidasi relationship + tree cache.
-- Catat `activity_logs` dan audit (`MARRIAGE_END_CORRECTED`, `MARRIAGE_REOPENED`).
-- Deliverable: service, request validation, tests (`RelationshipServiceTest`), docs.
+- [x] Tambah `RelationshipService::reopenMarriage($relationship, ?User $user)`: set `end_date`
+  dan `end_reason` menjadi null pada kedua arah spouse edge dalam satu transaksi; edge orang
+  tua tidak disentuh.
+- [x] Sinkronisasi inverse spouse edge untuk kedua operasi; invalidasi relationship + tree cache.
+- [x] Catat `activity_logs` (`MARRIAGE_END_CORRECTED`, `MARRIAGE_REOPENED`) dan audit lewat
+  `AuditObserver` saat ada aktor.
+- [x] Tests: koreksi, reopen, edge non-spouse, tanggal sebelum menikah, alasan tidak valid,
+  parent edge tetap, activity log (`tests/Unit/RelationshipServiceTest.php`).
+- [ ] Request/HTTP validation, route, dan UI: dikerjakan di PISAH-003/004.
+- Deliverable: `RelationshipService`, `ActivityLogService`, `ActivityLog` constants, tests, docs.
 
 ## PISAH-003 — Kontrak REST API Perceraian 🔲 Planned
 

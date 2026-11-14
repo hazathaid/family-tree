@@ -30,7 +30,7 @@ Sources: `FamilyPolicy`, family resource policies, `FamilyRoleService`, `EnsureA
 - Parent edges are cycle-checked before commit. Spouse edges are synchronized bidirectionally (`husband`/`wife`).
 - A marriage ends by setting `end_date` plus `end_reason` (`divorced` or `widowed`) on the spouse edge and its inverse. Parent edges are preserved so children stay linked to both parents.
 - Divorced spouses are labelled `Mantan Istri`/`Mantan Suami`; widowed spouses keep `Istri`/`Suami`. A marriage can only be ended once through the service.
-- PISAH target rule (not yet wired to HTTP/UI): the recorded marriage ending may be corrected (date/reason) or cancelled (reopened) because a user may misclick. Both operations update the spouse edge and its inverse in one transaction, keep parent edges intact, and are logged.
+- The recorded marriage ending can be corrected (date/reason) or cancelled (reopened) through `RelationshipService` because a user may misclick. Both operations update the spouse edge and its inverse in one transaction, keep parent edges intact, invalidate relationship/tree cache, and are logged. HTTP/UI wiring is PISAH-003/004.
 - PISAH target rule (not yet wired to tree rendering): a former spouse remains visible in the family tree when the couple has shared children, so the child keeps both parents; the edge is labelled `Mantan Istri`/`Mantan Suami`. A former spouse is not offered as an active co-parent for new children.
 - Derived labels are computed by `RelationshipTraversalService` and `RelationshipResolverService`, never accepted as stored input.
 - Relationship/member changes invalidate family relationship and tree cache.

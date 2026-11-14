@@ -67,6 +67,10 @@ class ActivityLog extends Model
 
     public const FAMILY_VIEW_ACCESSED = 'FAMILY_VIEW_ACCESSED';
 
+    public const MARRIAGE_END_CORRECTED = 'MARRIAGE_END_CORRECTED';
+
+    public const MARRIAGE_REOPENED = 'MARRIAGE_REOPENED';
+
     public const FILTERS = [
         'members' => [
             self::MEMBER_CREATED,
@@ -81,6 +85,8 @@ class ActivityLog extends Model
             self::TREE_RELATIVE_CREATED,
             self::GEDCOM_IMPORTED,
             self::MEMBERS_IMPORTED,
+            self::MARRIAGE_END_CORRECTED,
+            self::MARRIAGE_REOPENED,
         ],
         'articles' => [self::ARTICLE_CREATED],
         'photos' => [self::PHOTO_UPLOADED],
