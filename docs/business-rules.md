@@ -25,6 +25,8 @@ Sources: `FamilyPolicy`, family resource policies, `FamilyRoleService`, `EnsureA
 - A member cannot relate to self. Both endpoints must belong to the same family.
 - Only `father`, `mother`, `child`, `husband`, `wife` are persisted.
 - At most one biological father and one biological mother is allowed; duplicate edges are rejected.
+- A member may have more than one spouse edge, so a husband may have several wives. Each wife retains her own parent edges to her children.
+- Creating a child from the tree with an optional `co_parent_uuid` writes both the father and mother base edges; the co-parent must be in the same family, of the opposite gender, and already linked as a spouse.
 - Parent edges are cycle-checked before commit. Spouse edges are synchronized bidirectionally (`husband`/`wife`).
 - Derived labels are computed by `RelationshipTraversalService` and `RelationshipResolverService`, never accepted as stored input.
 - Relationship/member changes invalidate family relationship and tree cache.

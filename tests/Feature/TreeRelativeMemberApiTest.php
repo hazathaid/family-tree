@@ -6,6 +6,7 @@ use App\Models\ActivityLog;
 use App\Models\Family;
 use App\Models\FamilyMember;
 use App\Models\FamilyUserRole;
+use App\Models\MemberRelationship;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
@@ -116,6 +117,91 @@ class TreeRelativeMemberApiTest extends TestCase
             'gender' => 'female',
             'is_alive' => true,
         ])->assertForbidden();
+    }
+
+    public function test_child_can_be_added_for_a_specific_co_parent(): void
+    {
+        [$owner, $family] = $this->userWithFamily(FamilyUserRole::ROLE_OWNER);
+        $husband = FamilyMember::factory()->create([
+            'family_id' => $family->id,
+            'created_by' => $owner->id,
+            'gender' => 'male',
+        ]);
+        $wife = FamilyMember::factory()->create([
+            'family_id' => $family->id,
+            'created_by' => $owner->id,
+            'gender' => 'female',
+        ]);
+        $this->marry($family, $husband, $wife);
+
+        Sanctum::actingAs($owner);
+
+        $response = $this->postJson("/api/v1/family-members/{$husband->uuid}/relatives", [
+            'relation' => 'child',
+            'co_parent_uuid' => $wife->uuid,
+            'full_name' => 'Anak Bersama',
+            'gender' => 'female',
+            'is_alive' => true,
+        ]);
+
+        $response->assertCreated()->assertJsonPath('data.full_name', 'Anak Bersama');
+
+        $childId = $response->json('data.uuid');
+
+        $this->assertDatabaseHas('member_relationships', [
+            'family_id' => $family->id,
+            'source_member_id' => $husband->id,
+            'target_member_id' => FamilyMember::query()->where('uuid', $childId)->value('id'),
+            'relationship_type' => 'father',
+        ]);
+        $this->assertDatabaseHas('member_relationships', [
+            'family_id' => $family->id,
+            'source_member_id' => $wife->id,
+            'target_member_id' => FamilyMember::query()->where('uuid', $childId)->value('id'),
+            'relationship_type' => 'mother',
+        ]);
+    }
+
+    public function test_co_parent_from_another_family_is_rejected(): void
+    {
+        [$owner, $family] = $this->userWithFamily(FamilyUserRole::ROLE_OWNER);
+        $otherFamily = Family::factory()->create(['created_by' => $owner->id]);
+        $husband = FamilyMember::factory()->create([
+            'family_id' => $family->id,
+            'created_by' => $owner->id,
+            'gender' => 'male',
+        ]);
+        $outsider = FamilyMember::factory()->create([
+            'family_id' => $otherFamily->id,
+            'created_by' => $owner->id,
+            'gender' => 'female',
+        ]);
+
+        Sanctum::actingAs($owner);
+
+        $this->postJson("/api/v1/family-members/{$husband->uuid}/relatives", [
+            'relation' => 'child',
+            'co_parent_uuid' => $outsider->uuid,
+            'full_name' => 'Anak',
+            'gender' => 'female',
+            'is_alive' => true,
+        ])->assertStatus(422)->assertJsonValidationErrors('co_parent_uuid');
+    }
+
+    private function marry(Family $family, FamilyMember $husband, FamilyMember $wife): void
+    {
+        MemberRelationship::query()->create([
+            'family_id' => $family->id,
+            'source_member_id' => $husband->id,
+            'target_member_id' => $wife->id,
+            'relationship_type' => MemberRelationship::TYPE_HUSBAND,
+        ]);
+        MemberRelationship::query()->create([
+            'family_id' => $family->id,
+            'source_member_id' => $wife->id,
+            'target_member_id' => $husband->id,
+            'relationship_type' => MemberRelationship::TYPE_WIFE,
+        ]);
     }
 
     private function userWithFamily(string $role): array

@@ -30,8 +30,12 @@ religion, gender, and living state; it is not part of the stored member name.
 ## Web tree member creation
 
 The detail sheet for a tree node may create one new base relative: a parent,
-spouse, or child. The operation creates the member and its base relationship in
-one database transaction; it never creates a derived relationship. The member's
+spouse, or child. When adding a child, an optional co-parent (the node's
+spouse) can be selected so the new child receives both a `father` and a
+`mother` base edge; this is required for polygamous households where each
+wife's children must stay linked to that wife. The operation creates the member
+and its base relationship(s) in one database transaction; it never creates a
+derived relationship. The member's
 `created_by` and an `activity_logs` record preserve the actor and the target
 node. A family owner can create a relative from any node; a regular family
 member can do so only from the family-member profile linked to their account.

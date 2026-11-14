@@ -104,7 +104,7 @@ An accepted claim sets `family_members.user_id`, restores/creates a `member` fam
 | POST `/family-members` | `family_uuid`, `full_name`; optional branch UUID, nickname, gender, religion, birth, `is_alive`, death, biography | created member |
 | GET/PUT/DELETE `/family-members/{family_member}` | PUT member fields; death required when not alive | member / updated / soft-deleted null |
 | POST `/family-members/{family_member}/photo` | multipart `photo`, image <=10 MB in current request | updated member with photo |
-| POST `/family-members/{family_member}/relatives` | `relation` parent/spouse/child, `full_name`, `gender`; optional birth, death, biography fields | created relative; allowed only for the linked member or family owner |
+| POST `/family-members/{family_member}/relatives` | `relation` parent/spouse/child, `full_name`, `gender`; optional birth, death, biography fields; when `relation=child`, optional `co_parent_uuid` links the child to both biological parents (same family and already spouses) | created relative; allowed only for the linked member or family owner |
 | GET `/families/{family}/members/duplicates` | optional `limit` 1–100 | bounded candidate duplicate pairs with confidence/reasons; owner/admin only |
 | POST `/family-members/{family_member}/merge` | `duplicate_uuid` (same family) | merged primary member; owner/admin only; reassigns base relationships/tags/invitations and soft-deletes the duplicate |
 | GET/POST `/family-members/{family_member}/documents` | POST multipart `file` (jpg/jpeg/png/webp/pdf, <=20 MB), `title`, optional `category`, `document_date`, `notes`; GET `limit`<=100 | paginated documents / created document; member-scoped |

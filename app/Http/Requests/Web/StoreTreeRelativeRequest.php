@@ -11,6 +11,12 @@ class StoreTreeRelativeRequest extends FormRequest
     {
         return [
             'relation' => ['required', Rule::in(['parent', 'spouse', 'child'])],
+            'co_parent_uuid' => [
+                'nullable',
+                'uuid',
+                'exists:family_members,uuid',
+                Rule::prohibitedIf(fn (): bool => $this->input('relation') !== 'child'),
+            ],
             'full_name' => ['required', 'string', 'max:255'],
             'gender' => ['required', Rule::in(['male', 'female'])],
             'birth_date' => ['nullable', 'date'],

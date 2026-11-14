@@ -59,6 +59,8 @@ The web member detail "Relasi dasar" list uses `RelationshipTraversalService::re
 
 Before write, `RelationshipService` rejects self-reference, duplicate base edge, second biological father/mother and a parent edge that would create a cycle. Parent-cycle detection is iterative over existing parent edges. Spouse inverses are created/updated/deleted in the same database transaction. Runtime BFS remains cycle-safe even if legacy malformed data exists.
 
+Tree relative creation supports polygamous households. When `relation=child` is submitted with `co_parent_uuid`, `TreeRelativeMemberService` validates that the co-parent is in the same family, has the opposite gender, and is already linked as a spouse, then creates both the `father` and `mother` base edges to the new child in the same transaction. Without a co-parent, only the single parent edge derived from the acting member's gender is written. Multiple `husband`/`wife` edges are allowed, so each wife keeps her own parent edge to her children.
+
 ## Cache and invalidation
 
 `member_relationship_cache` is keyed by family/source/target, contains label, JSON path, connectivity and `expires_at`, with 24-hour TTL. Connected and disconnected outcomes are cached. Relationship create/update/delete invalidates the entire family's relationship and tree cache. Member mutations invoke member/family invalidation through member services. Expired rows are ignored and can be purged.

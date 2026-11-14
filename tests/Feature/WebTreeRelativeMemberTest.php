@@ -6,6 +6,7 @@ use App\Models\ActivityLog;
 use App\Models\Family;
 use App\Models\FamilyMember;
 use App\Models\FamilyUserRole;
+use App\Models\MemberRelationship;
 use App\Models\User;
 use App\Services\WebOnboardingService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -57,6 +58,53 @@ class WebTreeRelativeMemberTest extends TestCase
         $this->active($user, $family)->post(route('tree.relatives.store', $otherMember), [
             'relation' => 'child', 'full_name' => 'Tidak Boleh', 'gender' => 'male', 'is_alive' => '1',
         ])->assertForbidden();
+    }
+
+    public function test_owner_can_add_child_with_a_specific_co_parent(): void
+    {
+        [$owner, $family] = $this->userWithFamily(FamilyUserRole::ROLE_OWNER);
+        $husband = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $owner->id, 'gender' => 'male']);
+        $wife = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $owner->id, 'gender' => 'female']);
+        $this->marry($family, $husband, $wife);
+
+        $this->active($owner, $family)->post(route('tree.relatives.store', $husband), [
+            'relation' => 'child',
+            'co_parent_uuid' => $wife->uuid,
+            'full_name' => 'Anak Bersama',
+            'gender' => 'female',
+            'is_alive' => '1',
+        ])->assertRedirect(route('tree.index', ['root' => $husband->uuid]));
+
+        $child = FamilyMember::query()->where('family_id', $family->id)->where('full_name', 'Anak Bersama')->firstOrFail();
+
+        $this->assertDatabaseHas('member_relationships', [
+            'family_id' => $family->id,
+            'source_member_id' => $husband->id,
+            'target_member_id' => $child->id,
+            'relationship_type' => 'father',
+        ]);
+        $this->assertDatabaseHas('member_relationships', [
+            'family_id' => $family->id,
+            'source_member_id' => $wife->id,
+            'target_member_id' => $child->id,
+            'relationship_type' => 'mother',
+        ]);
+    }
+
+    private function marry(Family $family, FamilyMember $husband, FamilyMember $wife): void
+    {
+        MemberRelationship::query()->create([
+            'family_id' => $family->id,
+            'source_member_id' => $husband->id,
+            'target_member_id' => $wife->id,
+            'relationship_type' => MemberRelationship::TYPE_HUSBAND,
+        ]);
+        MemberRelationship::query()->create([
+            'family_id' => $family->id,
+            'source_member_id' => $wife->id,
+            'target_member_id' => $husband->id,
+            'relationship_type' => MemberRelationship::TYPE_WIFE,
+        ]);
     }
 
     private function userWithFamily(string $role): array

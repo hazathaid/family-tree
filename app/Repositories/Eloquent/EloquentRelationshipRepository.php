@@ -91,6 +91,26 @@ class EloquentRelationshipRepository implements RelationshipRepositoryInterface
         return $query->first();
     }
 
+    public function areSpouses(Family $family, FamilyMember $first, FamilyMember $second): bool
+    {
+        return MemberRelationship::query()
+            ->where('family_id', $family->id)
+            ->whereIn('relationship_type', [
+                MemberRelationship::TYPE_HUSBAND,
+                MemberRelationship::TYPE_WIFE,
+            ])
+            ->where(function (Builder $query) use ($first, $second): void {
+                $query->where(function (Builder $query) use ($first, $second): void {
+                    $query->where('source_member_id', $first->id)
+                        ->where('target_member_id', $second->id);
+                })->orWhere(function (Builder $query) use ($first, $second): void {
+                    $query->where('source_member_id', $second->id)
+                        ->where('target_member_id', $first->id);
+                });
+            })
+            ->exists();
+    }
+
     public function parentEdges(Family $family, ?int $exceptRelationshipId = null): Collection
     {
         /** @var Builder<MemberRelationship> $query */

@@ -36,6 +36,8 @@ interface RelationshipRepositoryInterface
         ?int $exceptRelationshipId = null
     ): ?MemberRelationship;
 
+    public function areSpouses(Family $family, FamilyMember $first, FamilyMember $second): bool;
+
     /**
      * @return Collection<int, MemberRelationship>
      */
