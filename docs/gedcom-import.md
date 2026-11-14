@@ -47,6 +47,7 @@ The import never computes or stores derived kinship. It writes only the five bas
 | `FAM.HUSB` + `FAM.CHIL` | `father` edge (husband -> child) |
 | `FAM.WIFE` + `FAM.CHIL` | `mother` edge (wife -> child) |
 | `FAM.HUSB` + `FAM.WIFE` | `husband` edge (husband -> wife) and `wife` edge (wife -> husband) |
+| `FAM.DIV.DATE` | `end_date` on both spouse edges and `end_reason = divorced` |
 
 ## Rules and behavior
 
@@ -55,6 +56,7 @@ The import never computes or stores derived kinship. It writes only the five bas
 - INDI records without a name are skipped and counted in `members_skipped`.
 - Duplicate edges inside one file (the same couple/child pair referenced by more than one `FAM` record) are skipped and counted in `relationships_skipped`.
 - Multiple `FAM` records that share the same `HUSB` but name different `WIFE` members are imported as separate spouse pairs. Each `CHIL` is linked to the father and mother from its own `FAM`, so polygamous households keep each wife's children with that wife.
+- A `DIV` date is written to both spouse edges as `end_date` with `end_reason = divorced`; parent edges are still created so children keep both parents.
 - The import runs in a single transaction; a failure rolls back the whole import.
 - Relationship and tree caches are invalidated for the family; a `GEDCOM_IMPORTED` activity log entry is written.
 
@@ -71,5 +73,5 @@ No migration or schema change was required. Members and relationships are create
 
 ## Tests
 
-- `tests/Unit/GedcomImportServiceTest.php` — individuals, life details, spouse edges, polygamous FAM-per-wife import with correct father/mother edges, activity log, within-file dedup, unnamed skip, invalid document rejection, partial dates/names.
+- `tests/Unit/GedcomImportServiceTest.php` — individuals, life details, spouse edges, polygamous FAM-per-wife import with correct father/mother edges, divorced `DIV` import, activity log, within-file dedup, unnamed skip, invalid document rejection, partial dates/names.
 - `tests/Feature/FamilyImportApiTest.php` — owner/admin import, regular-member/outsider/unauthenticated rejection, invalid content 422, missing file 422.

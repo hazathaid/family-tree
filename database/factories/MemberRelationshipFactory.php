@@ -25,6 +25,7 @@ class MemberRelationshipFactory extends Factory
             'relationship_type' => fake()->randomElement(MemberRelationship::TYPES),
             'start_date' => null,
             'end_date' => null,
+            'end_reason' => null,
             'notes' => fake()->optional()->sentence(),
         ];
     }

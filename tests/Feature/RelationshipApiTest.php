@@ -226,4 +226,56 @@ class RelationshipApiTest extends TestCase
             ->assertJsonMissingPath('data.path.0.from_member_id')
             ->assertJsonMissingPath('data.path.0.relationship_id');
     }
+
+    public function test_ended_marriage_is_exposed_in_relationship_and_spouses_endpoint(): void
+    {
+        $owner = User::factory()->create();
+        $family = Family::factory()->create(['created_by' => $owner->id]);
+        $husband = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $owner->id, 'gender' => 'male']);
+        $wife = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $owner->id, 'gender' => 'female']);
+        FamilyUserRole::factory()->owner()->create([
+            'family_id' => $family->id,
+            'user_id' => $owner->id,
+        ]);
+        Sanctum::actingAs($owner);
+
+        $this->postJson('/api/v1/relationships', [
+            'family_uuid' => $family->uuid,
+            'source_member_uuid' => $husband->uuid,
+            'target_member_uuid' => $wife->uuid,
+            'relationship_type' => 'husband',
+            'start_date' => '2010-01-01',
+            'end_date' => '2024-06-01',
+            'end_reason' => 'divorced',
+        ])->assertCreated()
+            ->assertJsonPath('data.end_reason', 'divorced');
+
+        $this->getJson('/api/v1/family-members/'.$husband->uuid.'/spouses')
+            ->assertOk()
+            ->assertJsonPath('data.0.spouse_uuid', $wife->uuid)
+            ->assertJsonPath('data.0.label', 'Mantan Istri')
+            ->assertJsonPath('data.0.is_ended', true);
+    }
+
+    public function test_end_reason_is_required_when_marriage_end_date_is_supplied(): void
+    {
+        $owner = User::factory()->create();
+        $family = Family::factory()->create(['created_by' => $owner->id]);
+        $husband = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $owner->id, 'gender' => 'male']);
+        $wife = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $owner->id, 'gender' => 'female']);
+        FamilyUserRole::factory()->owner()->create([
+            'family_id' => $family->id,
+            'user_id' => $owner->id,
+        ]);
+        Sanctum::actingAs($owner);
+
+        $this->postJson('/api/v1/relationships', [
+            'family_uuid' => $family->uuid,
+            'source_member_uuid' => $husband->uuid,
+            'target_member_uuid' => $wife->uuid,
+            'relationship_type' => 'husband',
+            'end_date' => '2024-06-01',
+        ])->assertUnprocessable()
+            ->assertJsonValidationErrors('end_reason');
+    }
 }

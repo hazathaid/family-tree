@@ -20,6 +20,7 @@ class StoreRelationshipRequest extends ApiFormRequest
             'relationship_type' => ['required', Rule::in(MemberRelationship::TYPES)],
             'start_date' => ['nullable', 'date'],
             'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
+            'end_reason' => ['nullable', Rule::in(MemberRelationship::END_REASONS), 'required_with:end_date'],
             'notes' => ['nullable', 'string'],
         ];
     }

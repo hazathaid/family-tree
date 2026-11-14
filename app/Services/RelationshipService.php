@@ -68,6 +68,40 @@ class RelationshipService
         });
     }
 
+    public function endMarriage(MemberRelationship $relationship, string $endDate, string $endReason): MemberRelationship
+    {
+        if (! in_array($relationship->relationship_type, [MemberRelationship::TYPE_HUSBAND, MemberRelationship::TYPE_WIFE], true)) {
+            throw ValidationException::withMessages([
+                'relationship_type' => ['Only spouse relationships can be ended.'],
+            ]);
+        }
+
+        if ($relationship->end_date !== null) {
+            throw ValidationException::withMessages([
+                'end_date' => ['This marriage is already ended.'],
+            ]);
+        }
+
+        if ($relationship->start_date !== null && $endDate < $relationship->start_date->toDateString()) {
+            throw ValidationException::withMessages([
+                'end_date' => ['The end date must be after or equal to the start date.'],
+            ]);
+        }
+
+        $relationship->loadMissing(['family', 'sourceMember', 'targetMember']);
+
+        return $this->update($relationship, [
+            'family_uuid' => $relationship->family->uuid,
+            'source_member_uuid' => $relationship->sourceMember->uuid,
+            'target_member_uuid' => $relationship->targetMember->uuid,
+            'relationship_type' => $relationship->relationship_type,
+            'start_date' => $relationship->start_date?->toDateString(),
+            'end_date' => $endDate,
+            'end_reason' => $endReason,
+            'notes' => $relationship->notes,
+        ]);
+    }
+
     public function delete(MemberRelationship $relationship): void
     {
         DB::transaction(function () use ($relationship): void {
@@ -174,6 +208,7 @@ class RelationshipService
             'relationship_type' => $data['relationship_type'],
             'start_date' => $data['start_date'] ?? null,
             'end_date' => $data['end_date'] ?? null,
+            'end_reason' => $data['end_reason'] ?? null,
             'notes' => $data['notes'] ?? null,
         ];
     }
@@ -293,6 +328,7 @@ class RelationshipService
             'relationship_type' => $inverseType,
             'start_date' => $relationship->start_date,
             'end_date' => $relationship->end_date,
+            'end_reason' => $relationship->end_reason,
             'notes' => $relationship->notes,
         ];
 

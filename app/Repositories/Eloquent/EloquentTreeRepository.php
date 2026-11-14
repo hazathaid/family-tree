@@ -21,7 +21,7 @@ class EloquentTreeRepository implements TreeRepositoryInterface
 
     public function relationships(int $familyId): iterable
     {
-        return MemberRelationship::query()->select(['id', 'source_member_id', 'target_member_id', 'relationship_type'])
+        return MemberRelationship::query()->select(['id', 'source_member_id', 'target_member_id', 'relationship_type', 'end_date', 'end_reason'])
             ->where('family_id', $familyId)->orderBy('id')->cursor();
     }
 

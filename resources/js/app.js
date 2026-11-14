@@ -19,6 +19,9 @@ if (viewer && dataElement) {
     const relativeModalElement = document.querySelector('#tree-relative-modal');
     const relativeForm = relativeModalElement?.querySelector('[data-tree-relative-form]');
     const spouseHint = relativeModalElement?.querySelector('[data-tree-relative-spouse-hint]');
+    const coParentBlock = relativeModalElement?.querySelector('[data-tree-relative-coparent]');
+    const coParentSelect = coParentBlock?.querySelector('select[name="co_parent_uuid"]');
+    let coParentRequest = 0;
     const readonly = viewer.dataset.readonly === 'true';
     const nodes = new Map(tree.nodes.map((node) => [node.uuid, node]));
     let scale = 1;
@@ -41,6 +44,25 @@ if (viewer && dataElement) {
     const memorialPrefix = (node) => {
         return node.memorial_prefix ?? (node.is_alive ? '' : 'Mendiang ');
     };
+    const loadCoParents = (node) => {
+        const requestId = ++coParentRequest;
+        if (!coParentBlock || !coParentSelect) return;
+        coParentSelect.innerHTML = '<option value="">Tidak diketahui</option>';
+        const template = relativeModalElement.dataset.spousesUrlTemplate;
+        if (!template) return;
+        fetch(template.replace('__member__', encodeURIComponent(node.uuid)), { headers: { Accept: 'application/json' } })
+            .then((response) => response.ok ? response.json() : null)
+            .then((payload) => {
+                if (requestId !== coParentRequest || !payload) return;
+                (payload.data ?? []).filter((spouse) => !spouse.is_ended).forEach((spouse) => {
+                    const option = document.createElement('option');
+                    option.value = spouse.spouse_uuid;
+                    option.textContent = spouse.spouse_name;
+                    coParentSelect.append(option);
+                });
+            })
+            .catch(() => {});
+    };
     const openRelativeForm = (node, relation) => {
         if (!relativeModalElement || !relativeForm) return;
         const labels = { parent: 'orang tua', spouse: 'pasangan', child: 'anak' };
@@ -54,6 +76,16 @@ if (viewer && dataElement) {
             const link = spouseHint.querySelector('[data-tree-relative-link-hint]');
             if (link && relativeModalElement.dataset.familyLinkUrlTemplate) {
                 link.href = relativeModalElement.dataset.familyLinkUrlTemplate.replace('__member__', encodeURIComponent(node.uuid));
+            }
+        }
+        if (coParentBlock && coParentSelect) {
+            const isChild = relation === 'child';
+            coParentBlock.classList.toggle('d-none', !isChild);
+            coParentSelect.value = '';
+            if (isChild) {
+                loadCoParents(node);
+            } else {
+                coParentRequest++;
             }
         }
         Offcanvas.getInstance(drawerElement)?.hide();

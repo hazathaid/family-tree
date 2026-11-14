@@ -31,6 +31,7 @@ Shortest path is deterministic only to the extent repository neighbor ordering i
 | father / mother / parent | target gender/path | Ayah / Ibu / Orang Tua |
 | child | male/female/other | Anak Laki-Laki / Anak Perempuan / Anak |
 | spouse | target gender | Suami / Istri / Pasangan |
+| spouse (ended, not widowed) | target gender | Mantan Istri / Mantan Suami / Mantan Pasangan |
 | spouse,spouse | target gender | Istri Lain / Suami Lain / Pasangan Lain (co-spouse) |
 | spouse,child or spouse,spouse,child | target gender | Anak Tiri Laki-Laki / Anak Tiri Perempuan / Anak Tiri |
 | father,spouse or mother,spouse | target gender | Ibu Tiri / Ayah Tiri / Orang Tua Tiri |
@@ -61,6 +62,8 @@ The web member detail "Relasi dasar" list uses `RelationshipTraversalService::re
 ## Integrity and cycle handling
 
 Before write, `RelationshipService` rejects self-reference, duplicate base edge, second biological father/mother and a parent edge that would create a cycle. Parent-cycle detection is iterative over existing parent edges. Spouse inverses are created/updated/deleted in the same database transaction. Runtime BFS remains cycle-safe even if legacy malformed data exists.
+
+Ending a marriage sets `end_date` and `end_reason` (`divorced` or `widowed`) on both spouse edges. Parent edges are never removed, so children keep both parents. Direct spouse resolution returns `Mantan Istri`/`Mantan Suami` when the marriage ended by divorce; widowed marriages keep the `Istri`/`Suami` label. Cache invalidation follows the normal relationship update path.
 
 Tree relative creation supports polygamous households. When `relation=child` is submitted with `co_parent_uuid`, `TreeRelativeMemberService` validates that the co-parent is in the same family, has the opposite gender, and is already linked as a spouse, then creates both the `father` and `mother` base edges to the new child in the same transaction. Without a co-parent, only the single parent edge derived from the acting member's gender is written. Multiple `husband`/`wife` edges are allowed, so each wife keeps her own parent edge to her children.
 

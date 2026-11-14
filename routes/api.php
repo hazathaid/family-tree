@@ -28,6 +28,7 @@ use App\Http\Controllers\Api\V1\MemberBulkController;
 use App\Http\Controllers\Api\V1\MemberDocumentController;
 use App\Http\Controllers\Api\V1\MemberMergeController;
 use App\Http\Controllers\Api\V1\MemberPhotoController;
+use App\Http\Controllers\Api\V1\MemberSpouseController;
 use App\Http\Controllers\Api\V1\NotificationController;
 use App\Http\Controllers\Api\V1\PhotoAlbumController;
 use App\Http\Controllers\Api\V1\ProfileController;
@@ -117,6 +118,7 @@ Route::prefix('v1')->name('api.')->middleware('throttle:api')->group(function ()
         Route::delete('member-documents/{member_document}', [MemberDocumentController::class, 'destroy']);
         Route::post('family-members/{family_member}/account-invitations', [MemberAccountInvitationController::class, 'store']);
         Route::post('family-members/{family_member}/relatives', [TreeRelativeMemberController::class, 'store']);
+        Route::get('family-members/{family_member}/spouses', [MemberSpouseController::class, 'index']);
 
         Route::get('relationship-engine', [RelationshipEngineController::class, 'show']);
         Route::apiResource('relationships', RelationshipController::class);

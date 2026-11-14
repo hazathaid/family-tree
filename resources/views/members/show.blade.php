@@ -8,6 +8,34 @@
         </div>
         <div class="col-lg-8 vstack gap-4"><x-card title="Biografi">@if($member->biography)<p class="mb-0 text-preline">{{ $member->biography }}</p>@else<x-empty-state title="Belum ada biografi" message="Tambahkan kisah hidup anggota ini melalui halaman edit." />@endif</x-card>
             <x-card title="Relasi dasar">@forelse($relationships as $relationship)<div class="d-flex justify-content-between border-bottom py-2"><a href="{{ route('members.show', $relationship['member']) }}"><x-member-name :member="$relationship['member']" /></a><x-badge variant="secondary">{{ $relationship['label'] }}</x-badge></div>@empty<x-empty-state title="Belum ada relasi" message="Relasi dasar anggota belum dicatat." />@endforelse</x-card>
+            <x-card title="Pasangan">
+                @forelse($spouseLinks as $link)
+                    <div class="border-bottom py-2">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                            <a href="{{ route('members.show', $link['spouse_uuid']) }}">{{ $link['spouse_name'] }}</a>
+                            <x-badge variant="secondary">{{ $link['label'] }}</x-badge>
+                        </div>
+                        <div class="small text-secondary">
+                            {{ $link['start_date'] ? 'Menikah '.$link['start_date'] : 'Tanggal menikah belum dicatat' }}
+                            @if($link['end_date'])
+                                · Berakhir {{ $link['end_date'] }} ({{ $link['end_reason'] === 'widowed' ? 'Meninggal' : 'Bercerai' }})
+                            @endif
+                        </div>
+                        @if(! $link['is_ended'])
+                            @can('update', $member)
+                                <form method="POST" action="{{ route('members.spouses.end', [$member, $link['relationship_uuid']]) }}" class="row g-2 mt-2">
+                                    @csrf
+                                    <div class="col-sm-5"><input type="date" name="end_date" class="form-control form-control-sm" aria-label="Tanggal akhir pernikahan" required></div>
+                                    <div class="col-sm-4"><select name="end_reason" class="form-select form-select-sm" aria-label="Alasan berakhir"><option value="divorced">Bercerai</option><option value="widowed">Meninggal</option></select></div>
+                                    <div class="col-sm-3"><button class="btn btn-outline-danger btn-sm w-100" type="submit">Catat</button></div>
+                                </form>
+                            @endcan
+                        @endif
+                    </div>
+                @empty
+                    <x-empty-state title="Belum ada pasangan" message="Hubungkan pasangan dari pohon keluarga atau tambah relasi suami/istri." />
+                @endforelse
+            </x-card>
             <div class="row g-4"><div class="col-md-4"><x-card title="Foto"><x-empty-state title="Belum ada foto" message="Foto yang menandai anggota akan tampil di sini." /></x-card></div><div class="col-md-4"><x-card title="Artikel"><x-empty-state title="Belum ada artikel" message="Artikel terkait anggota akan tampil di sini." /></x-card></div><div class="col-md-4"><x-card title="Timeline"><x-empty-state title="Belum ada aktivitas" message="Aktivitas anggota akan tampil di sini." /></x-card></div></div>
         </div>
     </div>

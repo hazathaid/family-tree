@@ -141,6 +141,52 @@ class RelationshipServiceTest extends TestCase
         ]);
     }
 
+    public function test_end_marriage_updates_both_spouse_edges(): void
+    {
+        [$family, $husband, $wife] = $this->familyWithMembers(2);
+        $relationship = app(RelationshipService::class)->create([
+            'family_uuid' => $family->uuid,
+            'source_member_uuid' => $husband->uuid,
+            'target_member_uuid' => $wife->uuid,
+            'relationship_type' => 'husband',
+            'start_date' => '2010-01-01',
+        ]);
+
+        app(RelationshipService::class)->endMarriage($relationship, '2024-06-01', 'divorced');
+
+        $this->assertDatabaseHas('member_relationships', [
+            'family_id' => $family->id,
+            'source_member_id' => $husband->id,
+            'target_member_id' => $wife->id,
+            'relationship_type' => 'husband',
+            'end_reason' => 'divorced',
+        ]);
+        $this->assertDatabaseHas('member_relationships', [
+            'family_id' => $family->id,
+            'source_member_id' => $wife->id,
+            'target_member_id' => $husband->id,
+            'relationship_type' => 'wife',
+            'end_reason' => 'divorced',
+        ]);
+    }
+
+    public function test_end_marriage_rejects_an_already_ended_marriage(): void
+    {
+        [$family, $husband, $wife] = $this->familyWithMembers(2);
+        $relationship = app(RelationshipService::class)->create([
+            'family_uuid' => $family->uuid,
+            'source_member_uuid' => $husband->uuid,
+            'target_member_uuid' => $wife->uuid,
+            'relationship_type' => 'husband',
+        ]);
+
+        app(RelationshipService::class)->endMarriage($relationship, '2024-06-01', 'divorced');
+
+        $this->expectException(ValidationException::class);
+
+        app(RelationshipService::class)->endMarriage($relationship->refresh(), '2025-01-01', 'divorced');
+    }
+
     public function test_relationship_rejects_member_from_another_family(): void
     {
         [$family, $source] = $this->familyWithMembers(1);

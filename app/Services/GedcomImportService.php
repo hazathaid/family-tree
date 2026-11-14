@@ -109,7 +109,13 @@ class GedcomImportService
                 }
 
                 if ($husbandMember !== null && $wifeMember !== null) {
-                    $this->createSpouseEdges($family, $husbandMember, $wifeMember, $summary);
+                    $this->createSpouseEdges(
+                        $family,
+                        $husbandMember,
+                        $wifeMember,
+                        $summary,
+                        $this->date($this->nestedValue($record['lines'], 'DIV', 'DATE')),
+                    );
                 }
             }
 
@@ -156,8 +162,13 @@ class GedcomImportService
     /**
      * @param  array{members_created: int, relationships_created: int, members_skipped: int, relationships_skipped: int, errors: array<int, string>}  $summary
      */
-    private function createSpouseEdges(Family $family, FamilyMember $husband, FamilyMember $wife, array &$summary): void
-    {
+    private function createSpouseEdges(
+        Family $family,
+        FamilyMember $husband,
+        FamilyMember $wife,
+        array &$summary,
+        ?string $divorceDate = null,
+    ): void {
         $types = [
             [MemberRelationship::TYPE_HUSBAND, $husband, $wife],
             [MemberRelationship::TYPE_WIFE, $wife, $husband],
@@ -175,6 +186,8 @@ class GedcomImportService
                 'source_member_id' => $source->id,
                 'target_member_id' => $target->id,
                 'relationship_type' => $type,
+                'end_date' => $divorceDate,
+                'end_reason' => $divorceDate !== null ? MemberRelationship::END_REASON_DIVORCED : null,
             ]);
             $summary['relationships_created']++;
         }

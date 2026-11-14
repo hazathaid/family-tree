@@ -28,6 +28,8 @@ Sources: `FamilyPolicy`, family resource policies, `FamilyRoleService`, `EnsureA
 - A member may have more than one spouse edge, so a husband may have several wives. Each wife retains her own parent edges to her children.
 - Creating a child from the tree with an optional `co_parent_uuid` writes both the father and mother base edges; the co-parent must be in the same family, of the opposite gender, and already linked as a spouse.
 - Parent edges are cycle-checked before commit. Spouse edges are synchronized bidirectionally (`husband`/`wife`).
+- A marriage ends by setting `end_date` plus `end_reason` (`divorced` or `widowed`) on the spouse edge and its inverse. Parent edges are preserved so children stay linked to both parents.
+- Divorced spouses are labelled `Mantan Istri`/`Mantan Suami`; widowed spouses keep `Istri`/`Suami`. A marriage can only be ended once through the service.
 - Derived labels are computed by `RelationshipTraversalService` and `RelationshipResolverService`, never accepted as stored input.
 - Relationship/member changes invalidate family relationship and tree cache.
 

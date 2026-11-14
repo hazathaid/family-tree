@@ -34,13 +34,25 @@ class FamilyTreeService
                     continue;
                 }
                 $visited[$edge['to']] = true;
-                $edges[] = ['source_id' => $id, 'target_id' => $edge['to'], 'relationship' => $edge['relationship']];
+                $edges[] = [
+                    'source_id' => $id,
+                    'target_id' => $edge['to'],
+                    'relationship' => $edge['relationship'],
+                    'end_date' => $edge['end_date'] ?? null,
+                    'end_reason' => $edge['end_reason'] ?? null,
+                ];
                 $queue->enqueue([$edge['to'], $distance + 1, $generation + $edge['delta']]);
             }
         }
         $edges = $this->addMissingParentEdges($graph['adjacency'], array_keys($nodes), $edges);
         $ids = array_column($nodes, 'uuid', 'id');
-        $edges = array_map(fn (array $edge): array => ['source_uuid' => $ids[$edge['source_id']], 'target_uuid' => $ids[$edge['target_id']], 'relationship' => $edge['relationship']], $edges);
+        $edges = array_map(fn (array $edge): array => [
+            'source_uuid' => $ids[$edge['source_id']],
+            'target_uuid' => $ids[$edge['target_id']],
+            'relationship' => $edge['relationship'],
+            'end_date' => $edge['end_date'] ?? null,
+            'end_reason' => $edge['end_reason'] ?? null,
+        ], $edges);
         $generations = array_column($nodes, 'generation');
         $tree = ['root_member_uuid' => $root->uuid, 'mode' => $mode, 'depth' => $depth, 'nodes' => array_values($nodes), 'edges' => $edges,
             'statistics' => ['members' => count($nodes), 'generations' => max($generations) - min($generations) + 1,

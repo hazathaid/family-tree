@@ -91,6 +91,56 @@ class WebTreeRelativeMemberTest extends TestCase
         ]);
     }
 
+    public function test_tree_modal_can_fetch_spouses_for_co_parent_selection(): void
+    {
+        [$owner, $family] = $this->userWithFamily(FamilyUserRole::ROLE_OWNER);
+        $husband = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $owner->id, 'gender' => 'male']);
+        $firstWife = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $owner->id, 'gender' => 'female']);
+        $secondWife = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $owner->id, 'gender' => 'female']);
+        $this->marry($family, $husband, $firstWife);
+        $this->marry($family, $husband, $secondWife);
+
+        $this->active($owner, $family)->getJson(route('tree.members.spouses', $husband))
+            ->assertOk()
+            ->assertJsonCount(2, 'data')
+            ->assertJsonFragment(['spouse_uuid' => $firstWife->uuid, 'label' => 'Istri'])
+            ->assertJsonFragment(['spouse_uuid' => $secondWife->uuid, 'label' => 'Istri']);
+    }
+
+    public function test_owner_can_record_the_end_of_a_marriage(): void
+    {
+        [$owner, $family] = $this->userWithFamily(FamilyUserRole::ROLE_OWNER);
+        $husband = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $owner->id, 'gender' => 'male']);
+        $wife = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $owner->id, 'gender' => 'female']);
+        $this->marry($family, $husband, $wife);
+        $relationship = MemberRelationship::query()
+            ->where('family_id', $family->id)
+            ->where('source_member_id', $husband->id)
+            ->where('target_member_id', $wife->id)
+            ->where('relationship_type', MemberRelationship::TYPE_HUSBAND)
+            ->firstOrFail();
+
+        $this->active($owner, $family)->post(route('members.spouses.end', [$husband, $relationship->uuid]), [
+            'end_date' => '2024-06-01',
+            'end_reason' => 'divorced',
+        ])->assertRedirect(route('members.show', $husband));
+
+        $this->assertDatabaseHas('member_relationships', [
+            'family_id' => $family->id,
+            'source_member_id' => $husband->id,
+            'target_member_id' => $wife->id,
+            'relationship_type' => MemberRelationship::TYPE_HUSBAND,
+            'end_reason' => 'divorced',
+        ]);
+        $this->assertDatabaseHas('member_relationships', [
+            'family_id' => $family->id,
+            'source_member_id' => $wife->id,
+            'target_member_id' => $husband->id,
+            'relationship_type' => MemberRelationship::TYPE_WIFE,
+            'end_reason' => 'divorced',
+        ]);
+    }
+
     private function marry(Family $family, FamilyMember $husband, FamilyMember $wife): void
     {
         MemberRelationship::query()->create([

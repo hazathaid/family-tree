@@ -3,8 +3,11 @@
 namespace App\Services;
 
 use App\Models\FamilyMember;
+use App\Models\MemberRelationship;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
+use Throwable;
 
 class RelationshipResolverService
 {
@@ -111,6 +114,14 @@ class RelationshipResolverService
         }
 
         if ($sequence === ['spouse']) {
+            if ($this->marriageEndedByDivorce($path[0] ?? [])) {
+                return match ($target->gender) {
+                    'male' => 'Mantan Suami',
+                    'female' => 'Mantan Istri',
+                    default => 'Mantan Pasangan',
+                };
+            }
+
             return match ($target->gender) {
                 'male' => 'Suami',
                 'female' => 'Istri',
@@ -256,6 +267,28 @@ class RelationshipResolverService
     private function isParent(string $relationship): bool
     {
         return in_array($relationship, ['father', 'mother', 'parent'], true);
+    }
+
+    /**
+     * @param  array<string, mixed>  $edge
+     */
+    private function marriageEndedByDivorce(array $edge): bool
+    {
+        $endDate = $edge['end_date'] ?? null;
+
+        if (! is_string($endDate) || $endDate === '') {
+            return false;
+        }
+
+        if (($edge['end_reason'] ?? null) === MemberRelationship::END_REASON_WIDOWED) {
+            return false;
+        }
+
+        try {
+            return Carbon::parse($endDate)->lte(today());
+        } catch (Throwable) {
+            return false;
+        }
     }
 
     private function uncleOrAuntName(int $parentMemberId, FamilyMember $target, ?int $uncleOrAuntMemberId = null): string

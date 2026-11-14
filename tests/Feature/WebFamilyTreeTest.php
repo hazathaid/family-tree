@@ -35,7 +35,10 @@ class WebFamilyTreeTest extends TestCase
             ->assertSee('Hasan Ayah')
             ->assertSee('Ayah')
             ->assertSee('data-tree-action="zoom-in"', false)
-            ->assertSee('tree-member-drawer');
+            ->assertSee('tree-member-drawer')
+            ->assertSee('data-spouses-url-template', false)
+            ->assertSee('data-tree-relative-coparent', false)
+            ->assertSee('name="co_parent_uuid"', false);
     }
 
     public function test_tree_rejects_invalid_controls_and_foreign_root(): void

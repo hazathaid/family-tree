@@ -41,6 +41,8 @@ class TreePresentationService
                 'from_member_id' => $from->id,
                 'to_member_id' => $to->id,
                 'relationship' => $edge['relationship'],
+                'end_date' => $edge['end_date'] ?? null,
+                'end_reason' => $edge['end_reason'] ?? null,
             ]];
         }
 

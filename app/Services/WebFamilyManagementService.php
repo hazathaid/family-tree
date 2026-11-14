@@ -20,6 +20,7 @@ class WebFamilyManagementService
         private readonly FamilyUserRoleRepositoryInterface $roles,
         private readonly RelationshipResolverService $relationshipResolver,
         private readonly FamilyViewGrantRepositoryInterface $viewGrants,
+        private readonly MemberSpouseService $spouses,
     ) {}
 
     public function settings(Family $family): array
@@ -62,6 +63,7 @@ class WebFamilyManagementService
         return [
             'relationships' => $this->relationshipResolver->relatives($member, 3),
             'relationship_to_viewer' => $relationship,
+            'spouseLinks' => $this->spouses->summaries($member),
         ];
     }
 

@@ -20,6 +20,7 @@ use App\Http\Controllers\Web\ReportController;
 use App\Http\Controllers\Web\ScopedFamilyViewController;
 use App\Http\Controllers\Web\SearchController;
 use App\Http\Controllers\Web\TimelineController;
+use App\Http\Controllers\Web\TreeMemberSpouseController;
 use App\Http\Controllers\Web\TreeRelativeMemberController;
 use App\Http\Controllers\Web\TwoFactorChallengeController;
 use Illuminate\Support\Facades\Route;
@@ -79,6 +80,8 @@ Route::middleware('auth')->group(function (): void {
             Route::get('/dashboard', DashboardController::class)->name('dashboard');
             Route::get('/tree', FamilyTreeController::class)->name('tree.index');
             Route::post('/tree/members/{member}/relatives', [TreeRelativeMemberController::class, 'store'])->name('tree.relatives.store');
+            Route::get('/tree/members/{member}/spouses', [TreeMemberSpouseController::class, 'index'])->name('tree.members.spouses');
+            Route::post('/members/{member}/spouses/{relationship}/end', [MemberController::class, 'endMarriage'])->name('members.spouses.end');
             Route::get('/family-links', [FamilyLinkController::class, 'index'])->name('family-links.index')->middleware('throttle:family-link');
             Route::post('/family-links', [FamilyLinkController::class, 'store'])->name('family-links.store')->middleware('throttle:family-link');
             Route::post('/family-links/{link}/approve', [FamilyLinkController::class, 'approve'])->name('family-links.approve')->middleware('throttle:family-link');

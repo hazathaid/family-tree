@@ -44,16 +44,23 @@ class TreeGraphBuilderService
                 $this->add($adjacency, $source, $target, $parent, -1);
                 $this->add($adjacency, $target, $source, 'child', 1);
             } else {
-                $this->add($adjacency, $source, $target, 'spouse', 0);
-                $this->add($adjacency, $target, $source, 'spouse', 0);
+                $this->add($adjacency, $source, $target, 'spouse', 0, $relation);
+                $this->add($adjacency, $target, $source, 'spouse', 0, $relation);
             }
         }
 
         return compact('nodes', 'adjacency');
     }
 
-    private function add(array &$adjacency, int $from, int $to, string $relationship, int $delta): void
+    private function add(array &$adjacency, int $from, int $to, string $relationship, int $delta, ?MemberRelationship $relation = null): void
     {
-        $adjacency[$from][] = compact('from', 'to', 'relationship', 'delta');
+        $edge = compact('from', 'to', 'relationship', 'delta');
+
+        if ($relationship === 'spouse' && $relation !== null) {
+            $edge['end_date'] = $relation->end_date?->toDateString();
+            $edge['end_reason'] = $relation->end_reason;
+        }
+
+        $adjacency[$from][] = $edge;
     }
 }

@@ -107,7 +107,7 @@
             <div class="offcanvas-header"><h2 class="offcanvas-title h5" id="tree-member-title">Detail anggota</h2><button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Tutup detail"></button></div>
             <div class="offcanvas-body" data-tree-detail></div>
         </div>
-        <div class="modal fade" id="tree-relative-modal" tabindex="-1" aria-labelledby="tree-relative-modal-title" aria-hidden="true" data-relative-url-template="{{ route('tree.relatives.store', ['member' => '__member__']) }}" data-family-link-url-template="{{ route('family-links.index') }}?member=__member__">
+        <div class="modal fade" id="tree-relative-modal" tabindex="-1" aria-labelledby="tree-relative-modal-title" aria-hidden="true" data-relative-url-template="{{ route('tree.relatives.store', ['member' => '__member__']) }}" data-spouses-url-template="{{ route('tree.members.spouses', ['member' => '__member__']) }}" data-family-link-url-template="{{ route('family-links.index') }}?member=__member__">
             <div class="modal-dialog modal-lg">
                 <form method="POST" class="modal-content" data-tree-relative-form>
                     @csrf
@@ -122,6 +122,13 @@
                         <div class="col-12"><p class="mb-0 text-body-secondary" data-tree-relative-description></p></div>
                         <div class="col-12 d-none" data-tree-relative-spouse-hint>
                             <div class="alert alert-info mb-0">Pasangan sudah punya data di keluarga lain? <a href="#" data-tree-relative-link-hint>Tautkan ke keluarga pasangan</a> tanpa membuat anggota baru.</div>
+                        </div>
+                        <div class="col-12 d-none" data-tree-relative-coparent>
+                            <label class="form-label" for="tree-relative-coparent">Pasangan / orang tua lainnya</label>
+                            <select class="form-select" id="tree-relative-coparent" name="co_parent_uuid">
+                                <option value="">Tidak diketahui</option>
+                            </select>
+                            <div class="form-text">Pilih pasangan agar anak terhubung ke ayah dan ibu. Untuk istri kedua, pilih istri yang menjadi ibu anak.</div>
                         </div>
                         <div class="col-md-8"><label class="form-label" for="tree-relative-name">Nama lengkap</label><input class="form-control" id="tree-relative-name" name="full_name" required maxlength="255"></div>
                         <div class="col-md-4"><label class="form-label" for="tree-relative-gender">Jenis kelamin</label><select class="form-select" id="tree-relative-gender" name="gender" required><option value="">Pilih</option><option value="male">Laki-laki</option><option value="female">Perempuan</option></select></div>

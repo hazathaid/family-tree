@@ -105,14 +105,15 @@ An accepted claim sets `family_members.user_id`, restores/creates a `member` fam
 | GET/PUT/DELETE `/family-members/{family_member}` | PUT member fields; death required when not alive | member / updated / soft-deleted null |
 | POST `/family-members/{family_member}/photo` | multipart `photo`, image <=10 MB in current request | updated member with photo |
 | POST `/family-members/{family_member}/relatives` | `relation` parent/spouse/child, `full_name`, `gender`; optional birth, death, biography fields; when `relation=child`, optional `co_parent_uuid` links the child to both biological parents (same family and already spouses) | created relative; allowed only for the linked member or family owner |
+| GET `/family-members/{family_member}/spouses` | none | spouse summaries with relationship UUID, spouse UUID/name, label, marriage start/end dates, `end_reason`, and `is_ended`; family membership required |
 | GET `/families/{family}/members/duplicates` | optional `limit` 1–100 | bounded candidate duplicate pairs with confidence/reasons; owner/admin only |
 | POST `/family-members/{family_member}/merge` | `duplicate_uuid` (same family) | merged primary member; owner/admin only; reassigns base relationships/tags/invitations and soft-deletes the duplicate |
 | GET/POST `/family-members/{family_member}/documents` | POST multipart `file` (jpg/jpeg/png/webp/pdf, <=20 MB), `title`, optional `category`, `document_date`, `notes`; GET `limit`<=100 | paginated documents / created document; member-scoped |
 | GET/DELETE `/member-documents/{member_document}` | none | document / soft-deleted null; family/policy scoped |
 | GET `/member-documents/{member_document}/download` | none | authenticated binary attachment; 30/min |
 | GET `/relationships` | family/member filters + pagination | base relationship resources |
-| POST `/relationships` | family/source/target UUID, type; optional dates/notes | base relationship; type only father/mother/child/husband/wife |
-| GET/PUT/DELETE `/relationships/{relationship}` | update base-edge fields | relationship / updated / null |
+| POST `/relationships` | family/source/target UUID, type; optional `start_date`, `end_date`, `end_reason` (divorced/widowed), notes | base relationship; type only father/mother/child/husband/wife; `end_reason` is required when `end_date` is supplied |
+| GET/PUT/DELETE `/relationships/{relationship}` | update base-edge fields including `end_date`/`end_reason` | relationship / updated / null |
 | GET `/relationship-engine` | `source_member_uuid`, `target_member_uuid` | `{relationship,path}`; same family; derived server-side |
 
 Member directory filters and sorting execute server-side. Relationship resolver inputs are public member UUIDs; numeric IDs are not accepted.

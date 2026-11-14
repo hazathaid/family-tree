@@ -22,7 +22,7 @@ Status: audited against all migrations present on 2026-07-22. Migrations are aut
 | `member_account_invitations` | uuid, family_member_id, invited_by, email, token_hash, expires_at, accepted_at | unique UUID/token hash; member/inviter FKs; expiry/pending indexes; soft delete; raw token is never stored |
 | `family_view_grants` | uuid, family_id, anchor_member_id, granted_by, grantee_user_id, invited_email, token_hash, can_view_living, expires_at, revoked_at, last_accessed_at | family/anchor/granted-by cascade, grantee null-on-delete; unique UUID/token hash; family/grantee, email, and expiry indexes; soft delete; raw token never stored; `can_view_living` is always false in v1 |
 | `family_links` | uuid, family_id, linked_family_id, member_id, linked_member_id, link_type, children_home_family_id, status, requested_by, approved_by_family, approved_by_linked_family, expires_at, revoked_at | marriage link between two members in different families; all family/member FKs cascade, approvers/children-home null-on-delete; member/status and family/status indexes; soft delete; status is `pending`/`active`/`revoked`/`expired` |
-| `member_relationships` | uuid, family_id, source_member_id, target_member_id, relationship_type, dates, notes | base enum only; composite edge index; all graph FKs cascade; soft delete |
+| `member_relationships` | uuid, family_id, source_member_id, target_member_id, relationship_type, start_date, end_date, end_reason, notes | base enum only; composite edge index; all graph FKs cascade; soft delete; `end_reason` is `divorced`/`widowed` and only metadata on a spouse edge |
 | `member_relationship_cache` | uuid, family/source/target IDs, relationship_name, relationship_path, is_connected, expires_at | unique lookup triple; expiry and FK indexes; cascade; no soft delete |
 | `member_tree_cache` | uuid, family_id, member_id, mode, depth, tree_json, generated_at, expires_at | unique member+mode+depth; family+expiry index; cascade |
 | `tree_exports` | uuid, family/user/root_member IDs, mode, depth, layout, format, paper_size, status, path, error, completed_at, expires_at | family/time and user/status indexes; expires index; cascade FKs; `path` points to the private `local` disk |
@@ -44,7 +44,7 @@ Status: audited against all migrations present on 2026-07-22. Migrations are aut
 | `user_badges` | uuid, family/user/badge IDs, awarded_at | unique family+user+badge; cascades |
 | `audit_logs` | uuid, user_id, action, auditable type/id/uuid, old/new values, IP, user agent | polymorphic and time/user indexes; user null; immutable operationally |
 
-`member_relationships.relationship_type` is exactly `father`, `mother`, `child`, `husband`, or `wife`. Derived kinship is cache output, never a permanent graph edge.
+`member_relationships.relationship_type` is exactly `father`, `mother`, `child`, `husband`, or `wife`. Derived kinship is cache output, never a permanent graph edge. A spouse edge with `end_date`/`end_reason` remains a base spouse edge; the engine reads the metadata to label a divorced relationship as `Mantan Istri`/`Mantan Suami` while keeping parent edges intact.
 
 ## Framework and operations tables
 

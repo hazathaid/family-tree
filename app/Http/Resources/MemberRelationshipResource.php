@@ -23,6 +23,7 @@ class MemberRelationshipResource extends JsonResource
             'relationship_type' => $relationship->relationship_type,
             'start_date' => $relationship->start_date?->toDateString(),
             'end_date' => $relationship->end_date?->toDateString(),
+            'end_reason' => $relationship->end_reason,
             'notes' => $relationship->notes,
             'created_at' => $relationship->created_at?->toISOString(),
             'updated_at' => $relationship->updated_at?->toISOString(),

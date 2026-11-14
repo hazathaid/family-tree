@@ -121,6 +121,8 @@ class RelationshipTraversalService
                         'relationship' => $relationship,
                         'relationship_id' => $relationshipId,
                         'relationship_type' => $relationshipType,
+                        'end_date' => $edge->end_date ?? null,
+                        'end_reason' => $edge->end_reason ?? null,
                     ];
                     $paths[$to] = $path;
                     $next[$to] = true;
@@ -147,6 +149,42 @@ class RelationshipTraversalService
         }
 
         return collect($relatives);
+    }
+
+    /**
+     * @return Collection<int, array{relationship: MemberRelationship, spouse: FamilyMember}>
+     */
+    public function spouses(FamilyMember $member): Collection
+    {
+        return $this->relationships->forMember($member)
+            ->filter(fn (MemberRelationship $relationship): bool => in_array(
+                $relationship->relationship_type,
+                [MemberRelationship::TYPE_HUSBAND, MemberRelationship::TYPE_WIFE],
+                true
+            ))
+            ->groupBy(fn (MemberRelationship $relationship): int => $relationship->source_member_id === $member->id
+                ? $relationship->target_member_id
+                : $relationship->source_member_id)
+            ->map(function (Collection $edges) use ($member): ?array {
+                /** @var MemberRelationship|null $relationship */
+                $relationship = $edges->first(
+                    fn (MemberRelationship $edge): bool => $edge->source_member_id === $member->id
+                ) ?? $edges->first();
+
+                if (! $relationship instanceof MemberRelationship) {
+                    return null;
+                }
+
+                $spouse = $relationship->source_member_id === $member->id
+                    ? $relationship->targetMember
+                    : $relationship->sourceMember;
+
+                return $spouse instanceof FamilyMember
+                    ? ['relationship' => $relationship, 'spouse' => $spouse]
+                    : null;
+            })
+            ->filter()
+            ->values();
     }
 
     /**
@@ -290,9 +328,17 @@ class RelationshipTraversalService
             ->get()
             ->keyBy('id');
 
-        return array_map(function (array $edge) use ($members): array {
+        $relationshipIds = array_values(array_unique(array_map(fn (array $edge): int => $edge[3], $path)));
+        $relationships = DB::table('member_relationships')
+            ->select(['id', 'end_date', 'end_reason'])
+            ->whereIn('id', $relationshipIds)
+            ->get()
+            ->keyBy('id');
+
+        return array_map(function (array $edge) use ($members, $relationships): array {
             $from = $members->get($edge[0]);
             $to = $members->get($edge[1]);
+            $relationship = $relationships->get($edge[3]);
 
             return [
                 'from_member_id' => $edge[0],
@@ -304,6 +350,8 @@ class RelationshipTraversalService
                 'relationship' => $edge[2],
                 'relationship_id' => $edge[3],
                 'relationship_type' => $edge[4],
+                'end_date' => $relationship?->end_date,
+                'end_reason' => $relationship?->end_reason,
             ];
         }, $path);
     }

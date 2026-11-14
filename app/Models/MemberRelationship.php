@@ -18,6 +18,7 @@ use Illuminate\Support\Carbon;
  * @property string $relationship_type
  * @property Carbon|null $start_date
  * @property Carbon|null $end_date
+ * @property string|null $end_reason
  * @property string|null $notes
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
@@ -49,6 +50,15 @@ class MemberRelationship extends Model
         self::TYPE_WIFE,
     ];
 
+    public const END_REASON_DIVORCED = 'divorced';
+
+    public const END_REASON_WIDOWED = 'widowed';
+
+    public const END_REASONS = [
+        self::END_REASON_DIVORCED,
+        self::END_REASON_WIDOWED,
+    ];
+
     protected $fillable = [
         'uuid',
         'family_id',
@@ -57,6 +67,7 @@ class MemberRelationship extends Model
         'relationship_type',
         'start_date',
         'end_date',
+        'end_reason',
         'notes',
     ];
 

@@ -153,6 +153,8 @@ class EloquentRelationshipRepository implements RelationshipRepositoryInterface
                 'source_member_id',
                 'target_member_id',
                 'relationship_type',
+                'end_date',
+                'end_reason',
             ])
             ->where('family_id', $familyId)
             ->where(function ($query) use ($memberId): void {
@@ -176,6 +178,8 @@ class EloquentRelationshipRepository implements RelationshipRepositoryInterface
                 'source_member_id',
                 'target_member_id',
                 'relationship_type',
+                'end_date',
+                'end_reason',
             ])
             ->where('family_id', $familyId)
             ->where(function ($query) use ($memberIds): void {

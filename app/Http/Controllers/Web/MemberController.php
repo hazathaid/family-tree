@@ -4,12 +4,15 @@ namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Web\ConfirmDeleteRequest;
+use App\Http\Requests\Web\EndMarriageRequest;
 use App\Http\Requests\Web\MemberDirectoryRequest;
 use App\Http\Requests\Web\SaveMemberRequest;
 use App\Models\Family;
 use App\Models\FamilyMember;
+use App\Models\MemberRelationship;
 use App\Services\FamilyMemberService;
 use App\Services\MemberAccountInvitationService;
+use App\Services\RelationshipService;
 use App\Services\WebFamilyManagementService;
 use App\Services\WebOnboardingService;
 use Illuminate\Contracts\View\View;
@@ -24,6 +27,7 @@ class MemberController extends Controller
         private readonly WebFamilyManagementService $presentation,
         private readonly FamilyMemberService $members,
         private readonly MemberAccountInvitationService $accountInvitations,
+        private readonly RelationshipService $relationships,
     ) {}
 
     public function index(MemberDirectoryRequest $request): View
@@ -86,6 +90,26 @@ class MemberController extends Controller
         }
 
         return redirect()->route('members.show', $member)->with('status', 'Anggota berhasil diperbarui.');
+    }
+
+    public function endMarriage(EndMarriageRequest $request, FamilyMember $member, MemberRelationship $relationship): RedirectResponse
+    {
+        $this->ensureActiveFamilyMember($request, $member);
+        Gate::authorize('update', $member);
+
+        abort_unless(
+            $relationship->family_id === $member->family_id
+            && in_array($member->id, [$relationship->source_member_id, $relationship->target_member_id], true),
+            404
+        );
+
+        $this->relationships->endMarriage(
+            $relationship,
+            (string) $request->validated('end_date'),
+            (string) $request->validated('end_reason'),
+        );
+
+        return redirect()->route('members.show', $member)->with('status', 'Akhir pernikahan berhasil dicatat.');
     }
 
     public function destroy(ConfirmDeleteRequest $request, FamilyMember $member): RedirectResponse

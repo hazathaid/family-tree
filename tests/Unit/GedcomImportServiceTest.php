@@ -204,6 +204,50 @@ GEDCOM;
         $this->assertDatabaseHas('family_members', ['full_name' => 'Santoso']);
     }
 
+    public function test_it_imports_a_divorced_marriage_end_date(): void
+    {
+        $user = User::factory()->create();
+        $family = Family::factory()->create(['created_by' => $user->id]);
+        $gedcom = <<<'GEDCOM'
+0 HEAD
+0 @I1@ INDI
+1 NAME Suami
+1 SEX M
+0 @I2@ INDI
+1 NAME Istri
+1 SEX F
+0 @F1@ FAM
+1 HUSB @I1@
+1 WIFE @I2@
+1 DIV
+2 DATE 1 MAY 2024
+0 TRLR
+GEDCOM;
+
+        app(GedcomImportService::class)->import($user, $family, $gedcom);
+
+        $husband = FamilyMember::where('full_name', 'Suami')->firstOrFail();
+        $wife = FamilyMember::where('full_name', 'Istri')->firstOrFail();
+
+        $husbandEdge = MemberRelationship::query()
+            ->where('family_id', $family->id)
+            ->where('source_member_id', $husband->id)
+            ->where('target_member_id', $wife->id)
+            ->where('relationship_type', MemberRelationship::TYPE_HUSBAND)
+            ->firstOrFail();
+        $wifeEdge = MemberRelationship::query()
+            ->where('family_id', $family->id)
+            ->where('source_member_id', $wife->id)
+            ->where('target_member_id', $husband->id)
+            ->where('relationship_type', MemberRelationship::TYPE_WIFE)
+            ->firstOrFail();
+
+        $this->assertSame('2024-05-01', $husbandEdge->end_date?->toDateString());
+        $this->assertSame(MemberRelationship::END_REASON_DIVORCED, $husbandEdge->end_reason);
+        $this->assertSame('2024-05-01', $wifeEdge->end_date?->toDateString());
+        $this->assertSame(MemberRelationship::END_REASON_DIVORCED, $wifeEdge->end_reason);
+    }
+
     public function test_it_imports_polygamous_families_and_keeps_children_with_their_mother(): void
     {
         $user = User::factory()->create();

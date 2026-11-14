@@ -9,6 +9,7 @@ use App\Repositories\Contracts\FamilyBranchRepositoryInterface;
 use App\Repositories\Contracts\FamilyMemberRepositoryInterface;
 use App\Repositories\Contracts\FamilyUserRoleRepositoryInterface;
 use App\Repositories\Contracts\FamilyViewGrantRepositoryInterface;
+use App\Services\MemberSpouseService;
 use App\Services\RelationshipResolverService;
 use App\Services\WebFamilyManagementService;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -27,12 +28,13 @@ class WebFamilyManagementServiceTest extends TestCase
         $roles = Mockery::mock(FamilyUserRoleRepositoryInterface::class);
         $resolver = Mockery::mock(RelationshipResolverService::class);
         $viewGrants = Mockery::mock(FamilyViewGrantRepositoryInterface::class);
+        $spouses = Mockery::mock(MemberSpouseService::class);
         $memberPage = new LengthAwarePaginator([], 0, 15);
         $branchPage = new LengthAwarePaginator([], 0, 100);
         $members->shouldReceive('paginateForFamily')->once()->with($family, $filters)->andReturn($memberPage);
         $branches->shouldReceive('paginateForFamily')->once()->with($family, 100)->andReturn($branchPage);
 
-        $result = (new WebFamilyManagementService($branches, $members, $roles, $resolver, $viewGrants))->directory($family, $filters);
+        $result = (new WebFamilyManagementService($branches, $members, $roles, $resolver, $viewGrants, $spouses))->directory($family, $filters);
 
         $this->assertSame($memberPage, $result['members']);
         $this->assertInstanceOf(Collection::class, $result['branches']);
@@ -52,12 +54,14 @@ class WebFamilyManagementServiceTest extends TestCase
         $roles = Mockery::mock(FamilyUserRoleRepositoryInterface::class);
         $resolver = Mockery::mock(RelationshipResolverService::class);
         $viewGrants = Mockery::mock(FamilyViewGrantRepositoryInterface::class);
+        $spouses = Mockery::mock(MemberSpouseService::class);
+        $spouses->shouldReceive('summaries')->once()->with($member)->andReturn([]);
 
         $members->shouldReceive('findForUserInFamily')->once()->with($user, $family)->andReturn($viewer);
         $resolver->shouldReceive('relatives')->once()->with($member, 3)->andReturn(collect());
         $resolver->shouldReceive('resolve')->once()->with($viewer, $member)->andReturn(['relationship' => 'Ayah', 'path' => []]);
 
-        $result = (new WebFamilyManagementService($branches, $members, $roles, $resolver, $viewGrants))->memberDetail($member, $user);
+        $result = (new WebFamilyManagementService($branches, $members, $roles, $resolver, $viewGrants, $spouses))->memberDetail($member, $user);
 
         $this->assertSame('Ayah', $result['relationship_to_viewer']);
         $this->assertTrue($result['relationships']->isEmpty());
@@ -74,12 +78,14 @@ class WebFamilyManagementServiceTest extends TestCase
         $roles = Mockery::mock(FamilyUserRoleRepositoryInterface::class);
         $resolver = Mockery::mock(RelationshipResolverService::class);
         $viewGrants = Mockery::mock(FamilyViewGrantRepositoryInterface::class);
+        $spouses = Mockery::mock(MemberSpouseService::class);
+        $spouses->shouldReceive('summaries')->once()->with($member)->andReturn([]);
 
         $members->shouldReceive('findForUserInFamily')->once()->andReturnNull();
         $resolver->shouldReceive('relatives')->once()->with($member, 3)->andReturn(collect());
         $resolver->shouldNotReceive('resolve');
 
-        $result = (new WebFamilyManagementService($branches, $members, $roles, $resolver, $viewGrants))->memberDetail($member, $user);
+        $result = (new WebFamilyManagementService($branches, $members, $roles, $resolver, $viewGrants, $spouses))->memberDetail($member, $user);
 
         $this->assertNull($result['relationship_to_viewer']);
     }

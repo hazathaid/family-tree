@@ -7,6 +7,7 @@ use App\Models\FamilyMember;
 use App\Models\MemberRelationship;
 use App\Repositories\Contracts\FamilyMemberRepositoryInterface;
 use App\Repositories\Contracts\RelationshipRepositoryInterface;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
@@ -98,6 +99,10 @@ class GedcomExportService
             foreach ($familyRecord['children'] as $id) {
                 $lines[] = '1 CHIL @I'.$id.'@';
             }
+            if ($familyRecord['divorce_date'] !== null) {
+                $lines[] = '1 DIV';
+                $lines[] = '2 DATE '.strtoupper(Carbon::parse($familyRecord['divorce_date'])->format('j M Y'));
+            }
         }
 
         $lines[] = '0 TRLR';
@@ -110,7 +115,7 @@ class GedcomExportService
      *
      * @param  Collection<int, FamilyMember>  $members
      * @param  Collection<int, MemberRelationship>  $edges
-     * @return array{records: list<array{xref: string, husbands: list<int>, wives: list<int>, children: list<int>}>, child_families: array<int, list<string>>, spouse_families: array<int, list<string>>}
+     * @return array{records: list<array{xref: string, husbands: list<int>, wives: list<int>, children: list<int>, divorce_date: string|null}>, child_families: array<int, list<string>>, spouse_families: array<int, list<string>>}
      */
     private function buildFamilies(Collection $members, Collection $edges): array
     {
@@ -118,6 +123,7 @@ class GedcomExportService
         $parentsOf = [];
         $husbandsOf = [];
         $wivesOf = [];
+        $divorceDates = [];
 
         foreach ($edges as $edge) {
             $source = $edge->source_member_id;
@@ -134,10 +140,12 @@ class GedcomExportService
                 case MemberRelationship::TYPE_HUSBAND:
                     $husbandsOf[$target][$source] = true;
                     $wivesOf[$source][$target] = true;
+                    $this->recordDivorce($divorceDates, $source, $target, $edge);
                     break;
                 case MemberRelationship::TYPE_WIFE:
                     $wivesOf[$target][$source] = true;
                     $husbandsOf[$source][$target] = true;
+                    $this->recordDivorce($divorceDates, $source, $target, $edge);
                     break;
             }
         }
@@ -170,7 +178,7 @@ class GedcomExportService
         $spouseFamilies = [];
         $familyIndex = 0;
 
-        foreach ($families as $family) {
+        foreach ($families as $key => $family) {
             $familyIndex++;
             $xref = 'F'.$familyIndex;
             $husbands = [];
@@ -192,6 +200,7 @@ class GedcomExportService
                 'husbands' => $husbands,
                 'wives' => $wives,
                 'children' => $childIds,
+                'divorce_date' => $divorceDates[$key] ?? null,
             ];
 
             foreach ($husbands as $id) {
@@ -210,6 +219,20 @@ class GedcomExportService
             'child_families' => array_map('array_keys', $childFamilies),
             'spouse_families' => array_map('array_keys', $spouseFamilies),
         ];
+    }
+
+    /**
+     * @param  array<string, string>  $divorceDates
+     */
+    private function recordDivorce(array &$divorceDates, int $source, int $target, MemberRelationship $edge): void
+    {
+        if ($edge->end_reason !== MemberRelationship::END_REASON_DIVORCED || $edge->end_date === null) {
+            return;
+        }
+
+        $ids = [$source, $target];
+        sort($ids);
+        $divorceDates[implode(',', $ids)] = $edge->end_date->toDateString();
     }
 
     /**

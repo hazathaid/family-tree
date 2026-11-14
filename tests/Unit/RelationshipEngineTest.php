@@ -156,6 +156,56 @@ class RelationshipEngineTest extends TestCase
         $this->assertSame('Ibu Tiri', $resolver->resolve($firstChild, $secondWife)['relationship']);
     }
 
+    public function test_resolver_labels_ended_marriages(): void
+    {
+        $user = User::factory()->create();
+        $family = Family::factory()->create(['created_by' => $user->id]);
+        $divorcedHusband = $this->member($family, 'Suami Cerai', 'male', '1970-01-01', $user);
+        $divorcedWife = $this->member($family, 'Istri Cerai', 'female', '1972-01-01', $user);
+        $widowedHusband = $this->member($family, 'Suami Wafat', 'male', '1940-01-01', $user);
+        $widowedWife = $this->member($family, 'Istri Wafat', 'female', '1945-01-01', $user);
+
+        MemberRelationship::factory()->create([
+            'family_id' => $family->id,
+            'source_member_id' => $divorcedHusband->id,
+            'target_member_id' => $divorcedWife->id,
+            'relationship_type' => 'husband',
+            'end_date' => '2024-06-01',
+            'end_reason' => 'divorced',
+        ]);
+        MemberRelationship::factory()->create([
+            'family_id' => $family->id,
+            'source_member_id' => $divorcedWife->id,
+            'target_member_id' => $divorcedHusband->id,
+            'relationship_type' => 'wife',
+            'end_date' => '2024-06-01',
+            'end_reason' => 'divorced',
+        ]);
+        MemberRelationship::factory()->create([
+            'family_id' => $family->id,
+            'source_member_id' => $widowedHusband->id,
+            'target_member_id' => $widowedWife->id,
+            'relationship_type' => 'husband',
+            'end_date' => '2020-01-01',
+            'end_reason' => 'widowed',
+        ]);
+        MemberRelationship::factory()->create([
+            'family_id' => $family->id,
+            'source_member_id' => $widowedWife->id,
+            'target_member_id' => $widowedHusband->id,
+            'relationship_type' => 'wife',
+            'end_date' => '2020-01-01',
+            'end_reason' => 'widowed',
+        ]);
+
+        $resolver = app(RelationshipResolverService::class);
+
+        $this->assertSame('Mantan Istri', $resolver->resolve($divorcedHusband, $divorcedWife)['relationship']);
+        $this->assertSame('Mantan Suami', $resolver->resolve($divorcedWife, $divorcedHusband)['relationship']);
+        $this->assertSame('Istri', $resolver->resolve($widowedHusband, $widowedWife)['relationship']);
+        $this->assertSame('Suami', $resolver->resolve($widowedWife, $widowedHusband)['relationship']);
+    }
+
     public function test_resolver_returns_null_for_unrecognized_path_sequence(): void
     {
         $graph = $this->relationshipGraph();

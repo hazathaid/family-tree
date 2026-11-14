@@ -173,6 +173,28 @@ class GedcomExportServiceTest extends TestCase
         $this->assertStringNotContainsString('1 FAMC @'.$secondFamily.'@', $this->individualBlock($content, $firstChild->id));
     }
 
+    public function test_divorced_marriage_exports_a_div_record(): void
+    {
+        $family = Family::factory()->create();
+        $husband = FamilyMember::factory()->create(['family_id' => $family->id, 'gender' => 'male']);
+        $wife = FamilyMember::factory()->create(['family_id' => $family->id, 'gender' => 'female']);
+
+        MemberRelationship::factory()->create([
+            'family_id' => $family->id,
+            'source_member_id' => $husband->id,
+            'target_member_id' => $wife->id,
+            'relationship_type' => MemberRelationship::TYPE_HUSBAND,
+            'start_date' => '2010-01-01',
+            'end_date' => '2024-05-01',
+            'end_reason' => MemberRelationship::END_REASON_DIVORCED,
+        ]);
+
+        $content = $this->service()->export($family);
+
+        $this->assertStringContainsString('1 DIV', $content);
+        $this->assertStringContainsString('2 DATE 1 MAY 2024', $content);
+    }
+
     public function test_gedcom_at_signs_are_escaped(): void
     {
         $family = Family::factory()->create();

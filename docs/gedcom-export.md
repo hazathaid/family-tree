@@ -57,6 +57,8 @@ The export never computes or stores derived kinship. It maps only the five base 
 1 HUSB @I<id>@
 1 WIFE @I<id>@
 1 CHIL @I<id>@
+1 DIV
+2 DATE <end_date>
 0 TRLR
 ```
 
@@ -77,6 +79,8 @@ Families are then built in two passes:
 2. **Spouse families** — a husband/wife pair with no child-family is emitted as a `FAM` with `HUSB`/`WIFE` only. Pairs already covered by a parent family are not duplicated.
 
 Per-member links: `FAMC` for every family the member is a child of, `FAMS` for every family the member is a husband or wife in. Soft-deleted members and relationships are excluded.
+
+When a spouse edge has `end_reason = divorced` and an `end_date`, the family record also emits `1 DIV` and `2 DATE <end_date>`. Widowed marriages do not emit `DIV`; the deceased spouse is represented by the normal `DEAT` record.
 
 ### Polygamous households
 
@@ -104,5 +108,5 @@ No migration or schema change was required. The service reads `family_members` a
 
 ## Tests
 
-- `tests/Unit/GedcomExportServiceTest.php` — envelope, INDI/FAM structure, sex mapping, parent/spouse/child mapping, polygamous one-FAM-per-wife export with multiple `FAMS` and correct `FAMC`, escaping, multiline continuation, line-length budget, filename, soft-delete exclusion.
+- `tests/Unit/GedcomExportServiceTest.php` — envelope, INDI/FAM structure, sex mapping, parent/spouse/child mapping, polygamous one-FAM-per-wife export with multiple `FAMS` and correct `FAMC`, divorced `DIV` export, escaping, multiline continuation, line-length budget, filename, soft-delete exclusion.
 - `tests/Feature/FamilyExportApiTest.php` — owner/member export, outsider and unauthenticated rejection, web download, settings-page link, web outsider redirect.
