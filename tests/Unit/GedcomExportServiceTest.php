@@ -8,6 +8,7 @@ use App\Models\MemberRelationship;
 use App\Repositories\Eloquent\EloquentFamilyMemberRepository;
 use App\Repositories\Eloquent\EloquentRelationshipRepository;
 use App\Services\GedcomExportService;
+use App\Services\RelationshipService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -193,6 +194,53 @@ class GedcomExportServiceTest extends TestCase
 
         $this->assertStringContainsString('1 DIV', $content);
         $this->assertStringContainsString('2 DATE 1 MAY 2024', $content);
+    }
+
+    public function test_corrected_marriage_end_updates_the_div_record(): void
+    {
+        $family = Family::factory()->create();
+        $husband = FamilyMember::factory()->create(['family_id' => $family->id, 'gender' => 'male']);
+        $wife = FamilyMember::factory()->create(['family_id' => $family->id, 'gender' => 'female']);
+        $relationship = MemberRelationship::factory()->create([
+            'family_id' => $family->id,
+            'source_member_id' => $husband->id,
+            'target_member_id' => $wife->id,
+            'relationship_type' => MemberRelationship::TYPE_HUSBAND,
+            'start_date' => '2010-01-01',
+            'end_date' => '2024-05-01',
+            'end_reason' => MemberRelationship::END_REASON_DIVORCED,
+        ]);
+
+        app(RelationshipService::class)->correctMarriageEnd($relationship, '2023-12-31', 'divorced');
+
+        $content = $this->service()->export($family);
+
+        $this->assertStringContainsString('1 DIV', $content);
+        $this->assertStringContainsString('2 DATE 31 DEC 2023', $content);
+        $this->assertStringNotContainsString('2 DATE 1 MAY 2024', $content);
+    }
+
+    public function test_reopened_marriage_omits_the_div_record(): void
+    {
+        $family = Family::factory()->create();
+        $husband = FamilyMember::factory()->create(['family_id' => $family->id, 'gender' => 'male']);
+        $wife = FamilyMember::factory()->create(['family_id' => $family->id, 'gender' => 'female']);
+        $relationship = MemberRelationship::factory()->create([
+            'family_id' => $family->id,
+            'source_member_id' => $husband->id,
+            'target_member_id' => $wife->id,
+            'relationship_type' => MemberRelationship::TYPE_HUSBAND,
+            'start_date' => '2010-01-01',
+            'end_date' => '2024-05-01',
+            'end_reason' => MemberRelationship::END_REASON_DIVORCED,
+        ]);
+
+        app(RelationshipService::class)->reopenMarriage($relationship);
+
+        $content = $this->service()->export($family);
+
+        $this->assertStringNotContainsString('1 DIV', $content);
+        $this->assertStringNotContainsString('2 DATE 1 MAY 2024', $content);
     }
 
     public function test_gedcom_at_signs_are_escaped(): void

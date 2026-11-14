@@ -8,6 +8,7 @@ use App\Models\MemberRelationship;
 use App\Models\MemberRelationshipCache;
 use App\Models\User;
 use App\Services\FamilyMemberService;
+use App\Services\FamilyTreeService;
 use App\Services\RelationshipCacheService;
 use App\Services\RelationshipResolverService;
 use App\Services\RelationshipService;
@@ -80,6 +81,43 @@ class RelationshipCacheServiceTest extends TestCase
         app(RelationshipService::class)->delete($relationship);
 
         $this->assertDatabaseCount('member_relationship_cache', 0);
+    }
+
+    public function test_marriage_correction_and_reopen_invalidate_relationship_and_tree_cache(): void
+    {
+        $user = User::factory()->create();
+        $family = Family::factory()->create(['created_by' => $user->id]);
+        $husband = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $user->id, 'gender' => 'male']);
+        $wife = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $user->id, 'gender' => 'female']);
+        $relationship = MemberRelationship::factory()->create([
+            'family_id' => $family->id,
+            'source_member_id' => $husband->id,
+            'target_member_id' => $wife->id,
+            'relationship_type' => MemberRelationship::TYPE_HUSBAND,
+            'start_date' => '2010-01-01',
+            'end_date' => '2024-06-01',
+            'end_reason' => MemberRelationship::END_REASON_DIVORCED,
+        ]);
+
+        app(RelationshipResolverService::class)->resolve($husband, $wife);
+        app(FamilyTreeService::class)->generate($husband, 'full', 1);
+        $this->assertDatabaseCount('member_relationship_cache', 1);
+        $this->assertDatabaseCount('member_tree_cache', 1);
+
+        app(RelationshipService::class)->correctMarriageEnd($relationship, '2023-12-31', 'divorced');
+
+        $this->assertDatabaseCount('member_relationship_cache', 0);
+        $this->assertDatabaseCount('member_tree_cache', 0);
+
+        app(RelationshipResolverService::class)->resolve($husband, $wife);
+        app(FamilyTreeService::class)->generate($husband, 'full', 1);
+        $this->assertDatabaseCount('member_relationship_cache', 1);
+        $this->assertDatabaseCount('member_tree_cache', 1);
+
+        app(RelationshipService::class)->reopenMarriage($relationship->refresh());
+
+        $this->assertDatabaseCount('member_relationship_cache', 0);
+        $this->assertDatabaseCount('member_tree_cache', 0);
     }
 
     public function test_member_service_invalidates_family_cache_when_member_changes(): void

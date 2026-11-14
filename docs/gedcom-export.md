@@ -80,7 +80,7 @@ Families are then built in two passes:
 
 Per-member links: `FAMC` for every family the member is a child of, `FAMS` for every family the member is a husband or wife in. Soft-deleted members and relationships are excluded.
 
-When a spouse edge has `end_reason = divorced` and an `end_date`, the family record also emits `1 DIV` and `2 DATE <end_date>`. Widowed marriages do not emit `DIV`; the deceased spouse is represented by the normal `DEAT` record.
+When a spouse edge has `end_reason = divorced` and an `end_date`, the family record also emits `1 DIV` and `2 DATE <end_date>`. Widowed marriages do not emit `DIV`; the deceased spouse is represented by the normal `DEAT` record. Correcting the marriage end updates the exported `DIV` date, and reopening the marriage removes the `DIV` record on the next export.
 
 ### Polygamous households
 
@@ -108,5 +108,6 @@ No migration or schema change was required. The service reads `family_members` a
 
 ## Tests
 
-- `tests/Unit/GedcomExportServiceTest.php` — envelope, INDI/FAM structure, sex mapping, parent/spouse/child mapping, polygamous one-FAM-per-wife export with multiple `FAMS` and correct `FAMC`, divorced `DIV` export, escaping, multiline continuation, line-length budget, filename, soft-delete exclusion.
+- `tests/Unit/GedcomExportServiceTest.php` — envelope, INDI/FAM structure, sex mapping, parent/spouse/child mapping, polygamous one-FAM-per-wife export with multiple `FAMS` and correct `FAMC`, divorced `DIV` export, corrected `DIV` date, reopened marriage without `DIV`, escaping, multiline continuation, line-length budget, filename, soft-delete exclusion.
+- `tests/Feature/GedcomMarriageRoundTripTest.php` — corrected divorce export/import round-trip preserves the ending date and reason.
 - `tests/Feature/FamilyExportApiTest.php` — owner/member export, outsider and unauthenticated rejection, web download, settings-page link, web outsider redirect.

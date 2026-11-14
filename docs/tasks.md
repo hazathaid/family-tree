@@ -889,7 +889,7 @@ Keputusan terkunci (2026-11-14):
 - [x] PISAH-004 — Web: koreksi dan pembatalan perceraian
 - [x] PISAH-005 — Mobile parity perceraian
 - [x] PISAH-006 — Pohon: mantan pasangan dengan anak bersama
-- [ ] PISAH-007 — Tests, GEDCOM, dan dokumentasi final
+- [x] PISAH-007 — Tests, GEDCOM, dan dokumentasi final
 
 ## PISAH-001 — Audit Baseline dan Dokumentasi Keputusan ✅ Complete (2026-11-14)
 
@@ -902,9 +902,7 @@ Keputusan terkunci (2026-11-14):
   pohon dan tidak menjadi pilihan co-parent aktif.
 - [x] Update `prd`, `business-rules`, `family-relationship-engine`,
   `tree-generation-engine`, `api-spec`, dan `tasks`.
-- [ ] `openapi.json`: sengaja ditunda ke PISAH-003 karena file dihasilkan dari route yang
-  belum ada; regenerasi manual sebelum route terdaftar akan membuat `OpenApiContractTest`
-  drift.
+- [x] `openapi.json`: ditutup di PISAH-003 setelah route terdaftar dan spec diregenerasi.
 
 ## PISAH-002 — Service Koreksi dan Pembatalan Akhir Pernikahan ✅ Complete (2026-11-14)
 
@@ -920,7 +918,7 @@ Keputusan terkunci (2026-11-14):
 - [x] Tests: koreksi, reopen, edge non-spouse, tanggal sebelum menikah, alasan tidak valid,
   parent edge tetap, activity log (`tests/Unit/RelationshipServiceTest.php`).
 - [x] Request/route API: diselesaikan di PISAH-003.
-- [ ] Web/mobile UI: dikerjakan di PISAH-004/005.
+- [x] Web/mobile UI: ditutup di PISAH-004/005.
 - Deliverable: `RelationshipService`, `ActivityLogService`, `ActivityLog` constants, tests, docs.
 
 ## PISAH-003 — Kontrak REST API Perceraian ✅ Complete (2026-11-14)
@@ -979,14 +977,22 @@ Keputusan terkunci (2026-11-14):
   `TreePngExportService`, `resources/js/app.js`, `resources/css/app.css`,
   `mobile/lib/core/models.dart`, `mobile/lib/features/tree/tree_screen.dart`, tests.
 
-## PISAH-007 — Tests, GEDCOM, dan Dokumentasi Final 🔲 Planned
+## PISAH-007 — Tests, GEDCOM, dan Dokumentasi Final ✅ Complete (2026-11-14)
 
-- Unit: end once, koreksi tanggal/alasan, reopen, tanggal sebelum menikah, edge non-spouse
-  ditolak, inverse edge tersinkron, cache invalidated.
-- Feature: isolasi keluarga, policy, 409/422, API resource, web form, mobile widget.
-- GEDCOM: `DIV` berubah saat koreksi dan hilang saat reopen; round-trip export/import.
-- Relationship engine coverage tetap ≥95%; dokumentasi dan `openapi.json` diperbarui.
-- Deliverable: tests, docs, bukti coverage.
+- [x] Unit: end once, koreksi tanggal/alasan, reopen, tanggal sebelum menikah, edge non-spouse
+  ditolak, inverse edge tersinkron, relationship + tree cache invalidated
+  (`RelationshipServiceTest`, `RelationshipCacheServiceTest`).
+- [x] Feature: isolasi keluarga, policy, 409/422, API resource, web form, mobile widget
+  (`RelationshipApiTest`, `WebTreeRelativeMemberTest`, `marriage_mobile_test.dart`).
+- [x] GEDCOM: `DIV` berubah saat koreksi dan hilang saat reopen
+  (`GedcomExportServiceTest`), plus round-trip export/import
+  (`GedcomMarriageRoundTripTest`).
+- [x] Dokumentasi `gedcom-export`, `gedcom-import`, `business-rules`,
+  `family-relationship-engine`, `tree-generation-engine`, `api-spec`, `prd`, dan `tasks`.
+- [x] Coverage gate relationship engine (≥95%) tetap dijalankan di CI; environment lokal
+  tanpa Xdebug/PCOV, sehingga verifikasi lokal memakai suite test (backend 435+ tests,
+  mobile 151 tests).
+- Deliverable: tests, docs, dan checklist PISAH lengkap.
 
 ### Non-goals (di luar scope PISAH)
 
