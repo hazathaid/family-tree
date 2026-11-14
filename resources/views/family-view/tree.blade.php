@@ -41,7 +41,7 @@
                     @php($from = $nodesByUuid->get($edge['source_uuid']))
                     @php($to = $nodesByUuid->get($edge['target_uuid']))
                     @if($from && $to)
-                        <line class="tree-edge" x1="{{ $from['position']['x'] }}" y1="{{ $from['position']['y'] }}" x2="{{ $to['position']['x'] }}" y2="{{ $to['position']['y'] }}" />
+                        <line class="tree-edge {{ ($edge['is_ended'] ?? false) ? 'tree-edge-ended' : '' }}" x1="{{ $from['position']['x'] }}" y1="{{ $from['position']['y'] }}" x2="{{ $to['position']['x'] }}" y2="{{ $to['position']['y'] }}" />
                     @endif
                 @endforeach
             </svg>

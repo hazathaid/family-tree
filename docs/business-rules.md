@@ -107,7 +107,7 @@ Sources: `NotificationService`, `NotifyFamilyOfUpdate`, `SendBirthdayGreetings`,
 - Only the owner/admin of the initiating family may request a link, and only the owner/admin of the linked family may approve it. Either side may revoke at any time.
 - A link is read-only across families. The linked family may view tree structure and derived relationship labels, never mutate members, documents, biographies, or media.
 - Pending, revoked, and expired links grant no access. Partner-tree reads require `status = active` and membership of one of the two families.
-- Living members of the linked family are redacted server-side (anonymous placeholder, PII and photo suppressed) except the anchor member; clients must render the redacted payload verbatim.
+- Living members of the linked family are redacted server-side (anonymous placeholder, PII and photo suppressed) except the anchor member; clients must render the redacted payload verbatim. Spouse-edge labels and `is_ended` metadata are suppressed when an edge touches a redacted member.
 - Request, approve, and revoke are rate-limited (`family-link`, 30/min) and recorded in `activity_logs` plus `audit_logs`; cross-family surfaces must never be public or indexed.
 
 ## Pre-marriage cross-family view

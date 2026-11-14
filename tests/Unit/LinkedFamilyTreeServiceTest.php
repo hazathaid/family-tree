@@ -66,4 +66,34 @@ class LinkedFamilyTreeServiceTest extends TestCase
             $this->assertArrayNotHasKey('id', $node);
         }
     }
+
+    public function test_present_removes_marriage_edge_labels_that_touch_redacted_members(): void
+    {
+        $owner = User::factory()->create();
+        $family = Family::factory()->create(['created_by' => $owner->id]);
+        FamilyUserRole::factory()->owner()->create(['family_id' => $family->id, 'user_id' => $owner->id]);
+
+        $anchor = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $owner->id, 'gender' => 'female', 'is_alive' => true]);
+        $livingFormerSpouse = FamilyMember::factory()->create(['family_id' => $family->id, 'created_by' => $owner->id, 'gender' => 'male', 'is_alive' => true]);
+        MemberRelationship::factory()->create([
+            'family_id' => $family->id,
+            'source_member_id' => $livingFormerSpouse->id,
+            'target_member_id' => $anchor->id,
+            'relationship_type' => MemberRelationship::TYPE_HUSBAND,
+            'start_date' => '2010-01-01',
+            'end_date' => '2024-06-01',
+            'end_reason' => MemberRelationship::END_REASON_DIVORCED,
+        ]);
+
+        $tree = app(LinkedFamilyTreeService::class)->present($anchor, 'full', 1, 'vertical');
+
+        $spouseEdge = collect($tree['edges'])->first(
+            fn (array $edge): bool => in_array($livingFormerSpouse->uuid, [$edge['source_uuid'], $edge['target_uuid']], true)
+                && in_array($anchor->uuid, [$edge['source_uuid'], $edge['target_uuid']], true),
+        );
+
+        $this->assertNotNull($spouseEdge);
+        $this->assertNull($spouseEdge['label']);
+        $this->assertFalse($spouseEdge['is_ended']);
+    }
 }

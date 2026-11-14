@@ -27,10 +27,15 @@ class LinkedFamilyTreeService
 
         $anchorUuid = $anchor->uuid;
         $bridgeUuid = $bridge?->uuid;
+        $redactedUuids = [];
 
-        $tree['nodes'] = array_map(function (array $node) use ($anchorUuid, $bridgeUuid): array {
+        $tree['nodes'] = array_map(function (array $node) use ($anchorUuid, $bridgeUuid, &$redactedUuids): array {
             $isAnchor = ($node['uuid'] ?? null) === $anchorUuid;
             $redact = ! $isAnchor && (bool) ($node['is_alive'] ?? false);
+
+            if ($redact) {
+                $redactedUuids[(string) ($node['uuid'] ?? '')] = true;
+            }
 
             $node['is_bridge'] = ($node['uuid'] ?? null) === $bridgeUuid;
             $node['is_redacted'] = $redact;
@@ -52,6 +57,16 @@ class LinkedFamilyTreeService
 
             return $node;
         }, $tree['nodes']);
+
+        $tree['edges'] = array_map(function (array $edge) use ($redactedUuids): array {
+            if (isset($redactedUuids[$edge['source_uuid']])
+                || isset($redactedUuids[$edge['target_uuid']])) {
+                $edge['label'] = null;
+                $edge['is_ended'] = false;
+            }
+
+            return $edge;
+        }, $tree['edges'] ?? []);
 
         $tree['cached'] = $tree['cached'] ?? false;
         $tree['redacted'] = true;
