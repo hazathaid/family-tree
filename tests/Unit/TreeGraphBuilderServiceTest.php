@@ -46,6 +46,7 @@ class TreeGraphBuilderServiceTest extends TestCase
         $husband = $this->member($family, 'Suami', 'male', $user);
         $divorcedWife = $this->member($family, 'Mantan Istri', 'female', $user);
         $widowedWife = $this->member($family, 'Istri Wafat', 'female', $user);
+        $legacyWife = $this->member($family, 'Istri Lama', 'female', $user);
 
         $this->edge($family, $husband, $divorcedWife, MemberRelationship::TYPE_HUSBAND, [
             'start_date' => '2010-01-01',
@@ -57,6 +58,11 @@ class TreeGraphBuilderServiceTest extends TestCase
             'end_date' => '2020-01-01',
             'end_reason' => MemberRelationship::END_REASON_WIDOWED,
         ]);
+        $this->edge($family, $husband, $legacyWife, MemberRelationship::TYPE_HUSBAND, [
+            'start_date' => '1990-01-01',
+            'end_date' => '1995-01-01',
+            'end_reason' => null,
+        ]);
 
         $graph = app(TreeGraphBuilderService::class)->build($family->id);
         $husbandEdges = collect($graph['adjacency'][$husband->id])->keyBy('to');
@@ -65,6 +71,8 @@ class TreeGraphBuilderServiceTest extends TestCase
         $this->assertTrue($husbandEdges[$divorcedWife->id]['is_ended']);
         $this->assertSame('Istri', $husbandEdges[$widowedWife->id]['label']);
         $this->assertTrue($husbandEdges[$widowedWife->id]['is_ended']);
+        $this->assertSame('Mantan Istri', $husbandEdges[$legacyWife->id]['label']);
+        $this->assertTrue($husbandEdges[$legacyWife->id]['is_ended']);
     }
 
     public function test_build_skips_relationships_to_deleted_members(): void

@@ -76,7 +76,7 @@ class TreeGraphBuilderService
     private function spouseLabel(?string $gender, MemberRelationship $relation): string
     {
         $divorced = $relation->end_date !== null
-            && $relation->end_reason === MemberRelationship::END_REASON_DIVORCED;
+            && $relation->end_reason !== MemberRelationship::END_REASON_WIDOWED;
 
         return match (true) {
             $gender === 'male' => $divorced ? 'Mantan Suami' : 'Suami',

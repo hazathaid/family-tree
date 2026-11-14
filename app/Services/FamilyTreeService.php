@@ -104,7 +104,7 @@ class FamilyTreeService
             foreach ($adjacency[$id] ?? [] as $edge) {
                 if (($edge['relationship'] ?? null) !== 'spouse'
                     || ! ($edge['is_ended'] ?? false)
-                    || ($edge['end_reason'] ?? null) !== MemberRelationship::END_REASON_DIVORCED) {
+                    || ($edge['end_reason'] ?? null) === MemberRelationship::END_REASON_WIDOWED) {
                     continue;
                 }
 
