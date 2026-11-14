@@ -867,3 +867,113 @@ dua pihak + redaksi anggota hidup, dan anak tinggal di satu `children_home_famil
 - Update `prd`, `business-rules`, `database-schema`, `tasks`, dan design doc; unit/feature
   tests mencakup isolasi, consent, expiry/revocation, dan redaksi.
 - Deliverable: docs, tests.
+
+# Backlog — Case Pisah karena Cerai (PISAH)
+
+Konteks: backend dan web sudah mencatat akhir pernikahan (`end_date` + `end_reason`,
+label `Mantan Istri`/`Mantan Suami`, parent edge tetap, GEDCOM `DIV`). Backlog ini menutup
+sisa case perceraian: **koreksi salah input**, tampilan mantan pasangan yang punya anak
+bersama, kontrak API, dan parity mobile.
+
+Keputusan terkunci (2026-11-14):
+- Akhir pernikahan **boleh dikoreksi** karena user bisa salah klik. Koreksi meliputi ubah
+  tanggal/alasan dan pembatalan akhir pernikahan (pernikahan kembali aktif).
+- Mantan pasangan **tetap ditampilkan di pohon keluarga** ketika sudah memiliki anak bersama,
+  agar konteks ayah/ibu anak tetap utuh.
+
+## Checklist Progres PISAH
+
+- [x] PISAH-001 — Audit baseline dan dokumentasi keputusan
+- [ ] PISAH-002 — Service koreksi dan pembatalan akhir pernikahan
+- [ ] PISAH-003 — Kontrak REST API perceraian
+- [ ] PISAH-004 — Web: koreksi dan pembatalan perceraian
+- [ ] PISAH-005 — Mobile parity perceraian
+- [ ] PISAH-006 — Pohon: mantan pasangan dengan anak bersama
+- [ ] PISAH-007 — Tests, GEDCOM, dan dokumentasi final
+
+## PISAH-001 — Audit Baseline dan Dokumentasi Keputusan ✅ Complete (2026-11-14)
+
+- [x] Audit baseline: `RelationshipService::endMarriage`, `MemberSpouseService`,
+  `MemberSpouseController` (`GET /api/v1/family-members/{member}/spouses`), form web
+  `members.spouses.end`, label `Mantan ...`, dan GEDCOM `DIV`.
+- [x] Dokumentasikan aturan: akhir pernikahan default final, tetapi dapat dikoreksi; koreksi
+  tidak menghapus edge pasangan maupun edge orang tua.
+- [x] Dokumentasikan aturan tampilan: mantan pasangan dengan anak bersama tetap tampil di
+  pohon dan tidak menjadi pilihan co-parent aktif.
+- [x] Update `prd`, `business-rules`, `family-relationship-engine`,
+  `tree-generation-engine`, `api-spec`, dan `tasks`.
+- [ ] `openapi.json`: sengaja ditunda ke PISAH-003 karena file dihasilkan dari route yang
+  belum ada; regenerasi manual sebelum route terdaftar akan membuat `OpenApiContractTest`
+  drift.
+
+## PISAH-002 — Service Koreksi dan Pembatalan Akhir Pernikahan 🔲 Planned
+
+- Tambah `RelationshipService::correctMarriageEnd($relationship, $endDate, $endReason)`:
+  hanya untuk edge `husband`/`wife`, hanya jika sudah berakhir, tanggal tidak boleh sebelum
+  `start_date`, dan `end_reason` wajib `divorced`/`widowed`.
+- Tambah `RelationshipService::reopenMarriage($relationship)`: set `end_date` dan
+  `end_reason` menjadi null pada kedua arah spouse edge dalam satu transaksi; edge orang tua
+  tidak disentuh.
+- Sinkronisasi inverse spouse edge untuk kedua operasi; invalidasi relationship + tree cache.
+- Catat `activity_logs` dan audit (`MARRIAGE_END_CORRECTED`, `MARRIAGE_REOPENED`).
+- Deliverable: service, request validation, tests (`RelationshipServiceTest`), docs.
+
+## PISAH-003 — Kontrak REST API Perceraian 🔲 Planned
+
+- `GET /api/v1/family-members/{member}/spouses` mengekspos `is_ended`, `end_date`,
+  `end_reason`, dan flag aksi server-side (`can_end`, `can_correct`).
+- `POST /api/v1/family-members/{member}/spouses/{relationship}/end` untuk mencatat perceraian.
+- `PATCH /api/v1/family-members/{member}/spouses/{relationship}` untuk koreksi tanggal/alasan.
+- `POST /api/v1/family-members/{member}/spouses/{relationship}/reopen` untuk membatalkan
+  akhir pernikahan (dengan konfirmasi klien).
+- Semua endpoint memakai Form Request, policy `update` member, isolasi `family_id`,
+  limiter yang wajar, dan envelope JSON standar; 409 untuk kondisi sudah berakhir/belum
+  berakhir yang tidak valid.
+- Deliverable: controller, request, resource, routes, OpenAPI, feature tests
+  (`tests/Feature/RelationshipApiTest.php`).
+
+## PISAH-004 — Web: Koreksi dan Pembatalan Perceraian 🔲 Planned
+
+- Kartu “Pasangan” menampilkan status berakhir + tombol **Koreksi** (ubah tanggal/alasan)
+  dan **Batalkan perceraian** dengan dialog konfirmasi.
+- Validasi dan pesan error dalam Bahasa Indonesia; hanya owner/admin/linked member yang
+  boleh (mengikuti policy update member).
+- Deliverable: `resources/views/members/show.blade.php`, controller, form requests,
+  feature tests (`tests/Feature/WebFamilyTreeTest`/member detail tests).
+
+## PISAH-005 — Mobile Parity Perceraian 🔲 Planned
+
+- Daftar pasangan pada member detail: tampilkan `Istri`/`Suami`, `Mantan Istri`/`Mantan Suami`,
+  tanggal menikah, tanggal berakhir, dan alasan.
+- Aksi catat perceraian, koreksi, dan batalkan perceraian dari bottom sheet; konfirmasi
+  sebelum reopen.
+- Tambah l10n ID/EN dan widget test; tidak ada perhitungan relasi di Dart (label dari API).
+- Deliverable: `mobile/lib/features/family/**`, `app_*.arb`, `mobile/test/**`.
+
+## PISAH-006 — Pohon: Mantan Pasangan dengan Anak Bersama 🔲 Planned
+
+- Mantan pasangan tetap muncul pada mode `ancestor`, `descendant`, dan `full` ketika pasangan
+  memiliki anak bersama; edge pasangan diberi label `Mantan Istri`/`Mantan Suami` dan gaya
+  visual berbeda (mis. garis putus-putus).
+- Parent edge tetap utuh sehingga anak tetap terhubung ke ayah dan ibu; resolver tidak
+  menghitung ulang relasi anak menjadi “anak tiri” hanya karena perceraian.
+- Mantan pasangan tidak masuk pilihan co-parent/household aktif saat menambah anak baru;
+  pasangan baru tetap didukung (polygamy/multiple spouse edges).
+- Berlaku untuk tampilan web, PNG, PDF, dan graph API; tidak ada BFS kedua di klien.
+- Deliverable: `TreeGraphBuilderService`, `TreePresentationService`, `FamilyTreeService`,
+  `RelationshipResolverService` (jika perlu), tests tree + resolver.
+
+## PISAH-007 — Tests, GEDCOM, dan Dokumentasi Final 🔲 Planned
+
+- Unit: end once, koreksi tanggal/alasan, reopen, tanggal sebelum menikah, edge non-spouse
+  ditolak, inverse edge tersinkron, cache invalidated.
+- Feature: isolasi keluarga, policy, 409/422, API resource, web form, mobile widget.
+- GEDCOM: `DIV` berubah saat koreksi dan hilang saat reopen; round-trip export/import.
+- Relationship engine coverage tetap ≥95%; dokumentasi dan `openapi.json` diperbarui.
+- Deliverable: tests, docs, bukti coverage.
+
+### Non-goals (di luar scope PISAH)
+
+- Pembagian hak asuh/household anak (tetap memakai `family_links.children_home_family_id`).
+- Riwayat lengkap pernikahan/cerita perceraian sebagai entitas baru.
+- Perubahan skema database baru; `end_date`/`end_reason` yang ada sudah cukup.

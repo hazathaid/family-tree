@@ -29,6 +29,8 @@ No recursive traversal or derived relationship rows are used.
 
 Nodes include public identity/display fields, generation/distance, living state, root/boundary flags, photo and nullable `relationship_to_root`. Spouse edges carry nullable `end_date`/`end_reason`; a divorced spouse stays in the graph for child context but resolves to `Mantan Istri`/`Mantan Suami`, while widowed spouses keep the normal spouse label. Labels use the authoritative PHP resolver over the already traversed path, avoiding a second BFS per node. Deceased nodes remain present with a memorial marker. Edges use member UUIDs and normalized base relationships.
 
+PISAH target contract (not yet applied to rendering): a former spouse stays visible in `ancestor`, `descendant`, and `full` trees when the couple has shared children, so the child keeps both parents without duplicating members. The spouse edge carries the `Mantan ...` label and is presented with a distinct style (for example a dashed line) in web, PNG, and PDF output. A former spouse is excluded from active co-parent/household selection; a later spouse is a separate spouse edge. Layout and cache keys do not change for this presentation rule.
+
 Web rendering and PNG/PDF exports use the server-derived memorial prefix:
 `Alm.`/`Almh.` for Islam, `†` for Christian/Catholic, and `Mendiang` for other
 or unspecified religions. The prefix is presentation metadata derived from

@@ -118,6 +118,17 @@ An accepted claim sets `family_members.user_id`, restores/creates a `member` fam
 
 Member directory filters and sorting execute server-side. Relationship resolver inputs are public member UUIDs; numeric IDs are not accepted.
 
+Planned PISAH-003 marriage-ending contract (not yet implemented; routes, OpenAPI, and tests land with the implementation):
+
+| Method/path | Request | Response / authorization |
+|---|---|---|
+| GET `/family-members/{family_member}/spouses` | none | existing summaries plus `is_ended`, `end_date`, `end_reason`, and server-computed `can_end`/`can_correct`; family membership required |
+| POST `/family-members/{family_member}/spouses/{relationship}/end` | `end_date`, `end_reason` divorced/widowed | ended spouse edge and inverse; policy `update` member; 409 when already ended |
+| PATCH `/family-members/{family_member}/spouses/{relationship}` | `end_date`, `end_reason` | corrected ending; only when already ended; 409 when not ended |
+| POST `/family-members/{family_member}/spouses/{relationship}/reopen` | none (client confirmation) | cleared `end_date`/`end_reason` on both spouse edges; 409 when not ended |
+
+All three mutations keep parent edges intact, invalidate relationship/tree cache, and record activity/audit entries. Until these routes exist, `PUT /relationships/{relationship}` already accepts `end_date`/`end_reason`; clients must not treat that as the dedicated correction contract.
+
 GET `/family-members/{family_member}` additionally resolves the derived
 relationship from the authenticated user's perspective: when the user has a
 linked member (`family_members.user_id`) in the same family as the target, the
@@ -256,6 +267,7 @@ All v1 endpoints use `throttle:api`. Additional route limits are: login named li
 | API-G07 | No explicit active-family REST selection is needed for stateless mobile, but onboarding create/select semantics must be defined client-side from memberships | FT-MOB-103; add API only if server state is approved |
 | API-G08 | Web article upload route name differs but REST capability exists; no gap. Web-only super-admin console is intentionally excluded. | Documented decision |
 | API-G09 | Cross-family marriage links were web-only (request, approve, revoke, read-only partner tree) | Closed by XF-006 (2026-10-21): REST endpoints plus Flutter family-links screens; see Cross-family links |
+| API-G10 | Marriage-end correction/reopen has no dedicated REST contract or mobile spouse actions | PISAH-003 and PISAH-005 (planned) |
 
 Historical phase API documents remain implementation history. This file is the sole Flutter contract; when routes/requests/resources change, update this file and tests in the same task.
 

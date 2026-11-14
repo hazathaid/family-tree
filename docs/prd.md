@@ -27,6 +27,7 @@ Family records and login accounts are distinct: a `family_member` may have no `u
 - Public identifiers are UUIDs. Internal numeric IDs must not become mobile contracts.
 - Mobile parity is capability equality, not visual duplication.
 - Server-side pagination/search/filtering is mandatory for potentially large collections.
+- A marriage ending (`divorced`/`widowed`) is correctable and may be cancelled because the user can misclick; former spouses stay visible in the tree when the couple shares children.
 
 ## Primary use cases
 
@@ -39,6 +40,7 @@ Family records and login accounts are distinct: a `family_member` may have no `u
 7. View reports, gamification and leaderboards appropriate to the active family.
 8. View a partner's family read-only through a consent-based, time-bound grant before marriage, with living members redacted.
 9. Let a super-admin moderate users/content and inspect/export audit logs on web.
+10. Record a marriage ending by divorce or death, correct or cancel an accidental ending, and keep former spouses visible in the tree when they share children.
 
 ## Functional scope and task traceability
 
@@ -49,6 +51,7 @@ Family records and login accounts are distinct: a `family_member` may have no `u
 | Authentication, onboarding and account | FT-MOB-101–104; FT-API-101 |
 | Dashboard and family administration | FT-API-201–202; FT-MOB-201–204 |
 | Member and relationship workflows | FT-MOB-301–305 |
+| Marriage-ending correction and former-spouse visibility | PISAH-001–007 |
 | Interactive tree and export | FT-API-301; FT-MOB-401–402 |
 | Articles and engagement | FT-MOB-501–503 |
 | Photos and albums | FT-MOB-601–603 |
